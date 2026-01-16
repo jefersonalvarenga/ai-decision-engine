@@ -1,7 +1,10 @@
+from typing import TypedDict, List, Annotated, Optional
+import operator
+
 class AgentState(TypedDict):
     lead_id: str
     lead_name: str
-    target_language: str  # Adicione isso para o nó de tradução final saber o que fazer.
+    target_language: str
     psychographic_profile: dict
     conversation_history: List[dict]
     ad_source: str
