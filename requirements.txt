@@ -5,4 +5,4 @@ supabase==2.3.0
 langgraph==0.0.60
 dspy-ai==2.4.5
 python-dotenv==1.0.0
-langcodes==3.3.0  # Útil para validar códigos de idiomas
+langcodes==3.3.0  # Útil para validar códigos de idiomas.
