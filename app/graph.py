@@ -2,32 +2,27 @@ from langgraph.graph import StateGraph, END
 from .state import AgentState
 from .agents import AnalystAgent
 
-# 1. Instanciar os agentes
+# Instanciar o agente
 analyst_agent = AnalystAgent()
 
-# 2. Definir as funções dos nós (Nodes)
-# Cada nó recebe o State atual e retorna apenas o que ele alterou
 def call_analyst(state: AgentState):
-    print(f"--- ANALYZING LEAD: {state['lead_name']} ---")
+    # Log para debug no console do Easypanel
+    print(f"--- STARTING ANALYSIS FOR: {state.get('lead_name')} ---")
     
-    # Chama o DSPy para o diagnóstico
-    diagnosis = analyst_agent.forward(state)
-    
-    # Retorna a atualização do estado
-    return {
-        "analyst_diagnosis": diagnosis
-    }
+    try:
+        # Chama o DSPy
+        diagnosis = analyst_agent.forward(state)
+        
+        # Forçamos ser string para evitar erros de serialização JSON
+        return {"analyst_diagnosis": str(diagnosis)}
+    except Exception as e:
+        print(f"--- ERROR IN ANALYST NODE: {e} ---")
+        return {"analyst_diagnosis": f"Error during analysis: {str(e)}"}
 
-# 3. Construir o Grafo
 workflow = StateGraph(AgentState)
-
-# Adicionar os nós na esteira
 workflow.add_node("analyst", call_analyst)
 
-# 4. Definir as Arestas (Edges) - O fluxo de execução
-workflow.set_entry_point("analyst") # Começa pelo analista
-workflow.add_edge("analyst", END)    # Por enquanto, termina após a análise
+workflow.set_entry_point("analyst")
+workflow.add_edge("analyst", END)
 
-# 5. Compilar o Grafo
-# O checkpointer (opcional no futuro) permitiria pausar e retomar a conversa
 app_graph = workflow.compile()
