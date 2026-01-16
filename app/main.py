@@ -49,8 +49,10 @@ async def start_reengagement(payload: n8nPayload):
         return {
             "lead_id": final_state["lead_id"],
             "diagnosis": final_state["analyst_diagnosis"],
-            "strategy": final_state["selected_strategy"], # Agora visível!
-            "copy": final_state["generated_copy"],         # Já pronto para o próximo passo
+            "strategy": final_state["selected_strategy"],
+            "copy": final_state["generated_copy"],
+            "critic_feedback": final_state["critic_feedback"], # Novo campo
+            "attempts": final_state["copy_attempts"],        # Novo campo
             "status": "processed"
         }
     except Exception as e:

@@ -1,11 +1,12 @@
 from langgraph.graph import StateGraph, END
 from .state import AgentState
-from .agents import AnalystAgent, StrategistAgent, CopywriterAgent # Atualize o import
+from .agents import AnalystAgent, StrategistAgent, CopywriterAgent, CriticAgent
 
 # Instanciar os agentes
 analyst_agent = AnalystAgent()
 strategist_agent = StrategistAgent()
 copywriter_agent = CopywriterAgent()
+critic_agent = CriticAgent()
 
 def call_analyst(state: AgentState):
     # Log para debug no console do Easypanel
@@ -42,16 +43,43 @@ def call_copywriter(state: AgentState):
     )
     return {"generated_copy": copy}
 
-# Configuração do Grafo
+def call_critic(state: AgentState):
+    print("--- CRITIQUING THE MESSAGE ---")
+    feedback, approved = critic_agent.forward(
+        state["generated_copy"], 
+        state["analyst_diagnosis"]
+    )
+    
+    # Se reprovado, incrementamos o contador de tentativas
+    # O state["copy_attempts"] será somado automaticamente via operator.add
+    return {
+        "critic_feedback": feedback,
+        "approval_status": approved,
+        "copy_attempts": 1 
+    }
+
+# Função lógica para decidir o próximo passo
+def decide_to_retry(state: AgentState):
+    if state["approval_status"] is True or state["copy_attempts"] >= 3:
+        return END
+    return "copywriter" # Se reprovado e tiver tentativas, volta para escrever de novo
+
 workflow = StateGraph(AgentState)
 
 workflow.add_node("analyst", call_analyst)
 workflow.add_node("strategist", call_strategist)
-workflow.add_node("copywriter", call_copywriter) # Novo nó
+workflow.add_node("copywriter", call_copywriter)
+workflow.add_node("critic", call_critic)
 
 workflow.set_entry_point("analyst")
 workflow.add_edge("analyst", "strategist")
-workflow.add_edge("strategist", "copywriter") # Fluxo linear
-workflow.add_edge("copywriter", END)
+workflow.add_edge("strategist", "copywriter")
+workflow.add_edge("copywriter", "critic") # Após o copy, vai para o crítico
+
+# Aresta Condicional: Se o crítico reprovar, volta para o copywriter
+workflow.add_conditional_edges(
+    "critic",
+    decide_to_retry
+)
 
 app_graph = workflow.compile()

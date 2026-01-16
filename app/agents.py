@@ -92,3 +92,31 @@ class CopywriterAgent(dspy.Module):
             target_language=language
         )
         return result.generated_copy
+
+class CriticSignature(dspy.Signature):
+    """
+    Atue como um Diretor Clínico e Especialista em Compliance.
+    Analise a mensagem de WhatsApp (copy) gerada.
+    
+    Critérios de Rejeição:
+    1. Promessa de cura garantida ou resultados milagrosos.
+    2. Tom excessivamente agressivo de vendas.
+    3. Linguagem médica muito técnica que o paciente não entenda.
+    4. Falta de empatia com a dor relatada.
+
+    Forneça o feedback detalhado e o status de aprovação.
+    """
+    generated_copy = dspy.InputField()
+    analyst_diagnosis = dspy.InputField()
+    
+    critic_feedback = dspy.OutputField(desc="Explicação do porquê foi aprovado ou reprovado")
+    is_approved = dspy.OutputField(desc="Aprovação final (True ou False)", bool=True)
+
+class CriticAgent(dspy.Module):
+    def __init__(self):
+        super().__init__()
+        self.critique = dspy.Predict(CriticSignature)
+    
+    def forward(self, copy: str, diagnosis: str):
+        result = self.critique(generated_copy=copy, analyst_diagnosis=diagnosis)
+        return result.critic_feedback, result.is_approved
