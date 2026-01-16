@@ -1,9 +1,10 @@
 from langgraph.graph import StateGraph, END
 from .state import AgentState
-from .agents import AnalystAgent
+from .agents import AnalystAgent, StrategistAgent # Atualize o import
 
-# Instanciar o agente
+# Instanciar os agentes
 analyst_agent = AnalystAgent()
+strategist_agent = StrategistAgent()
 
 def call_analyst(state: AgentState):
     # Log para debug no console do Easypanel
@@ -19,10 +20,25 @@ def call_analyst(state: AgentState):
         print(f"--- ERROR IN ANALYST NODE: {e} ---")
         return {"analyst_diagnosis": f"Error during analysis: {str(e)}"}
 
+def call_strategist(state: AgentState):
+    print("--- SELECTING STRATEGY ---")
+    diagnosis = state["analyst_diagnosis"]
+    
+    # Chama o Strategist
+    strategy, rationale = strategist_agent.forward(diagnosis)
+    
+    print(f"--- STRATEGY CHOSEN: {strategy} ---")
+    return {
+        "selected_strategy": f"{strategy}: {rationale}"
+    }
+
+# --- Atualização do Workflow ---
 workflow = StateGraph(AgentState)
 workflow.add_node("analyst", call_analyst)
+workflow.add_node("strategist", call_strategist) # Novo nó
 
 workflow.set_entry_point("analyst")
-workflow.add_edge("analyst", END)
+workflow.add_edge("analyst", "strategist") # Conecta Analista ao Estrategista
+workflow.add_edge("strategist", END)      # Termina após Estrategista
 
 app_graph = workflow.compile()

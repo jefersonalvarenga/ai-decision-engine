@@ -42,3 +42,27 @@ class AnalystAgent(dspy.Module):
             conversation_history=str(state['conversation_history'])
         )
         return result.analyst_diagnosis
+
+class StrategistSignature(dspy.Signature):
+    """
+    Based on the Analyst Diagnosis, select the best re-engagement strategy.
+    Options: 
+    - SOCIAL_PROOF: Use patient testimonials related to the lead's pain.
+    - EDUCATION: Send a tip or exercise to help with their specific goal.
+    - DIRECT_OFFER: A limited-time discount or exclusive consultation.
+    - CURIOSITY: Ask a specific question about their progress.
+    
+    Output the selected strategy name and a brief rationale in English.
+    """
+    analyst_diagnosis = dspy.InputField()
+    selected_strategy = dspy.OutputField(desc="Name of the chosen strategy")
+    rationale = dspy.OutputField(desc="Why this strategy fits the lead state")
+
+class StrategistAgent(dspy.Module):
+    def __init__(self):
+        super().__init__()
+        self.select_strategy = dspy.Predict(StrategistSignature)
+    
+    def forward(self, diagnosis: str):
+        result = self.select_strategy(analyst_diagnosis=diagnosis)
+        return result.selected_strategy, result.rationale
