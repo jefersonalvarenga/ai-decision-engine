@@ -66,3 +66,29 @@ class StrategistAgent(dspy.Module):
     def forward(self, diagnosis: str):
         result = self.select_strategy(analyst_diagnosis=diagnosis)
         return result.selected_strategy, result.rationale
+
+class CopywriterSignature(dspy.Signature):
+    """
+    Write a persuasive WhatsApp message in Portuguese (pt-BR).
+    Use the strategy and diagnosis provided.
+    The message must be friendly, professional, and focus on the patient's pain/goal.
+    Do not use hashtags. Keep it concise.
+    """
+    selected_strategy = dspy.InputField()
+    analyst_diagnosis = dspy.InputField()
+    target_language = dspy.InputField()
+    
+    generated_copy = dspy.OutputField(desc="The final WhatsApp message in Portuguese")
+
+class CopywriterAgent(dspy.Module):
+    def __init__(self):
+        super().__init__()
+        self.write = dspy.Predict(CopywriterSignature)
+    
+    def forward(self, strategy: str, diagnosis: str, language: str):
+        result = self.write(
+            selected_strategy=strategy, 
+            analyst_diagnosis=diagnosis,
+            target_language=language
+        )
+        return result.generated_copy

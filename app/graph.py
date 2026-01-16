@@ -1,10 +1,11 @@
 from langgraph.graph import StateGraph, END
 from .state import AgentState
-from .agents import AnalystAgent, StrategistAgent # Atualize o import
+from .agents import AnalystAgent, StrategistAgent, CopywriterAgent # Atualize o import
 
 # Instanciar os agentes
 analyst_agent = AnalystAgent()
 strategist_agent = StrategistAgent()
+copywriter_agent = CopywriterAgent()
 
 def call_analyst(state: AgentState):
     # Log para debug no console do Easypanel
@@ -32,13 +33,25 @@ def call_strategist(state: AgentState):
         "selected_strategy": f"{strategy}: {rationale}"
     }
 
-# --- Atualização do Workflow ---
+def call_copywriter(state: AgentState):
+    print("--- GENERATING FINAL COPY ---")
+    copy = copywriter_agent.forward(
+        state["selected_strategy"],
+        state["analyst_diagnosis"],
+        state["target_language"]
+    )
+    return {"generated_copy": copy}
+
+# Configuração do Grafo
 workflow = StateGraph(AgentState)
+
 workflow.add_node("analyst", call_analyst)
-workflow.add_node("strategist", call_strategist) # Novo nó
+workflow.add_node("strategist", call_strategist)
+workflow.add_node("copywriter", call_copywriter) # Novo nó
 
 workflow.set_entry_point("analyst")
-workflow.add_edge("analyst", "strategist") # Conecta Analista ao Estrategista
-workflow.add_edge("strategist", END)      # Termina após Estrategista
+workflow.add_edge("analyst", "strategist")
+workflow.add_edge("strategist", "copywriter") # Fluxo linear
+workflow.add_edge("copywriter", END)
 
 app_graph = workflow.compile()
