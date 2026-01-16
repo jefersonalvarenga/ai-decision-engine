@@ -104,6 +104,12 @@ class CriticSignature(dspy.Signature):
     3. Linguagem médica muito técnica que o paciente não entenda.
     4. Falta de empatia com a dor relatada.
 
+    REGRAS DE OURO:
+    - Nunca prescreva exercícios específicos como 'fazer alongamento X'.
+    - Em vez disso, ofereça um 'Guia' ou 'Dica de Cuidado' que exija contato com a clínica.
+    - Exemplo: 'Temos um vídeo rápido com movimentos seguros para quem tem dor lombar, quer que eu te envie?'
+    - Isso gera curiosidade e protege a clínica juridicamente.
+
     Forneça o feedback detalhado e o status de aprovação.
     """
     generated_copy = dspy.InputField()
