@@ -1,38 +1,22 @@
-"""
-EasyScale Configuration Module
-
-Centralized configuration for the EasyScale system.
-Includes DSPy settings, Supabase connection, and environment variables.
-"""
-
-import os
+import dspy
 from typing import Optional
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from pydantic_settings import BaseSettings
 
-
-class DSPyConfig(BaseModel):
-    """Configuration for DSPy language model."""
-
-    provider: str = Field(default="openai", description="LLM provider (openai, anthropic, groq)")
-    model: str = Field(default="gpt-4o-mini", description="Model identifier")
-    temperature: float = Field(default=0.3, ge=0.0, le=2.0, description="Sampling temperature")
-    max_tokens: int = Field(default=1000, ge=1, description="Maximum tokens in response")
-
-
 class SupabaseConfig(BaseModel):
-    """Configuration for Supabase database connection."""
-
     url: str = Field(description="Supabase project URL")
     key: str = Field(description="Supabase anon/service key")
-    schema: str = Field(default="public", description="Database schema")
-
+    # Mudamos 'schema' para 'supabase_schema' para evitar conflito com o Pydantic
+    supabase_schema: str = Field(default="public", description="Database schema")
 
 class EasyScaleSettings(BaseSettings):
-    """
-    Main settings class for EasyScale.
-    Loads configuration from environment variables with .env file support.
-    """
+    # Configuração moderna para Pydantic V2
+    model_config = ConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        case_sensitive=False,
+        extra="ignore"  # <--- ISSO RESOLVE O SEU ERRO PRINCIPAL
+    )
 
     # DSPy Configuration
     dspy_provider: str = Field(default="openai", env="DSPY_PROVIDER")
@@ -46,84 +30,40 @@ class EasyScaleSettings(BaseSettings):
     groq_api_key: Optional[str] = Field(default=None, env="GROQ_API_KEY")
 
     # Supabase
-    supabase_url: str = Field(env="SUPABASE_URL")
-    supabase_key: str = Field(env="SUPABASE_KEY")
+    supabase_url: str = Field(default="", env="SUPABASE_URL")
+    supabase_key: str = Field(default="", env="SUPABASE_KEY")
     supabase_schema: str = Field(default="public", env="SUPABASE_SCHEMA")
 
-    # Application Settings
-    log_level: str = Field(default="INFO", env="LOG_LEVEL")
-    debug_mode: bool = Field(default=False, env="DEBUG_MODE")
-    env: str = Field(default="development") # Agora o Pydantic aceita o 'production'
-
-    class Config:
-        env_file = ".env"
-        env_file_encoding = "utf-8"
-        case_sensitive = False
-
-    @property
-    def dspy_config(self) -> DSPyConfig:
-        """Get DSPy configuration object."""
-        return DSPyConfig(
-            provider=self.dspy_provider,
-            model=self.dspy_model,
-            temperature=self.dspy_temperature,
-            max_tokens=self.dspy_max_tokens,
-        )
-
-    @property
-    def supabase_config(self) -> SupabaseConfig:
-        """Get Supabase configuration object."""
-        return SupabaseConfig(
-            url=self.supabase_url,
-            key=self.supabase_key,
-            schema=self.supabase_schema,
-        )
-
     def get_api_key(self) -> Optional[str]:
-        """Get the appropriate API key based on DSPy provider."""
-        if self.dspy_provider == "openai":
-            return self.openai_api_key
-        elif self.dspy_provider == "anthropic":
-            return self.anthropic_api_key
-        elif self.dspy_provider == "groq":
-            return self.groq_api_key
+        if self.dspy_provider == "openai": return self.openai_api_key
+        if self.dspy_provider == "anthropic": return self.anthropic_api_key
+        if self.dspy_provider == "groq": return self.groq_api_key
         return None
 
-
-# Singleton instance
 _settings: Optional[EasyScaleSettings] = None
 
-
 def get_settings() -> EasyScaleSettings:
-    """
-    Get or create the global settings instance.
-
-    Returns:
-        EasyScaleSettings singleton
-    """
     global _settings
     if _settings is None:
         _settings = EasyScaleSettings()
     return _settings
 
-
-def reset_settings() -> None:
-    """Reset the settings singleton (useful for testing)."""
-    global _settings
-    _settings = None
-
-import dspy
-
 def init_dspy() -> None:
-    """Initialize DSPy globally using the current settings."""
     settings = get_settings()
     api_key = settings.get_api_key()
     
-    if settings.dspy_provider == "openai":
-        lm = dspy.LM(f"openai/{settings.dspy_model}", api_key=api_key, temperature=settings.dspy_temperature)
-    elif settings.dspy_provider == "anthropic":
-        lm = dspy.LM(f"anthropic/{settings.dspy_model}", api_key=api_key, temperature=settings.dspy_temperature)
-    elif settings.dspy_provider == "groq":
-        lm = dspy.LM(f"groq/{settings.dspy_model}", api_key=api_key, temperature=settings.dspy_temperature)
-    
-    dspy.settings.configure(lm=lm)
+    if not api_key:
+        print("⚠️ Warning: No API Key found for DSPy provider.")
+        return
+
+    try:
+        # Usando dspy.OpenAI para compatibilidade
+        lm = dspy.OpenAI(
+            model=settings.dspy_model, 
+            api_key=api_key, 
+            temperature=settings.dspy_temperature,
+            max_tokens=settings.dspy_max_tokens
+        )
+        dspy.settings.configure(lm=lm)
+    except Exception as e:
+        print(f"❌ Failed to initialize DSPy: {e}")
