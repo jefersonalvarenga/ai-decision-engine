@@ -53,6 +53,7 @@ class EasyScaleSettings(BaseSettings):
     # Application Settings
     log_level: str = Field(default="INFO", env="LOG_LEVEL")
     debug_mode: bool = Field(default=False, env="DEBUG_MODE")
+    env: str = Field(default="development") # Agora o Pydantic aceita o 'production'
 
     class Config:
         env_file = ".env"
