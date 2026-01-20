@@ -83,11 +83,11 @@ async def startup_event():
 # ENDPOINTS
 # ============================================================================
 
-@app.get("/health")
+@app.get("/v1/health")
 async def health():
     return {"status": "online", "timestamp": datetime.utcnow()}
 
-@app.post("/api/v1/router", response_model=RouterResponse)
+@app.post("/v1/router", response_model=RouterResponse)
 async def route_message(request: RouterRequest):
     """
     Endpoint para mensagens em tempo real (WhatsApp).
@@ -114,7 +114,7 @@ async def route_message(request: RouterRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Router Error: {str(e)}")
 
-@app.post("/api/v1/reengage", response_model=ReengageResponse)
+@app.post("/v1/reengage", response_model=ReengageResponse)
 async def reengage_lead(request: ReengageRequest):
     """
     Endpoint chamado pelo n8n para leads que pararam de responder.
@@ -145,4 +145,4 @@ async def reengage_lead(request: ReengageRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run("api:app", host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
