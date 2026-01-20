@@ -24,6 +24,6 @@ COPY . .
 EXPOSE 8000
 
 # CONFIGURAÇÃO IMPORTANTE: 
-# Ajustamos o comando para rodar o api.py que é o ponto de entrada unificado.
+# Ajustamos o comando para rodar o main.py que é o ponto de entrada unificado.
 # O --proxy-headers é fundamental se você usa Easypanel/Nginx para pegar o IP real.
-CMD ["uvicorn", "api:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]
+CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]
