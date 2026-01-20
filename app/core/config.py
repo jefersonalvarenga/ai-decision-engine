@@ -110,3 +110,19 @@ def reset_settings() -> None:
     """Reset the settings singleton (useful for testing)."""
     global _settings
     _settings = None
+
+import dspy
+
+def init_dspy() -> None:
+    """Initialize DSPy globally using the current settings."""
+    settings = get_settings()
+    api_key = settings.get_api_key()
+    
+    if settings.dspy_provider == "openai":
+        lm = dspy.LM(f"openai/{settings.dspy_model}", api_key=api_key, temperature=settings.dspy_temperature)
+    elif settings.dspy_provider == "anthropic":
+        lm = dspy.LM(f"anthropic/{settings.dspy_model}", api_key=api_key, temperature=settings.dspy_temperature)
+    elif settings.dspy_provider == "groq":
+        lm = dspy.LM(f"groq/{settings.dspy_model}", api_key=api_key, temperature=settings.dspy_temperature)
+    
+    dspy.settings.configure(lm=lm)
