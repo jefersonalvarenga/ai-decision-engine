@@ -20,6 +20,10 @@ RUN pip install --no-cache-dir --upgrade pip && \
 # Copia o restante do código
 COPY . .
 
+# CRUCIAL: Adicione esta linha antes do EXPOSE
+# Ela garante que 'from app.core...' funcione sem precisar de __init__.py
+ENV PYTHONPATH=/app
+
 # Expõe a porta que o FastAPI vai usar
 EXPOSE 8000
 

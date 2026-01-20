@@ -147,5 +147,5 @@ async def reengage_lead(request: ReengageRequest):
 #    import uvicorn
 #    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
 # Substitua as últimas linhas por isso:
-ENV PYTHONPATH=.
-CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+#ENV PYTHONPATH=.
+#CMD ["uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
