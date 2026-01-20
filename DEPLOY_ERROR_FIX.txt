@@ -1,0 +1,223 @@
+═══════════════════════════════════════════════════════════════════
+  ERRO DE DEPLOY - SOLUÇÃO RÁPIDA
+═══════════════════════════════════════════════════════════════════
+
+🚨 ERRO IDENTIFICADO
+─────────────────────────────────────────────────────────────────
+
+Você recebeu: "### Error ### Tue, 20 Jan 2026 18:42:48 GMT"
+
+Causa mais provável: DEPENDÊNCIAS NÃO INSTALADAS no ambiente de deploy
+
+
+✅ SOLUÇÃO (3 passos)
+─────────────────────────────────────────────────────────────────
+
+PASSO 1: Verifique qual plataforma você está usando
+───────────────────────────────────────────────────────────────
+
+[ ] Railway    → Vá para PASSO 2A
+[ ] Render     → Vá para PASSO 2B  
+[ ] Heroku     → Vá para PASSO 2C
+[ ] Outro      → Vá para PASSO 2D
+
+
+PASSO 2A: RAILWAY
+───────────────────────────────────────────────────────────────
+
+1. Commit os novos arquivos:
+   git push origin main
+
+2. Na Railway dashboard:
+   • Settings → Build & Deploy
+   • Build Command: pip install -r requirements.txt
+   • Start Command: uvicorn api:app --host 0.0.0.0 --port $PORT
+
+3. Verifique variáveis de ambiente:
+   Settings → Variables → Add todos:
+   ✓ DSPY_PROVIDER=openai
+   ✓ DSPY_MODEL=gpt-4o-mini  
+   ✓ OPENAI_API_KEY=sk-proj-...
+   ✓ SUPABASE_URL=https://...
+   ✓ SUPABASE_KEY=eyJ...
+
+4. Force redeploy:
+   • Deployments → ... → Redeploy
+
+
+PASSO 2B: RENDER
+───────────────────────────────────────────────────────────────
+
+1. Commit os novos arquivos:
+   git push origin main
+
+2. Na Render dashboard:
+   • Settings → Build & Deploy
+   • Build Command: pip install -r requirements.txt
+   • Start Command: uvicorn api:app --host 0.0.0.0 --port $PORT
+   • Python Version: 3.11.7
+
+3. Verifique variáveis de ambiente:
+   Environment → Add Variable → Add todos:
+   ✓ DSPY_PROVIDER=openai
+   ✓ DSPY_MODEL=gpt-4o-mini
+   ✓ OPENAI_API_KEY=sk-proj-...
+   ✓ SUPABASE_URL=https://...
+   ✓ SUPABASE_KEY=eyJ...
+
+4. Manual Deploy:
+   • Manual Deploy → Deploy latest commit
+
+
+PASSO 2C: HEROKU
+───────────────────────────────────────────────────────────────
+
+1. Verifique Procfile existe:
+   cat Procfile
+   # Deve mostrar: web: uvicorn api:app --host 0.0.0.0 --port $PORT
+
+2. Commit:
+   git push heroku main
+
+3. Configure variáveis:
+   heroku config:set DSPY_PROVIDER=openai
+   heroku config:set OPENAI_API_KEY=sk-proj-...
+   heroku config:set SUPABASE_URL=https://...
+   heroku config:set SUPABASE_KEY=eyJ...
+
+4. Force rebuild:
+   heroku builds:cancel
+   git push heroku main --force
+
+
+PASSO 2D: OUTRO / SELF-HOSTED
+───────────────────────────────────────────────────────────────
+
+1. SSH no servidor:
+   ssh user@seu-servidor
+
+2. Navegue até o projeto:
+   cd /path/to/easyscale
+
+3. Pull últimas mudanças:
+   git pull origin main
+
+4. Instale dependências:
+   pip install -r requirements.txt
+
+5. Configure .env:
+   cp .env.example .env
+   nano .env  # Adicione suas credenciais
+
+6. Reinicie serviço:
+   systemctl restart easyscale
+   # ou
+   pm2 restart easyscale
+   # ou
+   supervisorctl restart easyscale
+
+
+PASSO 3: VERIFIQUE SE FUNCIONOU
+───────────────────────────────────────────────────────────────
+
+1. Aguarde build completar (1-5 minutos)
+
+2. Acesse o health check:
+   curl https://seu-dominio.com/health
+
+   ✅ Sucesso:
+   {
+     "status": "healthy",
+     "version": "1.0.0",
+     "dspy_configured": true
+   }
+
+   ❌ Erro ainda persiste:
+   Vá para PASSO 4
+
+3. Teste endpoint:
+   curl https://seu-dominio.com/
+   
+   ✅ Deve retornar:
+   {
+     "service": "EasyScale Router API",
+     "version": "1.0.0",
+     "status": "online"
+   }
+
+
+PASSO 4: DEBUG AVANÇADO (se erro persistir)
+───────────────────────────────────────────────────────────────
+
+1. Veja os logs da plataforma:
+
+   Railway:  railway logs --tail
+   Render:   Dashboard → Logs
+   Heroku:   heroku logs --tail
+
+2. Procure por erros específicos:
+
+   "ModuleNotFoundError: No module named 'fastapi'"
+   → Problema: requirements.txt não foi lido
+   → Solução: Verifique Build Command
+
+   "ImportError: cannot import name 'SecurityMiddleware'"
+   → Problema: arquivo security_middleware.py não foi deployado
+   → Solução: git add security_middleware.py && git push
+
+   "ValueError: OPENAI_API_KEY not found"
+   → Problema: variáveis de ambiente não configuradas
+   → Solução: Configure na dashboard da plataforma
+
+3. Execute checker localmente:
+   python check_dependencies.py
+
+4. Se nada funcionar, leia:
+   cat TROUBLESHOOTING.md
+
+
+📚 ARQUIVOS DE REFERÊNCIA
+───────────────────────────────────────────────────────────────
+
+✅ check_dependencies.py      → Verifica dependências
+✅ TROUBLESHOOTING.md          → Guia completo de troubleshooting
+✅ DEPLOYMENT.md               → Guia de deploy detalhado
+✅ requirements.txt            → Lista de dependências
+✅ Procfile                    → Config Heroku/Railway
+✅ railway.toml                → Config Railway
+✅ runtime.txt                 → Versão Python
+
+
+🆘 AINDA COM ERRO?
+───────────────────────────────────────────────────────────────
+
+1. Cole a mensagem de erro COMPLETA:
+   • Copie TODO o log de erro
+   • Inclua as últimas 50-100 linhas
+
+2. Verifique:
+   ✓ requirements.txt existe?
+   ✓ Build command está correto?
+   ✓ Variáveis de ambiente configuradas?
+   ✓ security_middleware.py foi commitado?
+
+3. Teste local primeiro:
+   pip install -r requirements.txt
+   python check_dependencies.py
+   uvicorn api:app --reload
+
+   Se funcionar local mas não no deploy:
+   → Problema é configuração da plataforma
+   → Revise Build Command e variáveis
+
+
+═══════════════════════════════════════════════════════════════════
+  SOLUÇÃO MAIS COMUM (90% dos casos)
+═══════════════════════════════════════════════════════════════════
+
+1. git push origin main
+2. Configure variáveis de ambiente na dashboard
+3. Force redeploy
+4. Aguarde 2-3 minutos
+5. ✅ Funcionando!
+
