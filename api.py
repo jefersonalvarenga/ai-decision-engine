@@ -15,6 +15,7 @@ from pydantic import BaseModel, Field
 
 from router_agent import build_easyscale_graph, configure_dspy
 from config import get_settings, EasyScaleSettings
+from security_middleware import SecurityMiddleware, AccessLogMiddleware
 
 
 # ============================================================================
@@ -28,6 +29,10 @@ app = FastAPI(
     docs_url="/docs",
     redoc_url="/redoc"
 )
+
+# Security middleware (MUST be first)
+app.add_middleware(SecurityMiddleware, rate_limit=60)  # 60 requests/minute
+app.add_middleware(AccessLogMiddleware, log_level="INFO")
 
 # CORS configuration for frontend integration
 app.add_middleware(
@@ -134,15 +139,21 @@ async def verify_api_key(x_api_key: str = Header(...)) -> bool:
 # API ENDPOINTS
 # ============================================================================
 
-@app.get("/", response_model=HealthCheckResponse)
+@app.get("/")
 async def root():
-    """Root endpoint - health check."""
-    return HealthCheckResponse(
-        status="healthy",
-        version="1.0.0",
-        dspy_configured=hasattr(get_graph, "_graph"),
-        timestamp=datetime.utcnow()
-    )
+    """Root endpoint - welcome message."""
+    return {
+        "service": "EasyScale Router API",
+        "version": "1.0.0",
+        "status": "online",
+        "documentation": "/docs",
+        "health": "/health",
+        "endpoints": {
+            "router": "POST /api/v1/router",
+            "whatsapp_webhook": "POST /api/v1/whatsapp/webhook",
+            "test_classify": "POST /api/v1/test/classify"
+        }
+    }
 
 
 @app.get("/health", response_model=HealthCheckResponse)
