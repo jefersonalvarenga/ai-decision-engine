@@ -9,26 +9,8 @@ import operator
 import dspy
 from typing import TypedDict, List, Annotated, Literal
 from enum import Enum
-from signature import RouterSignature, IntentType
+from signatures import RouterSignature, IntentType
 from langgraph.graph import StateGraph, END
-
-# ============================================================================
-# STATE DEFINITION
-# ============================================================================
-
-class AgentState(TypedDict):
-    latest_incoming: str
-    history: List[str]
-    intake_status: str       # 'in_progress' ou 'completed'
-    schedule_status: str     # 'in_progress' ou 'idle'
-    reschedule_status: str   # 'in_progress' ou 'idle'
-    cancel_status: str       # 'in_progress' ou 'idle'
-    language: str     # 'PT-BR' ou EN-US
-    
-    # Resultados do Router
-    intentions: Annotated[List[str], operator.add]
-    reasoning: str
-    confidence: float
 
 # ============================================================================
 # MODULE & NODE
