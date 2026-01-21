@@ -13,33 +13,25 @@ import dspy
 from langgraph.graph import StateGraph, END
 
 # ============================================================================
-# INTENT DEFINITIONS (Global Standard)
+# INTENT DEFINITIONS
 # ============================================================================
 
 class IntentType(str, Enum):
-    # SESSION MANAGEMENT
     SESSION_START = "SESSION_START"
     SESSION_CLOSURE = "SESSION_CLOSURE"
-
-    # APPOINTMENT MANAGEMENT
     SERVICE_SCHEDULING = "SERVICE_SCHEDULING"
     SERVICE_RESCHEDULING = "SERVICE_RESCHEDULING"
     SERVICE_CANCELLATION = "SERVICE_CANCELLATION"
-    
-    # CLINICAL & TECHNICAL
     MEDICAL_ASSESSMENT = "MEDICAL_ASSESSMENT"
     PROCEDURE_INQUIRY = "PROCEDURE_INQUIRY"
-
-    # SALES & CONVERSION
     AD_CONVERSION = "AD_CONVERSION"
     ORGANIC_INQUIRY = "ORGANIC_INQUIRY"
     OFFER_CONVERSION = "OFFER_CONVERSION"
     REENGAGEMENT_RECOVERY = "REENGAGEMENT_RECOVERY"
-
-    # SYSTEM & TOOLS
     GENERAL_INFO = "GENERAL_INFO"
     IMAGE_ASSESSMENT = "IMAGE_ASSESSMENT"
     HUMAN_ESCALATION = "HUMAN_ESCALATION"
+    UNCLASSIFIED = "UNCLASSIFIED" # Adicionado para bater com a lógica
 
 # ============================================================================
 # STATE DEFINITION
@@ -54,7 +46,7 @@ class AgentState(TypedDict):
     reasoning: str
 
 # ============================================================================
-# DSPY SIGNATURE (Global/Multilanguage)
+# DSPY SIGNATURE
 # ============================================================================
 
 class RouterSignature(dspy.Signature):
@@ -70,27 +62,13 @@ class RouterSignature(dspy.Signature):
 
     intents: List[str] = dspy.OutputField(
         desc=(
-            "List of detected intents. Rules:\n"
-            "1. Return MULTIPLE intents if the message contains multiple requests.\n"
-            "2. Always prioritize MEDICAL_ASSESSMENT for safety.\n"
-            "3. Include SESSION_START for new interactions or returns after a long pause.\n\n"
-            "Categories:\n"
-            "- SESSION_START: Greetings or first contact.\n"
-            "- SESSION_CLOSURE: Farewells or closing the chat.\n"
-            "- SERVICE_SCHEDULING: Desire to book new appointments.\n"
-            "- SERVICE_RESCHEDULING: Requests to change dates/times.\n"
-            "- SERVICE_CANCELLATION: Requests to cancel.\n"
-            "- MEDICAL_ASSESSMENT: Health concerns, pain, complications.\n"
-            "- PROCEDURE_INQUIRY: Technical questions about procedures/recovery.\n"
-            "- AD_CONVERSION: Inquiry about a specific advertisement.\n"
-            "- ORGANIC_INQUIRY: General pricing or services questions.\n"
-            "- OFFER_CONVERSION: Responses to marketing campaigns.\n"
-            "- REENGAGEMENT_RECOVERY: Replying to follow-up/re-engagement messages.\n"
-            "- GENERAL_INFO: Logistics (address, hours, parking).\n"
-            "- IMAGE_ASSESSMENT: Sending or mentioning photos for analysis.\n"
-            "- HUMAN_ESCALATION: Explicit request for a human agent."
-            "- UNCLASSIFIED: Fallback for unclassified or ambiguous messages."
-            "DO NOT create new categories like 'INFORMATION_REQUEST'."
+            "List of detected intents. STRICTLY USE ONLY: "
+            "SESSION_START, SESSION_CLOSURE, SERVICE_SCHEDULING, SERVICE_RESCHEDULING, "
+            "SERVICE_CANCELLATION, MEDICAL_ASSESSMENT, PROCEDURE_INQUIRY, AD_CONVERSION, "
+            "ORGANIC_INQUIRY, OFFER_CONVERSION, REENGAGEMENT_RECOVERY, GENERAL_INFO, "
+            "IMAGE_ASSESSMENT, HUMAN_ESCALATION, UNCLASSIFIED. "
+            "Rules: 1. Multiple intents allowed. 2. Prioritize MEDICAL_ASSESSMENT. "
+            "3. Use UNCLASSIFIED if ambiguous."
         )
     )
 
@@ -114,42 +92,39 @@ class RouterModule(dspy.Module):
             patient_message=patient_message
         )
 
-    def router_node(state: AgentState) -> AgentState:
-        import json
-        router = RouterModule()
+# MOVIDO PARA FORA DA CLASSE
+def router_node(state: AgentState) -> AgentState:
+    router = RouterModule()
 
-        prediction = router(
-            context_json=json.dumps(state["context"], ensure_ascii=False),
-            patient_message=state["latest_message"]
-        )
+    prediction = router(
+        context_json=json.dumps(state["context"], ensure_ascii=False),
+        patient_message=state["latest_message"]
+    )
 
-        # Pegamos o que a IA devolveu
-        raw_output = prediction.intents
-        
-        # 1. Normalização para Lista
-        if isinstance(raw_output, str):
-            cleaned = raw_output.replace("[", "").replace("]", "").replace("'", "").replace('"', "")
-            intent_list = [i.strip() for i in cleaned.split(",")]
-        else:
-            intent_list = raw_output
+    # Pegamos o que a IA devolveu
+    raw_output = prediction.intents
+    
+    # 1. Normalização para Lista
+    if isinstance(raw_output, str):
+        cleaned = raw_output.replace("[", "").replace("]", "").replace("'", "").replace('"', "")
+        intent_list = [i.strip() for i in cleaned.split(",")]
+    else:
+        intent_list = raw_output
 
-        # 2. Validação contra o Enum
-        valid_values = {item.value for item in IntentType}
-        
-        # Se a intenção da IA for válida, mantém. Se não for, vira UNCLASSIFIED.
-        final_intents = [
-            i if i in valid_values else IntentType.UNCLASSIFIED.value 
-            for i in intent_list
-        ]
+    # 2. Validação contra o Enum
+    valid_values = {item.value for item in IntentType}
+    
+    # Mapeamento e Limpeza
+    final_intents = [
+        i if i in valid_values else IntentType.UNCLASSIFIED.value 
+        for i in intent_list
+    ]
 
-        # Se a lista vier vazia por algum motivo
-        if not final_intents:
-            final_intents = [IntentType.UNCLASSIFIED.value]
+    if not final_intents:
+        final_intents = [IntentType.UNCLASSIFIED.value]
 
-        return {
-            "intent_queue": final_intents,
-            "urgency_score": prediction.urgency_score,
-            "reasoning": prediction.rationale,
-        }
-
-# (The rest of the LangGraph construction follows the same logic...)
+    return {
+        "intent_queue": final_intents,
+        "urgency_score": prediction.urgency_score,
+        "reasoning": prediction.rationale,
+    }
