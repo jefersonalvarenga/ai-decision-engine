@@ -6,128 +6,127 @@ Standard: Enterprise-Grade Multilanguage Routing
 import os
 import json
 import operator
+import dspy
 from typing import TypedDict, List, Annotated, Literal
 from enum import Enum
-
-import dspy
+from signatures_final import RouterSignature, IntentType
 from langgraph.graph import StateGraph, END
-
-# ============================================================================
-# INTENT DEFINITIONS
-# ============================================================================
-
-class IntentType(str, Enum):
-    SESSION_START = "SESSION_START"
-    SESSION_CLOSURE = "SESSION_CLOSURE"
-    SERVICE_SCHEDULING = "SERVICE_SCHEDULING"
-    SERVICE_RESCHEDULING = "SERVICE_RESCHEDULING"
-    SERVICE_CANCELLATION = "SERVICE_CANCELLATION"
-    MEDICAL_ASSESSMENT = "MEDICAL_ASSESSMENT"
-    PROCEDURE_INQUIRY = "PROCEDURE_INQUIRY"
-    AD_CONVERSION = "AD_CONVERSION"
-    ORGANIC_INQUIRY = "ORGANIC_INQUIRY"
-    OFFER_CONVERSION = "OFFER_CONVERSION"
-    REENGAGEMENT_RECOVERY = "REENGAGEMENT_RECOVERY"
-    GENERAL_INFO = "GENERAL_INFO"
-    IMAGE_ASSESSMENT = "IMAGE_ASSESSMENT"
-    HUMAN_ESCALATION = "HUMAN_ESCALATION"
-    UNCLASSIFIED = "UNCLASSIFIED" # Adicionado para bater com a lógica
 
 # ============================================================================
 # STATE DEFINITION
 # ============================================================================
 
 class AgentState(TypedDict):
-    context: dict
-    latest_message: str
-    intents: Annotated[List[str], operator.add]
-    final_response: str
-    urgency_score: int
+    latest_incoming: str
+    history: str
+    intake_status: str       # 'in_progress' ou 'completed'
+    schedule_status: str     # 'in_progress' ou 'idle'
+    reschedule_status: str   # 'in_progress' ou 'idle'
+    cancel_status: str       # 'in_progress' ou 'idle'
+    language: str     # 'PT-BR' ou EN-US
+    
+    # Resultados do Router
+    intentions: Annotated[List[str], operator.add]
     reasoning: str
-
-# ============================================================================
-# DSPY SIGNATURE
-# ============================================================================
-
-class RouterSignature(dspy.Signature):
-    """
-    Global Intent Classifier for Aesthetic Clinics.
-    Interpret the patient_message based on the input_language and map it to 
-    standardized English Intent Categories.
-    """
-
-    context_json = dspy.InputField(desc="JSON string with patient history and profile.")
-    input_language = dspy.InputField(desc="The language of the message (e.g., 'Brazilian Portuguese').")
-    patient_message = dspy.InputField(desc="The raw message from the patient.")
-
-    intents: List[str] = dspy.OutputField(
-        desc=(
-            "List of detected intents. STRICTLY USE ONLY: "
-            "SESSION_START, SESSION_CLOSURE, SERVICE_SCHEDULING, SERVICE_RESCHEDULING, "
-            "SERVICE_CANCELLATION, MEDICAL_ASSESSMENT, PROCEDURE_INQUIRY, AD_CONVERSION, "
-            "ORGANIC_INQUIRY, OFFER_CONVERSION, REENGAGEMENT_RECOVERY, GENERAL_INFO, "
-            "IMAGE_ASSESSMENT, HUMAN_ESCALATION, UNCLASSIFIED. "
-            "Rules: 1. Multiple intents allowed. 2. Prioritize MEDICAL_ASSESSMENT. "
-            "3. Use UNCLASSIFIED if ambiguous."
-        )
-    )
-
-    urgency_score: int = dspy.OutputField(desc="Score 1-5 based on clinical risk. 5 is critical.")
-    reasoning: str = dspy.OutputField(desc="Technical rationale in English.")
+    confidence: float
 
 # ============================================================================
 # MODULE & NODE
 # ============================================================================
 
 class RouterModule(dspy.Module):
+
+    """
+    The core DSPy module that uses ChainOfThought to classify the patient's intentions
+    based on the highly contextualized RouterSignature.
+    """
     def __init__(self):
         super().__init__()
         self.classifier = dspy.ChainOfThought(RouterSignature)
 
-    def forward(self, context_json: str, patient_message: str):
-        input_lang = os.getenv("INPUT_LANGUAGE", "Brazilian Portuguese")
+    def forward(self, latest_incoming: str, history: str, intake_status: str, schedule_status: str, reschedule_status: str, cancel_status: str, language: str) -> Dict[str, Any]:
+        input_lang = os.getenv("INPUT_LANGUAGE", "PT-BR")
         return self.classifier(
-            context_json=context_json,
-            input_language=input_lang,
-            patient_message=patient_message
+            latest_incoming=latest_incoming,
+            history=history,
+            intake_status=intake_status,
+            schedule_status=schedule_status,
+            reschedule_status=reschedule_status,
+            cancel_status=cancel_status,
+            language=language
         )
 
-# MOVIDO PARA FORA DA CLASSE
-def router_node(state: AgentState) -> AgentState:
-    router = RouterModule()
+# ============================================================================
+# ROUTER AGENT IMPLEMENTATION (The n8n Mapper)
+# ============================================================================
 
-    prediction = router(
-        context_json=json.dumps(state["context"], ensure_ascii=False),
-        patient_message=state["latest_message"]
-    )
+class RouterAgent:
+    """
+    A wrapper class that uses RouterModule to get the prediction and maps 
+    the output to the required n8n JSON format.
+    """
+    def __init__(self):
+        self.router_module = RouterModule()
 
-    # Pegamos o que a IA devolveu
-    raw_output = prediction.intents
-    
-    # 1. Normalização para Lista
-    if isinstance(raw_output, str):
-        cleaned = raw_output.replace("[", "").replace("]", "").replace("'", "").replace('"', "")
-        intent_list = [i.strip() for i in cleaned.split(",")]
-    else:
-        intent_list = raw_output
+    def forward(self, latest_incoming: str, history: str, intake_status: str, schedule_status: str, reschedule_status: str, cancel_status: str, language: str) -> Dict[str, Any]:
+        """
+        Executes the DSPy prediction and formats the result into the required n8n JSON structure.
+        """
+        
+        # 1. Execute the DSPy prediction using the RouterModule
+        prediction = self.router_module.forward(
+            latest_incoming=latest_incoming,
+            history=history,
+            intake_status=intake_status,
+            schedule_status=schedule_status,
+            reschedule_status=reschedule_status,
+            cancel_status=cancel_status,
+            language=language
+        )
+        
+        # 2. Map the DSPy output to the final JSON structure
+        timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat().replace('+00:00', 'Z')
+        
+        # Ensure confidence is a float, with fallback
+        try:
+            confidence_value = float(prediction.confidence)
+        except (ValueError, TypeError):
+            confidence_value = 0.0
 
-    # 2. Validação contra o Enum
-    valid_values = {item.value for item in IntentType}
-    
-    # Mapeamento e Limpeza
-    final_intents = [
-        i if i in valid_values else IntentType.UNCLASSIFIED.value 
-        for i in intent_list
-    ]
+        # 3. Validate and clean intentions_list using IntentType Enum
+        valid_intents = {item.value for item in IntentType}
+        
+        intentions_list = prediction.intentions_list
+        
+        if not isinstance(intentions_list, list):
+            # Fallback: se o LLM retornar uma string, tentamos dividir por vírgula
+            if isinstance(intentions_list, str):
+                intentions_list = [i.strip() for i in intentions_list.split(',') if i.strip()]
+            else:
+                intentions_list = []
+        
+        # Filtra apenas as intenções que são valores válidos do nosso Enum
+        cleaned_intentions = [
+            intent for intent in intentions_list 
+            if intent in valid_intents
+        ]
+        
+        # Garante que UNCLASSIFIED seja o fallback se a lista estiver vazia
+        if not cleaned_intentions:
+            cleaned_intentions = [IntentType.UNCLASSIFIED.value]
 
-    if not final_intents:
-        final_intents = [IntentType.UNCLASSIFIED.value]
-
-    print(f"DEBUG - Rationale: {prediction.reasoning}") # Ver o pensamento da IA
-    print(f"DEBUG - Raw Intents: {prediction.intents}")   # Ver o que ela cuspiu antes do filtro
-
-    return {
-        "intents": final_intents,
-        "urgency_score": prediction.urgency_score,
-        "reasoning": prediction.rationale,
-    }
+        # 4. Final JSON Output (n8n format)
+        output_json = {
+            "agent": "router",
+            "patient_intention": {
+                "value": cleaned_intentions,
+                "reasoning": prediction.reasoning,
+                "confidence": confidence_value
+            },
+            "data": {
+                "version": "1.0.0",
+                "timestamp": timestamp
+            }
+        }
+        
+        return output_json
