@@ -72,8 +72,13 @@ class RouterAgent:
         """
         Executes the DSPy prediction and formats the result into the required n8n JSON structure.
         """
+
+        # 1. Pré-processar o histórico de List[Dict] para String (formato esperado pelo LLM)
+        # O LLM precisa de uma string formatada para contexto
+        history_str = "\n".join([f"{item.get('role', 'System')}: {item.get('content', '')}" for item in history])
+
         
-        # 1. Execute the DSPy prediction using the RouterModule
+        # 2. Execute the DSPy prediction using the RouterModule
         prediction = self.router_module.forward(
             latest_incoming=latest_incoming,
             history=history,
@@ -84,7 +89,7 @@ class RouterAgent:
             language=language
         )
         
-        # 2. Map the DSPy output to the final JSON structure
+        # 3. Map the DSPy output to the final JSON structure
         timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat().replace('+00:00', 'Z')
         
         # Ensure confidence is a float, with fallback
@@ -93,7 +98,7 @@ class RouterAgent:
         except (ValueError, TypeError):
             confidence_value = 0.0
 
-        # 3. Validate and clean intentions_list using IntentType Enum
+        # 4. Validate and clean intentions_list using IntentType Enum
         valid_intents = {item.value for item in IntentType}
         
         intentions_list = prediction.intentions_list
