@@ -1,4 +1,5 @@
 import dspy
+from enum import Enum
 
 # ============================================================================
 # INTENT DEFINITIONS (ENUM)
