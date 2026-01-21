@@ -1,0 +1,127 @@
+"""
+EasyScale Router Agent
+Standard: Enterprise-Grade Multilanguage Routing
+"""
+
+import os
+import json
+import operator
+from typing import TypedDict, List, Annotated, Literal
+from enum import Enum
+
+import dspy
+from langgraph.graph import StateGraph, END
+
+# ============================================================================
+# INTENT DEFINITIONS (Global Standard)
+# ============================================================================
+
+class IntentType(str, Enum):
+    # SESSION MANAGEMENT
+    SESSION_START = "SESSION_START"
+    SESSION_CLOSURE = "SESSION_CLOSURE"
+
+    # APPOINTMENT MANAGEMENT
+    SERVICE_SCHEDULING = "SERVICE_SCHEDULING"
+    SERVICE_RESCHEDULING = "SERVICE_RESCHEDULING"
+    SERVICE_CANCELLATION = "SERVICE_CANCELLATION"
+    
+    # CLINICAL & TECHNICAL
+    MEDICAL_ASSESSMENT = "MEDICAL_ASSESSMENT"
+    PROCEDURE_INQUIRY = "PROCEDURE_INQUIRY"
+
+    # SALES & CONVERSION
+    AD_CONVERSION = "AD_CONVERSION"
+    ORGANIC_INQUIRY = "ORGANIC_INQUIRY"
+    OFFER_CONVERSION = "OFFER_CONVERSION"
+    REENGAGEMENT_RECOVERY = "REENGAGEMENT_RECOVERY"
+
+    # SYSTEM & TOOLS
+    GENERAL_INFO = "GENERAL_INFO"
+    IMAGE_ASSESSMENT = "IMAGE_ASSESSMENT"
+    HUMAN_ESCALATION = "HUMAN_ESCALATION"
+
+# ============================================================================
+# STATE DEFINITION
+# ============================================================================
+
+class AgentState(TypedDict):
+    context: dict
+    latest_message: str
+    intent_queue: Annotated[List[str], operator.add]
+    final_response: str
+    urgency_score: int
+    reasoning: str
+
+# ============================================================================
+# DSPY SIGNATURE (Global/Multilanguage)
+# ============================================================================
+
+class RouterSignature(dspy.Signature):
+    """
+    Global Intent Classifier for Aesthetic Clinics.
+    Interpret the patient_message based on the input_language and map it to 
+    standardized English Intent Categories.
+    """
+
+    context_json = dspy.InputField(desc="JSON string with patient history and profile.")
+    input_language = dspy.InputField(desc="The language of the message (e.g., 'Brazilian Portuguese').")
+    patient_message = dspy.InputField(desc="The raw message from the patient.")
+
+    intents: List[str] = dspy.OutputField(
+        desc=(
+            "List of detected intents. Rules:\n"
+            "1. Return MULTIPLE intents if the message contains multiple requests.\n"
+            "2. Always prioritize MEDICAL_ASSESSMENT for safety.\n"
+            "3. Include SESSION_START for new interactions or returns after a long pause.\n\n"
+            "Categories:\n"
+            "- SESSION_START: Greetings or first contact.\n"
+            "- SESSION_CLOSURE: Farewells or closing the chat.\n"
+            "- SERVICE_SCHEDULING: Desire to book new appointments.\n"
+            "- SERVICE_RESCHEDULING: Requests to change dates/times.\n"
+            "- SERVICE_CANCELLATION: Requests to cancel.\n"
+            "- MEDICAL_ASSESSMENT: Health concerns, pain, complications.\n"
+            "- PROCEDURE_INQUIRY: Technical questions about procedures/recovery.\n"
+            "- AD_CONVERSION: Inquiry about a specific advertisement.\n"
+            "- ORGANIC_INQUIRY: General pricing or services questions.\n"
+            "- OFFER_CONVERSION: Responses to marketing campaigns.\n"
+            "- REENGAGEMENT_RECOVERY: Replying to follow-up/re-engagement messages.\n"
+            "- GENERAL_INFO: Logistics (address, hours, parking).\n"
+            "- IMAGE_ASSESSMENT: Sending or mentioning photos for analysis.\n"
+            "- HUMAN_ESCALATION: Explicit request for a human agent."
+        )
+    )
+
+    urgency_score: int = dspy.OutputField(desc="Score 1-5 based on clinical risk. 5 is critical.")
+    reasoning: str = dspy.OutputField(desc="Technical rationale in English.")
+
+# ============================================================================
+# MODULE & NODE
+# ============================================================================
+
+class RouterModule(dspy.Module):
+    def __init__(self):
+        super().__init__()
+        self.classifier = dspy.ChainOfThought(RouterSignature)
+
+    def forward(self, context_json: str, patient_message: str):
+        input_lang = os.getenv("INPUT_LANGUAGE", "Brazilian Portuguese")
+        return self.classifier(
+            context_json=context_json,
+            input_language=input_lang,
+            patient_message=patient_message
+        )
+
+def router_node(state: AgentState) -> AgentState:
+    router = RouterModule()
+    prediction = router(
+        context_json=json.dumps(state["context"], ensure_ascii=False),
+        patient_message=state["latest_message"]
+    )
+    return {
+        "intent_queue": prediction.intents,
+        "urgency_score": prediction.urgency_score,
+        "reasoning": prediction.rationale, # Capturing the CoT rationale
+    }
+
+# (The rest of the LangGraph construction follows the same logic...)
