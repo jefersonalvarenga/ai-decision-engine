@@ -34,13 +34,15 @@ class CopywriterSignature(dspy.Signature):
 
 class CriticSignature(dspy.Signature):
     """
-    Você é o Diretor da Clínica. Sua missão é garantir que a mensagem seja 
-    curta, segura e empática. 
-    CRITÉRIO DE APROVAÇÃO: Se a mensagem ataca a dor do lead de forma amigável, aprove (True). 
-    Não seja excessivamente técnico.
+    Avalie a qualidade da mensagem de re-engajamento.
+    Sua única função é barrar mensagens agressivas, formais demais ou com erros médicos.
+    
+    REGRA DE OURO: Se a mensagem for amigável, curta e tratar Mariana pelo nome, 
+    você DEVE definir is_approved como True. 
+    Não tente melhorar o que já está bom.
     """
     generated_copy = dspy.InputField()
     analyst_diagnosis = dspy.InputField()
     
-    is_approved = dspy.OutputField(desc="True para aprovada, False para reprovada")
-    critic_feedback = dspy.OutputField(desc="Explique o motivo se reprovar")
+    is_approved = dspy.OutputField(desc="REGRAS: Apenas 'True' ou 'False'")
+    critic_feedback = dspy.OutputField(desc="Justificativa da sua decisão")
