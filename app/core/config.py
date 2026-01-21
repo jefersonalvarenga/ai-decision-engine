@@ -57,13 +57,14 @@ def init_dspy() -> None:
         return
 
     try:
-        # Usando dspy.OpenAI para compatibilidade
-        lm = dspy.OpenAI(
-            model=settings.dspy_model, 
+        # Novo padrão DSPy 2.5+
+        lm = dspy.LM(
+            model=f"{settings.dspy_provider}/{settings.dspy_model}", 
             api_key=api_key, 
             temperature=settings.dspy_temperature,
             max_tokens=settings.dspy_max_tokens
         )
         dspy.settings.configure(lm=lm)
+        print(f"✅ DSPy Motor initialized with {settings.dspy_model}")
     except Exception as e:
         print(f"❌ Failed to initialize DSPy: {e}")

@@ -134,7 +134,8 @@ async def reengage_lead(request: ReengageRequest):
             generated_copy=result.get("generated_copy", ""),
             selected_strategy=result.get("selected_strategy", ""),
             analyst_diagnosis=result.get("analyst_diagnosis", ""),
-            revision_count=result.get("revision_count", 0)
+            revision_count=result.get("revision_count", 0),
+            critic_feedback=result.get("critic_feedback", "")
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Reengage Error: {str(e)}")
