@@ -21,5 +21,5 @@ class CopywriterAgent(dspy.Module):
         
         # Returns a dictionary to update the 'generated_copy' key in the state
         return {
-            "generated_copy": result.generated_copy
+            "generated_copy": str(result.generated_copy)
         }

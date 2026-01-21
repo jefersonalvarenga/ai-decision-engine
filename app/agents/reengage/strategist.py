@@ -18,6 +18,5 @@ class StrategistAgent(dspy.Module):
         
         # Returns a dictionary to update the LangGraph state
         return {
-            "selected_strategy": result.selected_strategy,
-            "strategy_rationale": result.rationale
+            "selected_strategy": str(result.selected_strategy)
         }
