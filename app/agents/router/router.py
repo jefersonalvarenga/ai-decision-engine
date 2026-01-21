@@ -89,6 +89,7 @@ class RouterSignature(dspy.Signature):
             "- GENERAL_INFO: Logistics (address, hours, parking).\n"
             "- IMAGE_ASSESSMENT: Sending or mentioning photos for analysis.\n"
             "- HUMAN_ESCALATION: Explicit request for a human agent."
+            "DO NOT create new categories like 'INFORMATION_REQUEST'."
         )
     )
 
@@ -112,16 +113,25 @@ class RouterModule(dspy.Module):
             patient_message=patient_message
         )
 
-def router_node(state: AgentState) -> AgentState:
-    router = RouterModule()
-    prediction = router(
-        context_json=json.dumps(state["context"], ensure_ascii=False),
-        patient_message=state["latest_message"]
-    )
-    return {
-        "intent_queue": prediction.intents,
-        "urgency_score": prediction.urgency_score,
-        "reasoning": prediction.rationale, # Capturing the CoT rationale
-    }
+    def router_node(state: AgentState) -> AgentState:
+        router = RouterModule()
+        prediction = router(
+            context_json=json.dumps(state["context"], ensure_ascii=False),
+            patient_message=state["latest_message"]
+        )
+
+        # GARANTIA: Se a IA mandar string, vira lista. Se for lista, mantém.
+        raw_intents = prediction.intents
+        if isinstance(raw_intents, str):
+            # Limpa possíveis vírgulas e transforma em lista
+            processed_intents = [i.strip() for i in raw_intents.split(',')]
+        else:
+            processed_intents = raw_intents
+
+        return {
+            "intent_queue": processed_intents,
+            "urgency_score": prediction.urgency_score,
+            "reasoning": prediction.rationale,
+        }
 
 # (The rest of the LangGraph construction follows the same logic...)
