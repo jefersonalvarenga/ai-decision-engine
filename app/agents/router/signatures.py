@@ -7,7 +7,7 @@ class RouterSignature(dspy.Signature):
     latest_message = dspy.InputField(desc="The new message from WhatsApp")
     
     #intent_queue = dspy.OutputField(desc="List of detected intents (e.g., BOOKING, DOUBT, COMPLAINT)")
-    intents: List[str] = dspy.OutputField(
+    intent_queue: List[str] = dspy.OutputField(
         desc=(
             "List of detected intents. STRICTLY USE the provided categories. "
             "If the message is too ambiguous or doesn't fit any category, use 'UNCLASSIFIED'."
