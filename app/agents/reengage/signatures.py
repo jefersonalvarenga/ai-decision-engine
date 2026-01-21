@@ -1,34 +1,46 @@
 import dspy
 
 class AnalystSignature(dspy.Signature):
-    """Analyze the conversation history and patient profile to identify ghosting reasons and triggers."""
-    customer_name = dspy.InputField()
-    ad_source = dspy.InputField()
-    psychographic_profile = dspy.InputField(desc="Patient's age, interests, and pain points")
-    conversation_history = dspy.InputField(desc="Last exchanges")
+    """
+    Analise o histórico da conversa e o perfil do paciente para identificar 
+    o motivo real do sumiço (ghosting) e os gatilhos emocionais.
+    """
+    customer_name = dspy.InputField(desc="Nome do lead")
+    ad_source = dspy.InputField(desc="Origem do anúncio")
+    psychographic_profile = dspy.InputField(desc="Idade, interesses e dores")
+    conversation_history = dspy.InputField(desc="Últimas mensagens trocadas")
     
-    analyst_diagnosis = dspy.OutputField(desc="Strategic diagnosis of the current lead state")
+    analyst_diagnosis = dspy.OutputField(desc="Diagnóstico estratégico em português")
 
 class StrategistSignature(dspy.Signature):
-    """Select the best re-engagement strategy (SOCIAL_PROOF, EDUCATION, DIRECT_OFFER, CURIOSITY)."""
+    """
+    Escolha a melhor estratégia de re-engajamento (PROVA_SOCIAL, EDUCACIONAL, OFERTA_DIRETA ou CURIOSIDADE).
+    """
     analyst_diagnosis = dspy.InputField()
-    selected_strategy = dspy.OutputField(desc="Name of the chosen strategy")
-    rationale = dspy.OutputField(desc="Why this strategy fits")
+    selected_strategy = dspy.OutputField(desc="Apenas o nome da estratégia escolhida")
 
 class CopywriterSignature(dspy.Signature):
     """
-    Write a persuasive WhatsApp message in Portuguese (pt-BR). 
-    Focus on empathy, the patient's specific pain point, and the chosen strategy.
-    NO hashtags, NO formal letter openings. Use a friendly, conversational WhatsApp tone.
+    Escreva uma mensagem de WhatsApp curta, humana e altamente persuasiva.
+    REGRAS: 
+    - No máximo 2 ou 3 parágrafos curtos.
+    - Tom de conversa entre amigos, sem formalidades.
+    - Se o problema for medo, mencione conforto e anestesia de forma leve.
+    - NÃO use hashtags ou termos como 'Prezada'.
     """
     selected_strategy = dspy.InputField()
     analyst_diagnosis = dspy.InputField()
-    generated_copy = dspy.OutputField(desc="The final message in Portuguese")
+    generated_copy = dspy.OutputField(desc="Mensagem final pronta para enviar")
 
 class CriticSignature(dspy.Signature):
-    """Clinical Director review for compliance, empathy, and safety (No direct prescriptions)."""
+    """
+    Você é o Diretor da Clínica. Sua missão é garantir que a mensagem seja 
+    curta, segura e empática. 
+    CRITÉRIO DE APROVAÇÃO: Se a mensagem ataca a dor do lead de forma amigável, aprove (True). 
+    Não seja excessivamente técnico.
+    """
     generated_copy = dspy.InputField()
     analyst_diagnosis = dspy.InputField()
     
-    critic_feedback = dspy.OutputField(desc="Feedback on approval or rejection")
-    is_approved = dspy.OutputField(desc="True or False", bool=True)
+    is_approved = dspy.OutputField(desc="True para aprovada, False para reprovada")
+    critic_feedback = dspy.OutputField(desc="Explique o motivo se reprovar")
