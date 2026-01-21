@@ -25,11 +25,29 @@ from pydantic import BaseModel, Field
 class IntentType(str, Enum):
     """Available intent types for patient message classification."""
 
-    SALES = "SALES"  # Price inquiries, offers, promotions
-    SCHEDULING = "SCHEDULING"  # Appointment booking/cancellation
-    TECH_FAQ = "TECH_FAQ"  # Procedure questions, technical doubts
-    MEDICAL_ASSESSMENT = "MEDICAL_ASSESSMENT"  # Health concerns, urgency
-    GENERAL_INFO = "GENERAL_INFO"  # General questions about the clinic
+    # SESSION MANAGEMENT
+    SESSION_START = "SESSION_START"      # Greetings, "Hi", introductions.
+    SESSION_CLOSURE = "SESSION_CLOSURE"  # Finalizing chat after a completed action (farewells).
+
+    # APPOINTMENT MANAGEMENT
+    SERVICE_SCHEDULING = "SERVICE_SCHEDULING"      # Booking new appointments.
+    SERVICE_RESCHEDULING = "SERVICE_RESCHEDULING"  # Changing existing appointments.
+    SERVICE_CANCELLATION = "SERVICE_CANCELLATION"  # Cancellation existing appointments.
+    
+    # CLINICAL & TECHNICAL
+    MEDICAL_ASSESSMENT = "MEDICAL_ASSESSMENT" # Health concerns, complications, symptoms, or urgency.
+    PROCEDURE_INQUIRY = "PROCEDURE_INQUIRY"   # Technical questions about how it works, pain, or recovery.
+
+    # SALES & CONVERSION (The Funnel)
+    AD_CONVERSION = "AD_CONVERSION"           # Direct response to external ads (IG/FB/TikTok).
+    ORGANIC_INQUIRY = "ORGANIC_INQUIRY"       # Organic lead asking about general services/offers.
+    OFFER_CONVERSION = "OFFER_CONVERSION"     # Leads responding to active clinic-outbound campaigns.
+    REENGAGEMENT_RECOVERY = "REENGAGEMENT_RECOVERY" # Successful response to the "Cold Lead" workflow.
+
+    # SYSTEM & TOOLS
+    GENERAL_INFO = "GENERAL_INFO"         # Clinic hours, address, parking, etc.
+    IMAGE_ASSESSMENT = "IMAGE_ASSESSMENT" # When a patient sends a photo for visual analysis.
+    HUMAN_ESCALATION = "HUMAN_ESCALATION" # Requesting a human agent or manager (HITL).
 
 
 # ============================================================================
@@ -75,73 +93,42 @@ class AgentState(TypedDict):
 
 class RouterSignature(dspy.Signature):
     """
-    DSPy signature for intent classification and routing decisions.
-
-    This signature is optimized to understand Brazilian Portuguese colloquialisms
-    and map them to technical intent categories.
+    Global Intent Classifier for Aesthetic Clinics.
+    The system must interpret the patient_message (in the language specified by ENV)
+    and map it to the standardized English Intent Categories.
     """
 
-    context_json: str = dspy.InputField(
+    context_json = dspy.InputField(desc="JSON string with patient history, last interaction, and profile.")
+    input_language = dspy.InputField(desc="The language of the patient_message (e.g., 'Portuguese', 'English', 'Spanish').")
+    patient_message = dspy.InputField(desc="The raw message received from the patient via WhatsApp/Messaging.")
+
+    intents = dspy.OutputField(
         desc=(
-            "JSON string containing patient context from Supabase. "
-            "Includes fields: active_items (list of services being discussed), "
-            "behavioral_profile (patient personality/preferences), "
-            "conversation_history, patient_demographics, etc."
+            "List of detected intents based on the following mapping:\n"
+            "1. Return MULTIPLE intents if the message contains multiple requests.\n"
+            "2. Always prioritize MEDICAL_ASSESSMENT for safety.\n"
+            "3. Always include SESSION_START for new conversations or returns after a long pause.\n\n"
+            
+            "Standardized Categories:\n"
+            "- SESSION_START: Greetings, introductory phrases, or first contact.\n"
+            "- SESSION_CLOSURE: Farewells, thank yous, and closing of the cycle.\n"
+            "- SERVICE_SCHEDULING: Expressed desire to book a new appointment.\n"
+            "- SERVICE_RESCHEDULING: Requests to change existing appointment times/dates.\n"
+            "- SERVICE_CANCELLATION: Requests to cancel or stop a scheduled procedure.\n"
+            "- MEDICAL_ASSESSMENT: Health concerns, complications, symptoms, or emergency signs.\n"
+            "- PROCEDURE_INQUIRY: Technical questions about procedures, pain, or recovery.\n"
+            "- AD_CONVERSION: Lead inquiring about a specific advertisement or call-to-action.\n"
+            "- ORGANIC_INQUIRY: General interest in services, pricing, or catalog.\n"
+            "- OFFER_CONVERSION: Responses to specific outbound marketing campaigns.\n"
+            "- REENGAGEMENT_RECOVERY: Responses to re-engagement efforts after a period of inactivity.\n"
+            "- GENERAL_INFO: Logistic questions (address, hours, payment methods).\n"
+            "- IMAGE_ASSESSMENT: Mentioning or sending photos for visual analysis.\n"
+            "- HUMAN_ESCALATION: Explicit request to talk to a human, manager, or owner."
         )
     )
 
-    patient_message: str = dspy.InputField(
-        desc=(
-            "The latest WhatsApp message from the patient in Brazilian Portuguese (PT-BR). "
-            "May contain colloquialisms like 'tá caro' (it's expensive), "
-            "'quero marcar' (want to schedule), 'fiquei com alergia' (had allergic reaction), "
-            "'tenho interesse no combo' (interested in the package deal)."
-        )
-    )
-
-    intents: List[str] = dspy.OutputField(
-        desc=(
-            "List of detected intents from the following categories:\n"
-            "- SALES: Price questions, discount requests, package deals, payment terms. "
-            "PT-BR indicators: 'quanto custa', 'tá caro', 'tem desconto', 'parcelamento', "
-            "'valor', 'preço', 'promoção', 'oferta', 'combo'.\n"
-            "- SCHEDULING: Booking, rescheduling, or canceling appointments. "
-            "PT-BR indicators: 'marcar', 'agendar', 'desmarcar', 'remarcar', 'horário', "
-            "'vaga', 'disponibilidade', 'quando posso ir'.\n"
-            "- TECH_FAQ: Questions about procedures, recovery, preparation, contraindications. "
-            "PT-BR indicators: 'como funciona', 'quanto tempo dura', 'dói', 'preciso fazer algo antes', "
-            "'quanto tempo de recuperação', 'posso fazer se'.\n"
-            "- MEDICAL_ASSESSMENT: Health concerns, side effects, complications, urgent issues. "
-            "PT-BR indicators: 'alergia', 'inflamou', 'está doendo', 'vermelho', 'inchaço', "
-            "'febre', 'não melhorou', 'piorou', 'emergência', 'urgente'.\n"
-            "- GENERAL_INFO: Clinic hours, location, policies, general questions. "
-            "PT-BR indicators: 'onde fica', 'horário de funcionamento', 'estacionamento', "
-            "'formas de pagamento aceitas', 'pode levar acompanhante'.\n\n"
-            "Return multiple intents if the message contains multiple requests. "
-            "Prioritize MEDICAL_ASSESSMENT if any health concern is detected."
-        )
-    )
-
-    urgency_score: int = dspy.OutputField(
-        desc=(
-            "Urgency score from 1 to 5:\n"
-            "1 = No urgency (general info, routine scheduling)\n"
-            "2 = Low urgency (price questions, FAQ)\n"
-            "3 = Medium urgency (wants to book soon, mild concerns)\n"
-            "4 = High urgency (concerning symptoms, needs quick response)\n"
-            "5 = Critical urgency (severe pain, allergic reaction, medical emergency)\n\n"
-            "Indicators of high urgency in PT-BR: 'muita dor', 'não aguento', 'está piorando', "
-            "'não consigo respirar', 'muito inchado', 'febre alta', 'sangramento'."
-        )
-    )
-
-    reasoning: str = dspy.OutputField(
-        desc=(
-            "Brief explanation in English of why these intents were selected "
-            "and how the urgency score was determined. Include key phrases "
-            "from the patient message that influenced the decision."
-        )
-    )
+    urgency_score = dspy.OutputField(desc="Score from 1 to 5 based on clinical risk. 5 is critical.")
+    reasoning = dspy.OutputField(desc="Technical rationale for classification in English.")
 
 
 # ============================================================================
@@ -178,41 +165,27 @@ class RouterModule(dspy.Module):
 # LANGGRAPH NODES
 # ============================================================================
 
+import os
+
 def router_node(state: AgentState) -> AgentState:
-    """
-    Main router node that classifies patient intent using DSPy.
-
-    This node:
-    1. Takes the context and latest message from state
-    2. Calls the DSPy RouterModule for classification
-    3. Updates the intent_queue with detected intents
-    4. Sets urgency_score and reasoning for downstream use
-
-    Args:
-        state: Current agent state
-
-    Returns:
-        Updated state with populated intent_queue
-    """
     import json
-
-    # Initialize the router module
     router = RouterModule()
+    
+    # Language defined via Environment Variable (default to Portuguese)
+    input_lang = os.getenv("INPUT_LANGUAGE", "Brazilian Portuguese")
 
-    # Convert context dict to JSON string for DSPy
     context_json = json.dumps(state["context"], ensure_ascii=False)
 
-    # Run classification
     prediction = router(
         context_json=context_json,
+        input_language=input_lang, # Passando o idioma como parâmetro
         patient_message=state["latest_message"]
     )
 
-    # Update state with results
     return {
         "intent_queue": prediction.intents,
         "urgency_score": prediction.urgency_score,
-        "reasoning": prediction.reasoning,
+        "reasoning": prediction.rationale, # From ChainOfThought
     }
 
 
