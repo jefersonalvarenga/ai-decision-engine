@@ -89,6 +89,7 @@ class RouterSignature(dspy.Signature):
             "- GENERAL_INFO: Logistics (address, hours, parking).\n"
             "- IMAGE_ASSESSMENT: Sending or mentioning photos for analysis.\n"
             "- HUMAN_ESCALATION: Explicit request for a human agent."
+            "- UNCLASSIFIED: Fallback for unclassified or ambiguous messages."
             "DO NOT create new categories like 'INFORMATION_REQUEST'."
         )
     )
@@ -114,22 +115,39 @@ class RouterModule(dspy.Module):
         )
 
     def router_node(state: AgentState) -> AgentState:
+        import json
         router = RouterModule()
+
         prediction = router(
             context_json=json.dumps(state["context"], ensure_ascii=False),
             patient_message=state["latest_message"]
         )
 
-        # GARANTIA: Se a IA mandar string, vira lista. Se for lista, mantém.
-        raw_intents = prediction.intents
-        if isinstance(raw_intents, str):
-            # Limpa possíveis vírgulas e transforma em lista
-            processed_intents = [i.strip() for i in raw_intents.split(',')]
+        # Pegamos o que a IA devolveu
+        raw_output = prediction.intents
+        
+        # 1. Normalização para Lista
+        if isinstance(raw_output, str):
+            cleaned = raw_output.replace("[", "").replace("]", "").replace("'", "").replace('"', "")
+            intent_list = [i.strip() for i in cleaned.split(",")]
         else:
-            processed_intents = raw_intents
+            intent_list = raw_output
+
+        # 2. Validação contra o Enum
+        valid_values = {item.value for item in IntentType}
+        
+        # Se a intenção da IA for válida, mantém. Se não for, vira UNCLASSIFIED.
+        final_intents = [
+            i if i in valid_values else IntentType.UNCLASSIFIED.value 
+            for i in intent_list
+        ]
+
+        # Se a lista vier vazia por algum motivo
+        if not final_intents:
+            final_intents = [IntentType.UNCLASSIFIED.value]
 
         return {
-            "intent_queue": processed_intents,
+            "intent_queue": final_intents,
             "urgency_score": prediction.urgency_score,
             "reasoning": prediction.rationale,
         }

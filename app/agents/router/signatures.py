@@ -6,7 +6,15 @@ class RouterSignature(dspy.Signature):
     context = dspy.InputField(desc="Patient history and clinic data")
     latest_message = dspy.InputField(desc="The new message from WhatsApp")
     
-    intent_queue = dspy.OutputField(desc="List of detected intents (e.g., BOOKING, DOUBT, COMPLAINT)")
+    #intent_queue = dspy.OutputField(desc="List of detected intents (e.g., BOOKING, DOUBT, COMPLAINT)")
+    intents: List[str] = dspy.OutputField(
+        desc=(
+            "List of detected intents. STRICTLY USE the provided categories. "
+            "If the message is too ambiguous or doesn't fit any category, use 'UNCLASSIFIED'."
+        )
+    )
+    
+
     urgency_score = dspy.OutputField(desc="1 to 5 scale of urgency")
     reasoning = dspy.OutputField(desc="Brief explanation of the routing decision")
     routed_to = dspy.OutputField(desc="Destination: 'scheduler', 'support', or 'human_urgent'")
