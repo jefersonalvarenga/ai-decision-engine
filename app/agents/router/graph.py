@@ -7,7 +7,7 @@ from .signatures import RouterSignature
 class RouterState(TypedDict):
     context: dict
     latest_message: str
-    intent_queue: List[str]
+    intents: List[str]
     urgency_score: int
     reasoning: str
     routed_to: str
@@ -26,7 +26,7 @@ class RouterAgent(dspy.Module):
         )
         
         return {
-            "intent_queue": result.intent_queue,
+            "intents": result.intents,
             "urgency_score": int(result.urgency_score),
             "reasoning": result.reasoning,
             "routed_to": result.routed_to,
