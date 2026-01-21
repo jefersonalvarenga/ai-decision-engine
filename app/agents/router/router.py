@@ -127,7 +127,7 @@ def router_node(state: AgentState) -> AgentState:
     print(f"DEBUG - Raw Intents: {prediction.intents}")   # Ver o que ela cuspiu antes do filtro
 
     return {
-        "intent_queue": final_intents,
+        "intents": final_intents,
         "urgency_score": prediction.urgency_score,
         "reasoning": prediction.rationale,
     }
