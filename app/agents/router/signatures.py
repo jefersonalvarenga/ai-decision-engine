@@ -6,11 +6,16 @@ class RouterSignature(dspy.Signature):
     context = dspy.InputField(desc="Patient history and clinic data")
     latest_message = dspy.InputField(desc="The new message from WhatsApp")
     
-    #intent_queue = dspy.OutputField(desc="List of detected intents (e.g., BOOKING, DOUBT, COMPLAINT)")
-    intent_queue: List[str] = dspy.OutputField(
+    intents: List[str] = dspy.OutputField(
         desc=(
-            "List of detected intents. STRICTLY USE the provided categories. "
-            "If the message is too ambiguous or doesn't fit any category, use 'UNCLASSIFIED'."
+            "STRICT REQUIREMENT: Return a LIST of strings. "
+            "ONLY choose from the following allowed CATEGORIES: "
+            "[SESSION_START, SESSION_CLOSURE, SERVICE_SCHEDULING, SERVICE_RESCHEDULING, "
+            "SERVICE_CANCELLATION, MEDICAL_ASSESSMENT, PROCEDURE_INQUIRY, AD_CONVERSION, "
+            "ORGANIC_INQUIRY, OFFER_CONVERSION, REENGAGEMENT_RECOVERY, GENERAL_INFO, "
+            "IMAGE_ASSESSMENT, HUMAN_ESCALATION, UNCLASSIFIED].\n"
+            "CRITICAL: Do not translate these categories. Do not use spaces. "
+            "If the message is about a discount or promotion, use OFFER_CONVERSION."
         )
     )
     
