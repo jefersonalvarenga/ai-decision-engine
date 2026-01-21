@@ -51,6 +51,8 @@ def decide_to_retry(state: ReengageState):
         return END
     
     print(f"--- REJECTED BY CRITIC. ATTEMPT #{state.get('revision_count')}. RETRYING... ---")
+    # Adicione este print para ver o motivo no log do Easypanel
+    print(f"❌ REJEITADO POR: {state.get('critic_feedback')}")
     return "copywriter"
 
 # --- GRAPH CONSTRUCTION ---
