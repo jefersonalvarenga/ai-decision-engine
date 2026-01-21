@@ -18,7 +18,7 @@ from langgraph.graph import StateGraph, END
 
 class AgentState(TypedDict):
     latest_incoming: str
-    history: str
+    history: List[str]
     intake_status: str       # 'in_progress' ou 'completed'
     schedule_status: str     # 'in_progress' ou 'idle'
     reschedule_status: str   # 'in_progress' ou 'idle'
