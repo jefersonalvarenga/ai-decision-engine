@@ -40,7 +40,7 @@ class IntentType(str, Enum):
 class AgentState(TypedDict):
     context: dict
     latest_message: str
-    intent_queue: Annotated[List[str], operator.add]
+    intents: Annotated[List[str], operator.add]
     final_response: str
     urgency_score: int
     reasoning: str
