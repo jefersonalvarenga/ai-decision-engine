@@ -8,14 +8,12 @@ class RouterSignature(dspy.Signature):
     
     intents: List[str] = dspy.OutputField(
         desc=(
-            "STRICT REQUIREMENT: Return a LIST of strings. "
-            "ONLY choose from the following allowed CATEGORIES: "
-            "[SESSION_START, SESSION_CLOSURE, SERVICE_SCHEDULING, SERVICE_RESCHEDULING, "
-            "SERVICE_CANCELLATION, MEDICAL_ASSESSMENT, PROCEDURE_INQUIRY, AD_CONVERSION, "
-            "ORGANIC_INQUIRY, OFFER_CONVERSION, REENGAGEMENT_RECOVERY, GENERAL_INFO, "
-            "IMAGE_ASSESSMENT, HUMAN_ESCALATION, UNCLASSIFIED].\n"
-            "CRITICAL: Do not translate these categories. Do not use spaces. "
-            "If the message is about a discount or promotion, use OFFER_CONVERSION."
+            "List of intents. Choose ONLY from: [SESSION_START, SESSION_CLOSURE, "
+            "SERVICE_SCHEDULING, SERVICE_RESCHEDULING, SERVICE_CANCELLATION, "
+            "MEDICAL_ASSESSMENT, PROCEDURE_INQUIRY, AD_CONVERSION, ORGANIC_INQUIRY, "
+            "OFFER_CONVERSION, REENGAGEMENT_RECOVERY, GENERAL_INFO, IMAGE_ASSESSMENT, "
+            "HUMAN_ESCALATION, UNCLASSIFIED].\n"
+            "Example output: ['OFFER_CONVERSION', 'PROCEDURE_INQUIRY']"
         )
     )
     
