@@ -9,7 +9,7 @@ import operator
 import dspy
 from typing import TypedDict, List, Annotated, Literal
 from enum import Enum
-from signatures_final import RouterSignature, IntentType
+from signature import RouterSignature, IntentType
 from langgraph.graph import StateGraph, END
 
 # ============================================================================

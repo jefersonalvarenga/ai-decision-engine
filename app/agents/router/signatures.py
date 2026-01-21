@@ -1,5 +1,6 @@
 import dspy
 from enum import Enum
+from typing import List # Adicionando List para o OutputField
 
 # ============================================================================
 # INTENT DEFINITIONS (ENUM)
@@ -62,7 +63,7 @@ class RouterSignature(dspy.Signature):
 
     # Input Fields
     latest_incoming = dspy.InputField(desc="The most recent message received from the patient.")
-        history = dspy.InputField(desc="The full conversation history, formatted as a string (use only if context is needed).")
+    history = dspy.InputField(desc="The full conversation history, formatted as a string (use only if context is needed).")
     intake_status = dspy.InputField(desc="The current status of the clinical intake (e.g., 'in_progress', 'completed').")
     schedule_status = dspy.InputField(desc="The current status of the service scheduling (e.g., 'in_progress', 'pending').")
     reschedule_status = dspy.InputField(desc="The current status of the service rescheduling (e.g., 'in_progress', 'pending').")
