@@ -15,6 +15,8 @@ from pydantic import BaseModel, Field
 from app.core.config import get_settings, init_dspy
 from app.agents.router.graph import app_graph as router_graph
 from app.agents.reengage.graph import app_graph as reengage_graph
+from app.agents.sdr import gatekeeper_graph, closer_graph
+from app.agents.sdr.state import ConversationTurn
 from app.core.security import SecurityMiddleware, AccessLogMiddleware
 
 # ============================================================================
@@ -64,6 +66,71 @@ class ReengageResponse(BaseModel):
     selected_strategy: str
     analyst_diagnosis: str
     revision_count: int
+
+
+# SDR Models
+class SDRConversationTurn(BaseModel):
+    role: str = Field(..., pattern="^(agent|human)$")
+    content: str
+
+
+class GatekeeperRequest(BaseModel):
+    """Request from n8n webhook for Gatekeeper agent"""
+    clinic_name: str = Field(..., description="Nome da clínica")
+    clinic_phone: str = Field(..., description="WhatsApp da clínica")
+    conversation_history: List[SDRConversationTurn] = Field(
+        default_factory=list,
+        description="Histórico da conversa"
+    )
+    latest_message: Optional[str] = Field(
+        None,
+        description="Última mensagem recebida (None se primeira mensagem)"
+    )
+
+
+class GatekeeperResponse(BaseModel):
+    """Response to n8n with action to take"""
+    response_message: str
+    conversation_stage: str
+    extracted_manager_contact: Optional[str] = None
+    extracted_manager_name: Optional[str] = None
+    should_send_message: bool
+    reasoning: str
+    processing_time_ms: float
+
+
+class CloserRequest(BaseModel):
+    """Request from n8n webhook for Closer agent"""
+    manager_name: str = Field(..., description="Nome do gestor")
+    manager_phone: str = Field(..., description="WhatsApp do gestor")
+    clinic_name: str = Field(..., description="Nome da clínica")
+    clinic_specialty: Optional[str] = Field(
+        None,
+        description="Especialidade: odonto, estética, etc"
+    )
+    conversation_history: List[SDRConversationTurn] = Field(
+        default_factory=list,
+        description="Histórico da conversa"
+    )
+    latest_message: Optional[str] = Field(
+        None,
+        description="Última mensagem recebida"
+    )
+    available_slots: List[str] = Field(
+        ...,
+        description="Horários disponíveis no formato 'YYYY-MM-DD HH:MM'"
+    )
+
+
+class CloserResponse(BaseModel):
+    """Response to n8n with action to take"""
+    response_message: str
+    conversation_stage: str
+    meeting_datetime: Optional[str] = None
+    meeting_confirmed: bool = False
+    should_send_message: bool
+    reasoning: str
+    processing_time_ms: float
 
 # ============================================================================
 # STARTUP EVENT
@@ -139,6 +206,120 @@ async def reengage_lead(request: ReengageRequest):
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Reengage Error: {str(e)}")
+
+
+# ============================================================================
+# SDR ENDPOINTS
+# ============================================================================
+
+@app.post("/v1/sdr/gatekeeper", response_model=GatekeeperResponse)
+async def sdr_gatekeeper(request: GatekeeperRequest):
+    """
+    Endpoint para o fluxo Gatekeeper (coletar contato do gestor).
+
+    Chamado pelo n8n quando:
+    1. Inicia prospecção de uma nova clínica (conversation_history vazio)
+    2. Recebe resposta da recepção (latest_message preenchido)
+
+    Retorna ação para o n8n executar:
+    - response_message: mensagem para enviar via Z-API
+    - should_send_message: se deve enviar
+    - extracted_manager_contact: telefone do gestor se conseguiu
+    """
+    start_time = time.time()
+    current_hour = datetime.now().hour
+
+    try:
+        # Count agent messages in history
+        attempt_count = len([
+            t for t in request.conversation_history
+            if t.role == "agent"
+        ])
+
+        result = gatekeeper_graph.invoke({
+            "clinic_name": request.clinic_name,
+            "conversation_history": [
+                {"role": t.role, "content": t.content}
+                for t in request.conversation_history
+            ],
+            "latest_message": request.latest_message,
+            "current_hour": current_hour,
+            "attempt_count": attempt_count,
+        })
+
+        return GatekeeperResponse(
+            response_message=result.get("response_message", ""),
+            conversation_stage=result.get("conversation_stage", "opening"),
+            extracted_manager_contact=result.get("extracted_manager_contact"),
+            extracted_manager_name=result.get("extracted_manager_name"),
+            should_send_message=result.get("should_send_message", False),
+            reasoning=result.get("reasoning", ""),
+            processing_time_ms=(time.time() - start_time) * 1000,
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Gatekeeper Error: {str(e)}"
+        )
+
+
+@app.post("/v1/sdr/closer", response_model=CloserResponse)
+async def sdr_closer(request: CloserRequest):
+    """
+    Endpoint para o fluxo Closer (agendar reunião com gestor).
+
+    Chamado pelo n8n quando:
+    1. Inicia contato com o gestor (conversation_history vazio)
+    2. Recebe resposta do gestor (latest_message preenchido)
+
+    Retorna ação para o n8n executar:
+    - response_message: mensagem para enviar via Z-API
+    - should_send_message: se deve enviar
+    - meeting_datetime: ISO datetime se reunião foi confirmada
+    - meeting_confirmed: true se deve criar evento no Google Calendar
+    """
+    start_time = time.time()
+    current_hour = datetime.now().hour
+
+    try:
+        # Count agent messages in history
+        attempt_count = len([
+            t for t in request.conversation_history
+            if t.role == "agent"
+        ])
+
+        result = closer_graph.invoke({
+            "manager_name": request.manager_name,
+            "manager_phone": request.manager_phone,
+            "clinic_name": request.clinic_name,
+            "clinic_specialty": request.clinic_specialty,
+            "conversation_history": [
+                {"role": t.role, "content": t.content}
+                for t in request.conversation_history
+            ],
+            "latest_message": request.latest_message,
+            "available_slots": request.available_slots,
+            "current_hour": current_hour,
+            "attempt_count": attempt_count,
+        })
+
+        return CloserResponse(
+            response_message=result.get("response_message", ""),
+            conversation_stage=result.get("conversation_stage", "greeting"),
+            meeting_datetime=result.get("meeting_datetime"),
+            meeting_confirmed=result.get("meeting_confirmed", False),
+            should_send_message=result.get("should_send_message", False),
+            reasoning=result.get("reasoning", ""),
+            processing_time_ms=(time.time() - start_time) * 1000,
+        )
+
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Closer Error: {str(e)}"
+        )
+
 
 # ============================================================================
 # SERVER RUNNER
