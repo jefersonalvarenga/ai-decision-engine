@@ -15,6 +15,7 @@ import sys
 import argparse
 from datetime import datetime, timedelta
 from typing import List, Dict
+import json  # <--- ADICIONE ESTA LINHA AQUI
 
 # Adiciona o diretório raiz ao path
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
@@ -26,63 +27,11 @@ from app.core.config import init_dspy
 # TEST SCENARIOS - GATEKEEPER
 # ============================================================================
 
-GATEKEEPER_SCENARIOS = [
-    {
-        "name": "Primeira mensagem",
-        "clinic_name": "Clínica Bella Luna",
-        "conversation_history": [],
-        "latest_message": None,
-        "expected_stage": "opening",
-    },
-    {
-        "name": "Recepção confirma clínica",
-        "clinic_name": "Clínica Bella Luna",
-        "conversation_history": [
-            {"role": "agent", "content": "Bom dia, é da clínica Bella Luna?"},
-            {"role": "human", "content": "Bom dia! Sim, aqui é a Juliana. Em que posso ajudar?"},
-        ],
-        "latest_message": "Bom dia! Sim, aqui é a Juliana. Em que posso ajudar?",
-        "expected_stage": "requesting",
-    },
-    {
-        "name": "Recepção pergunta do que se trata",
-        "clinic_name": "Clínica Bella Luna",
-        "conversation_history": [
-            {"role": "agent", "content": "Bom dia, é da clínica Bella Luna?"},
-            {"role": "human", "content": "Sim, aqui é Juliana. Em que posso ajudar?"},
-            {"role": "agent", "content": "Gostaria de falar com o gestor ou gestora da clínica."},
-            {"role": "human", "content": "Pode me adiantar do que se trata?"},
-        ],
-        "latest_message": "Pode me adiantar do que se trata?",
-        "expected_stage": "handling_objection",
-    },
-    {
-        "name": "Recepção fornece contato",
-        "clinic_name": "Clínica Bella Luna",
-        "conversation_history": [
-            {"role": "agent", "content": "Bom dia, é da clínica Bella Luna?"},
-            {"role": "human", "content": "Sim, é sim."},
-            {"role": "agent", "content": "Gostaria de falar com o gestor ou gestora da clínica."},
-            {"role": "human", "content": "Do que se trata?"},
-            {"role": "agent", "content": "Seria sobre assunto comercial."},
-            {"role": "human", "content": "Ok, o número do Dr. Carlos é 11999887766"},
-        ],
-        "latest_message": "Ok, o número do Dr. Carlos é 11999887766",
-        "expected_stage": "success",
-    },
-    {
-        "name": "Recepção nega passar contato",
-        "clinic_name": "Clínica Odonto Smile",
-        "conversation_history": [
-            {"role": "agent", "content": "Boa tarde, é da clínica Odonto Smile?"},
-            {"role": "human", "content": "Sim"},
-            {"role": "agent", "content": "Gostaria de falar com o gestor da clínica."},
-            {"role": "human", "content": "Não passamos contato de gestor. Pode mandar email."},
-        ],
-        "latest_message": "Não passamos contato de gestor. Pode mandar email.",
-        "expected_stage": "handling_objection",  # Ainda tenta uma vez
-    },
-]
+# Carregando do arquivo externo
+with open('test_gatekeeper_cases.json', 'r', encoding='utf-8') as f:
+    GATEKEEPER_SCENARIOS = json.load(f)
+
+
 
 
 # ============================================================================
@@ -102,80 +51,9 @@ def get_available_slots() -> List[str]:
 
     return slots
 
-
-CLOSER_SCENARIOS = [
-    {
-        "name": "Primeira mensagem ao gestor",
-        "manager_name": "Dr. Carlos",
-        "manager_phone": "11999887766",
-        "clinic_name": "Clínica Bella Luna",
-        "clinic_specialty": "estética",
-        "conversation_history": [],
-        "latest_message": None,
-        "expected_stage": "greeting",
-    },
-    {
-        "name": "Gestor responde saudação",
-        "manager_name": "Dr. Carlos",
-        "manager_phone": "11999887766",
-        "clinic_name": "Clínica Bella Luna",
-        "clinic_specialty": "estética",
-        "conversation_history": [
-            {"role": "agent", "content": "Boa tarde Dr. Carlos, aqui é Jeferson da EasyScale. Tudo bem?"},
-            {"role": "human", "content": "Tudo bem e você?"},
-        ],
-        "latest_message": "Tudo bem e você?",
-        "expected_stage": "pitching",
-    },
-    {
-        "name": "Gestor aceita conversar",
-        "manager_name": "Dra. Ana",
-        "manager_phone": "21988776655",
-        "clinic_name": "Estética Premium",
-        "clinic_specialty": "estética",
-        "conversation_history": [
-            {"role": "agent", "content": "Bom dia Dra. Ana, aqui é Jeferson da EasyScale. Tudo bem?"},
-            {"role": "human", "content": "Tudo bem!"},
-            {"role": "agent", "content": "Nossa empresa ajuda clínicas de estética a duplicarem o faturamento com ferramentas de tecnologia para a equipe de atendimento."},
-            {"role": "agent", "content": "Faria sentido batermos um papo pra eu mostrar como funciona?"},
-            {"role": "human", "content": "Podemos marcar sim"},
-        ],
-        "latest_message": "Podemos marcar sim",
-        "expected_stage": "proposing_time",
-    },
-    {
-        "name": "Gestor contrapropõe horário",
-        "manager_name": "Dr. Marcos",
-        "manager_phone": "47991234567",
-        "clinic_name": "OdontoVida",
-        "clinic_specialty": "odonto",
-        "conversation_history": [
-            {"role": "agent", "content": "Boa tarde Dr. Marcos, aqui é Jeferson da EasyScale. Tudo bem?"},
-            {"role": "human", "content": "Tudo joia"},
-            {"role": "agent", "content": "Nossa empresa ajuda clínicas de odonto a duplicarem o faturamento. Faria sentido batermos um papo?"},
-            {"role": "human", "content": "Pode ser"},
-            {"role": "agent", "content": "Amanhã às 15h seria um bom horário? São só 20 minutinhos."},
-            {"role": "human", "content": "Pode ser 15:30?"},
-        ],
-        "latest_message": "Pode ser 15:30?",
-        "expected_stage": "confirming",
-    },
-    {
-        "name": "Gestor pede material primeiro",
-        "manager_name": "Dr. Roberto",
-        "manager_phone": "31999998888",
-        "clinic_name": "Clínica Derma",
-        "clinic_specialty": "dermatologia",
-        "conversation_history": [
-            {"role": "agent", "content": "Bom dia Dr. Roberto, aqui é Jeferson da EasyScale. Tudo bem?"},
-            {"role": "human", "content": "Bom dia"},
-            {"role": "agent", "content": "Nossa empresa ajuda clínicas a duplicarem o faturamento. Podemos conversar?"},
-            {"role": "human", "content": "Me manda um material primeiro por email"},
-        ],
-        "latest_message": "Me manda um material primeiro por email",
-        "expected_stage": "pitching",  # Tenta contornar
-    },
-]
+# Carregando do arquivo externo
+with open('test_closer_cases.json', 'r', encoding='utf-8') as f:
+    CLOSER_SCENARIOS = json.load(f)
 
 
 # ============================================================================

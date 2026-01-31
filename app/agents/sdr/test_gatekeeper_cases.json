@@ -1,0 +1,57 @@
+[
+  {
+    "name": "Primeira mensagem",
+    "clinic_name": "Clínica Bella Luna",
+    "conversation_history": [],
+    "latest_message": null,
+    "expected_stage": "opening"
+  },
+  {
+    "name": "Recepção confirma clínica",
+    "clinic_name": "Clínica Bella Luna",
+    "conversation_history": [
+      { "role": "agent", "content": "Bom dia, é da clínica Bella Luna?" },
+      { "role": "human", "content": "Bom dia! Sim, aqui é a Juliana. Em que posso ajudar?" }
+    ],
+    "latest_message": "Bom dia! Sim, aqui é a Juliana. Em que posso ajudar?",
+    "expected_stage": "requesting"
+  },
+  {
+    "name": "Recepção pergunta do que se trata",
+    "clinic_name": "Clínica Bella Luna",
+    "conversation_history": [
+      { "role": "agent", "content": "Bom dia, é da clínica Bella Luna?" },
+      { "role": "human", "content": "Sim, aqui é Juliana. Em que posso ajudar?" },
+      { "role": "agent", "content": "Gostaria de falar com o gestor ou gestora da clínica." },
+      { "role": "human", "content": "Pode me adiantar do que se trata?" }
+    ],
+    "latest_message": "Pode me adiantar do que se trata?",
+    "expected_stage": "handling_objection"
+  },
+  {
+    "name": "Recepção fornece contato",
+    "clinic_name": "Clínica Bella Luna",
+    "conversation_history": [
+      { "role": "agent", "content": "Bom dia, é da clínica Bella Luna?" },
+      { "role": "human", "content": "Sim, é sim." },
+      { "role": "agent", "content": "Gostaria de falar com o gestor ou gestora da clínica." },
+      { "role": "human", "content": "Do que se trata?" },
+      { "role": "agent", "content": "Seria sobre assunto comercial." },
+      { "role": "human", "content": "Ok, o número do Dr. Carlos é 11999887766" }
+    ],
+    "latest_message": "Ok, o número do Dr. Carlos é 11999887766",
+    "expected_stage": "success"
+  },
+  {
+    "name": "Recepção nega passar contato",
+    "clinic_name": "Clínica Odonto Smile",
+    "conversation_history": [
+      { "role": "agent", "content": "Boa tarde, é da clínica Odonto Smile?" },
+      { "role": "human", "content": "Sim" },
+      { "role": "agent", "content": "Gostaria de falar com o gestor da clínica." },
+      { "role": "human", "content": "Não passamos contato de gestor. Pode mandar email." }
+    ],
+    "latest_message": "Não passamos contato de gestor. Pode mandar email.",
+    "expected_stage": "handling_objection"
+  }
+]
