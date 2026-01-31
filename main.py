@@ -45,14 +45,24 @@ app.add_middleware(
 # ============================================================================
 
 class RouterRequest(BaseModel):
-    context: Dict[str, Any]
-    message: str
+    """Request for Router agent - classifies patient intentions"""
+    latest_incoming: str = Field(..., description="Última mensagem do paciente")
+    history: List[Dict[str, str]] = Field(
+        default_factory=list,
+        description="Histórico da conversa [{role, content}]"
+    )
+    intake_status: str = Field(default="idle", description="Status do intake")
+    schedule_status: str = Field(default="idle", description="Status do agendamento")
+    reschedule_status: str = Field(default="idle", description="Status do reagendamento")
+    cancel_status: str = Field(default="idle", description="Status do cancelamento")
+    language: str = Field(default="pt-BR", description="Idioma do paciente")
+
 
 class RouterResponse(BaseModel):
-    intents: List[str]
-    urgency_score: int
-    routed_to: str
-    response: str
+    """Response from Router agent"""
+    intentions: List[str] = Field(..., description="Lista de intenções identificadas")
+    reasoning: str = Field(..., description="Explicação da decisão")
+    confidence: float = Field(..., description="Nível de confiança (0.0 a 1.0)")
     processing_time_ms: float
 
 class ReengageRequest(BaseModel):
@@ -157,25 +167,31 @@ async def health():
 @app.post("/v1/router", response_model=RouterResponse)
 async def route_message(request: RouterRequest):
     """
-    Endpoint para mensagens em tempo real (WhatsApp).
-    Decide se vai para agendamento, tirar dúvidas ou humano.
+    Endpoint para classificar intenções de mensagens de pacientes.
+
+    Identifica quais agentes especializados devem ser ativados:
+    - SERVICE_SCHEDULING: Agendamento
+    - PROCEDURE_INQUIRY: Dúvidas sobre procedimentos
+    - INTAKE: Coleta de informações médicas
+    - HUMAN_ESCALATION: Escalar para humano
+    - etc.
     """
     start_time = time.time()
     try:
-        # Invoca o Grafo do Roteador
         result = router_graph.invoke({
-            "context": request.context,
-            "latest_message": request.message,
-            "intent_queue": [],
-            "final_response": "",
-            "urgency_score": 0
+            "latest_incoming": request.latest_incoming,
+            "history": request.history,
+            "intake_status": request.intake_status,
+            "schedule_status": request.schedule_status,
+            "reschedule_status": request.reschedule_status,
+            "cancel_status": request.cancel_status,
+            "language": request.language,
         })
 
         return RouterResponse(
-            intents=result.get("intent_queue", []),
-            urgency_score=result.get("urgency_score", 1),
-            routed_to=result.get("routed_to", "human"),
-            response=result.get("final_response", ""),
+            intentions=result.get("intentions", ["UNCLASSIFIED"]),
+            reasoning=result.get("reasoning", ""),
+            confidence=result.get("confidence", 0.0),
             processing_time_ms=(time.time() - start_time) * 1000
         )
     except Exception as e:
