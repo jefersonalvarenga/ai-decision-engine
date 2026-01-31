@@ -1,0 +1,26 @@
+[
+    {
+        "latest_message": "<manter mensagem> Olá, quero aproveitar o Fotona 20%OFF",
+        "history": "No history (New Lead)",
+        "ad_conversion_status": "idle",
+        "intake_status": "idle",
+        "schedule_status": "idle",
+        "reschedule_status": "idle",
+        "cancel_status": "idle",
+        "is_ad_click": true,
+        "ad_metadata": "Campanha: Verão 2026 | Oferta: Fotona 20% OFF",
+        "language": "PT-BR"
+    },
+    {
+        "latest_message": "sim",
+        "history": "[patient]<manter mensagem> Olá, quero aproveitar o Fotona 20%OFF | [patient]: Quanto custa o Fotona? | [faq]: O valor é R$ 900. | [ad_conversion]: Posso te mandar umas fotos de antes e depois?",
+        "ad_conversion_status": "in_progress",
+        "intake_status": "idle",
+        "schedule_status": "idle",
+        "reschedule_status": "idle",
+        "cancel_status": "idle",
+        "is_ad_click": true,
+        "ad_metadata": "O ad01 é identificado pela mensagem (<manter mensagem> Olá, quero aproveitar o Fotona 20%OFF). Ela oferece o tratamento com desconto de 20%. O anúncio está direcionado para mulheres entre 35-55 anos",
+        "language": "PT-BR"
+    }
+]
