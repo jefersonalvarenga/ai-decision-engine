@@ -13,12 +13,17 @@ Ou para testar cenários específicos:
 import os
 import sys
 import argparse
+import json
 from datetime import datetime, timedelta
 from typing import List, Dict
-import json  # <--- ADICIONE ESTA LINHA AQUI
+from pathlib import Path
+
+# Diretório onde este arquivo está localizado
+SCRIPT_DIR = Path(__file__).parent.absolute()
 
 # Adiciona o diretório raiz ao path
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
+ROOT_DIR = SCRIPT_DIR.parent.parent.parent
+sys.path.insert(0, str(ROOT_DIR))
 
 from app.core.config import init_dspy
 
@@ -27,9 +32,22 @@ from app.core.config import init_dspy
 # TEST SCENARIOS - GATEKEEPER
 # ============================================================================
 
-# Carregando do arquivo externo
-with open('test_gatekeeper_cases.json', 'r', encoding='utf-8') as f:
-    GATEKEEPER_SCENARIOS = json.load(f)
+# Carregando do arquivo externo (usando caminho absoluto)
+GATEKEEPER_JSON = SCRIPT_DIR / "test_gatekeeper_cases.json"
+if GATEKEEPER_JSON.exists():
+    with open(GATEKEEPER_JSON, 'r', encoding='utf-8') as f:
+        GATEKEEPER_SCENARIOS = json.load(f)
+else:
+    # Fallback: cenários inline se arquivo não existir
+    GATEKEEPER_SCENARIOS = [
+        {
+            "name": "Primeira mensagem",
+            "clinic_name": "Clínica Bella Luna",
+            "conversation_history": [],
+            "latest_message": None,
+            "expected_stage": "opening",
+        },
+    ]
 
 
 
@@ -51,9 +69,25 @@ def get_available_slots() -> List[str]:
 
     return slots
 
-# Carregando do arquivo externo
-with open('test_closer_cases.json', 'r', encoding='utf-8') as f:
-    CLOSER_SCENARIOS = json.load(f)
+# Carregando do arquivo externo (usando caminho absoluto)
+CLOSER_JSON = SCRIPT_DIR / "test_closer_cases.json"
+if CLOSER_JSON.exists():
+    with open(CLOSER_JSON, 'r', encoding='utf-8') as f:
+        CLOSER_SCENARIOS = json.load(f)
+else:
+    # Fallback: cenários inline se arquivo não existir
+    CLOSER_SCENARIOS = [
+        {
+            "name": "Primeira mensagem ao gestor",
+            "manager_name": "Dr. Carlos",
+            "manager_phone": "11999887766",
+            "clinic_name": "Clínica Bella Luna",
+            "clinic_specialty": "estética",
+            "conversation_history": [],
+            "latest_message": None,
+            "expected_stage": "greeting",
+        },
+    ]
 
 
 # ============================================================================
