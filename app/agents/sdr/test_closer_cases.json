@@ -16,58 +16,244 @@
     "clinic_name": "Clínica Bella Luna",
     "clinic_specialty": "estética",
     "conversation_history": [
-      { "role": "agent", "content": "Boa tarde Dr. Carlos, aqui é Jeferson da EasyScale. Tudo bem?" },
-      { "role": "human", "content": "Tudo bem e você?" }
+      {
+        "role": "agent",
+        "content": "Boa tarde Dr. Carlos, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Tudo bem e você?"
+      }
     ],
     "latest_message": "Tudo bem e você?",
     "expected_stage": "pitching"
   },
   {
-    "name": "Gestor aceita conversar",
+    "name": "Gestor aceita conversar rapidamente",
     "manager_name": "Dra. Ana",
     "manager_phone": "21988776655",
     "clinic_name": "Estética Premium",
     "clinic_specialty": "estética",
     "conversation_history": [
-      { "role": "agent", "content": "Bom dia Dra. Ana, aqui é Jeferson da EasyScale. Tudo bem?" },
-      { "role": "human", "content": "Tudo bem!" },
-      { "role": "agent", "content": "Nossa empresa ajuda clínicas de estética a duplicarem o faturamento com ferramentas de tecnologia para a equipe de atendimento." },
-      { "role": "agent", "content": "Faria sentido batermos um papo pra eu mostrar como funciona?" },
-      { "role": "human", "content": "Podemos marcar sim" }
+      {
+        "role": "agent",
+        "content": "Podemos marcar um papo rápido?"
+      },
+      {
+        "role": "human",
+        "content": "Pode sim"
+      }
     ],
-    "latest_message": "Podemos marcar sim",
+    "latest_message": "Pode sim",
     "expected_stage": "proposing_time"
   },
   {
-    "name": "Gestor contrapropõe horário",
-    "manager_name": "Dr. Marcos",
-    "manager_phone": "47991234567",
-    "clinic_name": "OdontoVida",
-    "clinic_specialty": "odonto",
+    "name": "Gestor ocupado pede objetividade",
+    "manager_name": "Dr. Felipe",
+    "manager_phone": "11988771234",
+    "clinic_name": "Clínica Alpha",
+    "clinic_specialty": "estética",
     "conversation_history": [
-      { "role": "agent", "content": "Boa tarde Dr. Marcos, aqui é Jeferson da EasyScale. Tudo bem?" },
-      { "role": "human", "content": "Tudo joia" },
-      { "role": "agent", "content": "Nossa empresa ajuda clínicas de odonto a duplicarem o faturamento. Faria sentido batermos um papo?" },
-      { "role": "human", "content": "Pode ser" },
-      { "role": "agent", "content": "Amanhã às 15h seria um bom horário? São só 20 minutinhos." },
-      { "role": "human", "content": "Pode ser 15:30?" }
+      {
+        "role": "agent",
+        "content": "Olá Dr. Felipe, posso explicar rapidamente uma ideia?"
+      },
+      {
+        "role": "human",
+        "content": "Pode falar rápido, estou corrido."
+      }
     ],
-    "latest_message": "Pode ser 15:30?",
-    "expected_stage": "confirming"
+    "latest_message": "Pode falar rápido, estou corrido.",
+    "expected_stage": "pitching"
   },
   {
-    "name": "Gestor pede material primeiro",
+    "name": "Gestor pergunta do que se trata",
+    "manager_name": "Dr. João",
+    "manager_phone": "11990001122",
+    "clinic_name": "OdontoMax",
+    "clinic_specialty": "odonto",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Posso apresentar uma solução para clínicas?"
+      },
+      {
+        "role": "human",
+        "content": "Sobre o que exatamente?"
+      }
+    ],
+    "latest_message": "Sobre o que exatamente?",
+    "expected_stage": "pitching"
+  },
+  {
+    "name": "Gestor desconfiado",
+    "manager_name": "Dra. Marina",
+    "manager_phone": "21995556677",
+    "clinic_name": "SkinCare Pro",
+    "clinic_specialty": "dermatologia",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Tenho uma proposta para otimizar o atendimento."
+      },
+      {
+        "role": "human",
+        "content": "Isso é marketing? Não gosto dessas coisas."
+      }
+    ],
+    "latest_message": "Isso é marketing? Não gosto dessas coisas.",
+    "expected_stage": "pitching"
+  },
+  {
+    "name": "Gestor pede prova social",
+    "manager_name": "Dr. Lucas",
+    "manager_phone": "11993334444",
+    "clinic_name": "Estética Lux",
+    "clinic_specialty": "estética",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Trabalhamos com aumento de conversão."
+      },
+      {
+        "role": "human",
+        "content": "Vocês já trabalham com quais clínicas?"
+      }
+    ],
+    "latest_message": "Vocês já trabalham com quais clínicas?",
+    "expected_stage": "pitching"
+  },
+  {
+    "name": "Gestor pede valores direto",
+    "manager_name": "Dr. Ricardo",
+    "manager_phone": "31998887777",
+    "clinic_name": "Clínica Derma",
+    "clinic_specialty": "dermatologia",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Podemos conversar sobre tecnologia para aumentar faturamento?"
+      },
+      {
+        "role": "human",
+        "content": "Quanto custa?"
+      }
+    ],
+    "latest_message": "Quanto custa?",
+    "expected_stage": "pitching"
+  },
+  {
+    "name": "Gestor quer material antes",
     "manager_name": "Dr. Roberto",
     "manager_phone": "31999998888",
     "clinic_name": "Clínica Derma",
     "clinic_specialty": "dermatologia",
     "conversation_history": [
-      { "role": "agent", "content": "Bom dia Dr. Roberto, aqui é Jeferson da EasyScale. Tudo bem?" },
-      { "role": "human", "content": "Bom dia" },
-      { "role": "agent", "content": "Nossa empresa ajuda clínicas a duplicarem o faturamento. Podemos conversar?" },
-      { "role": "human", "content": "Me manda um material primeiro por email" }
+      {
+        "role": "agent",
+        "content": "Podemos conversar?"
+      },
+      {
+        "role": "human",
+        "content": "Me manda material primeiro."
+      }
     ],
-    "latest_message": "Me manda um material primeiro por email",
+    "latest_message": "Me manda material primeiro.",
+    "expected_stage": "pitching"
+  },
+  {
+    "name": "Gestor pede para falar com sócio",
+    "manager_name": "Dra. Fernanda",
+    "manager_phone": "41997776655",
+    "clinic_name": "OdontoPrime",
+    "clinic_specialty": "odonto",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Podemos marcar um horário?"
+      },
+      {
+        "role": "human",
+        "content": "Preciso ver com meu sócio antes."
+      }
+    ],
+    "latest_message": "Preciso ver com meu sócio antes.",
+    "expected_stage": "pitching"
+  },
+  {
+    "name": "Gestor rejeita diretamente",
+    "manager_name": "Dr. Pedro",
+    "manager_phone": "11992223333",
+    "clinic_name": "Clínica Nova",
+    "clinic_specialty": "estética",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Podemos conversar sobre aumentar conversão?"
+      },
+      {
+        "role": "human",
+        "content": "Não tenho interesse."
+      }
+    ],
+    "latest_message": "Não tenho interesse.",
+    "expected_stage": "lost"
+  },
+  {
+    "name": "Gestor aceita e pede agenda",
+    "manager_name": "Dr. Marcos",
+    "manager_phone": "47991234567",
+    "clinic_name": "OdontoVida",
+    "clinic_specialty": "odonto",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Podemos conversar?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, me manda horários."
+      }
+    ],
+    "latest_message": "Sim, me manda horários.",
+    "expected_stage": "proposing_time"
+  },
+  {
+    "name": "Gestor responde curto",
+    "manager_name": "Dr. Caio",
+    "manager_phone": "11995554444",
+    "clinic_name": "Estética Smart",
+    "clinic_specialty": "estética",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Tudo bem Dr. Caio?"
+      },
+      {
+        "role": "human",
+        "content": "Sim"
+      }
+    ],
+    "latest_message": "Sim",
+    "expected_stage": "pitching"
+  },
+  {
+    "name": "Gestor pede retorno depois",
+    "manager_name": "Dra. Paula",
+    "manager_phone": "21998889999",
+    "clinic_name": "Beauty Clinic",
+    "clinic_specialty": "estética",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Podemos conversar agora?"
+      },
+      {
+        "role": "human",
+        "content": "Agora não posso, fala comigo amanhã."
+      }
+    ],
+    "latest_message": "Agora não posso, fala comigo amanhã.",
     "expected_stage": "pitching"
   }
 ]
