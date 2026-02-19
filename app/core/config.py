@@ -30,6 +30,9 @@ class EasyScaleSettings(BaseSettings):
     groq_api_key: Optional[str] = Field(default=None, env="GROQ_API_KEY")
     glm_api_key: Optional[str] = Field(default=None, validation_alias="GLM-API-KEY")
 
+    # API Authentication
+    api_key: Optional[str] = Field(default=None, env="API_KEY")
+
     # Supabase
     supabase_url: str = Field(default="", env="SUPABASE_URL")
     supabase_key: str = Field(default="", env="SUPABASE_KEY")

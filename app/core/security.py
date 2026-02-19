@@ -18,6 +18,12 @@ from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
 
+def _get_api_key() -> Optional[str]:
+    """Lazy import to avoid circular dependency at module load time."""
+    from app.core.config import get_settings
+    return get_settings().api_key
+
+
 # ============================================================================
 # SUSPICIOUS PATTERNS
 # ============================================================================
@@ -125,7 +131,18 @@ class SecurityMiddleware(BaseHTTPMiddleware):
                 content={"detail": "Access denied"}
             )
 
-        # 5. Rate limiting (only for API endpoints)
+        # 5. API Key authentication (only for /v1/ endpoints, except /v1/health)
+        if path.startswith("/v1/") and path != "/v1/health":
+            required_key = _get_api_key()
+            if required_key:
+                provided_key = request.headers.get("X-API-Key", "")
+                if provided_key != required_key:
+                    return JSONResponse(
+                        status_code=status.HTTP_401_UNAUTHORIZED,
+                        content={"detail": "Invalid or missing API key"}
+                    )
+
+        # 6. Rate limiting (only for API endpoints)
         if path.startswith("/v1/") or path.startswith("/api/"):
             if not self.rate_limiter.is_allowed(client_ip):
                 return JSONResponse(
