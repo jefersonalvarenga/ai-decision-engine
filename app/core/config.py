@@ -28,6 +28,7 @@ class EasyScaleSettings(BaseSettings):
     openai_api_key: Optional[str] = Field(default=None, env="OPENAI_API_KEY")
     anthropic_api_key: Optional[str] = Field(default=None, env="ANTHROPIC_API_KEY")
     groq_api_key: Optional[str] = Field(default=None, env="GROQ_API_KEY")
+    glm_api_key: Optional[str] = Field(default=None, validation_alias="GLM-API-KEY")
 
     # Supabase
     supabase_url: str = Field(default="", env="SUPABASE_URL")
@@ -38,6 +39,7 @@ class EasyScaleSettings(BaseSettings):
         if self.dspy_provider == "openai": return self.openai_api_key
         if self.dspy_provider == "anthropic": return self.anthropic_api_key
         if self.dspy_provider == "groq": return self.groq_api_key
+        if self.dspy_provider == "glm": return self.glm_api_key
         return None
 
 _settings: Optional[EasyScaleSettings] = None
@@ -58,13 +60,22 @@ def init_dspy() -> None:
 
     try:
         # Novo padrão DSPy 2.5+
-        lm = dspy.LM(
-            model=f"{settings.dspy_provider}/{settings.dspy_model}", 
-            api_key=api_key, 
-            temperature=settings.dspy_temperature,
-            max_tokens=settings.dspy_max_tokens
-        )
+        if settings.dspy_provider == "glm":
+            lm = dspy.LM(
+                model="openai/glm-5",
+                api_key=api_key,
+                api_base="https://open.bigmodel.cn/api/paas/v4/",
+                temperature=settings.dspy_temperature,
+                max_tokens=settings.dspy_max_tokens
+            )
+        else:
+            lm = dspy.LM(
+                model=f"{settings.dspy_provider}/{settings.dspy_model}",
+                api_key=api_key,
+                temperature=settings.dspy_temperature,
+                max_tokens=settings.dspy_max_tokens
+            )
         dspy.settings.configure(lm=lm)
-        print(f"✅ DSPy Motor initialized with {settings.dspy_model}")
+        print(f"✅ DSPy Motor initialized with {settings.dspy_provider}/{settings.dspy_model}")
     except Exception as e:
         print(f"❌ Failed to initialize DSPy: {e}")

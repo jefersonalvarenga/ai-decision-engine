@@ -25,6 +25,51 @@ SCRIPT_DIR = Path(__file__).parent.absolute()
 ROOT_DIR = SCRIPT_DIR.parent.parent.parent
 sys.path.insert(0, str(ROOT_DIR))
 
+
+# ============================================================================
+# LOGGER — duplica stdout para arquivo de log
+# ============================================================================
+
+class TeeLogger:
+    """Escreve simultaneamente no terminal e num arquivo de log."""
+
+    def __init__(self, log_path: Path):
+        self.terminal = sys.stdout
+        self.log_file = open(log_path, "w", encoding="utf-8")
+
+    def write(self, message):
+        self.terminal.write(message)
+        self.log_file.write(message)
+        self.log_file.flush()
+
+    def flush(self):
+        self.terminal.flush()
+        self.log_file.flush()
+
+    def close(self):
+        self.log_file.close()
+        sys.stdout = self.terminal
+
+
+def setup_logger(agent: str) -> TeeLogger:
+    """Cria o diretório de logs e inicia o TeeLogger."""
+    from app.core.config import get_settings
+    settings = get_settings()
+    provider = settings.dspy_provider
+    model = settings.dspy_model if settings.dspy_provider != "glm" else "glm-5"
+
+    logs_dir = SCRIPT_DIR / "logs"
+    logs_dir.mkdir(exist_ok=True)
+
+    timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+    filename = f"{timestamp}_{agent}_{provider}_{model}.log"
+    log_path = logs_dir / filename
+
+    logger = TeeLogger(log_path)
+    sys.stdout = logger
+    print(f"📝 Log salvo em: logs/{filename}\n")
+    return logger
+
 from app.core.config import init_dspy
 
 
@@ -368,7 +413,7 @@ def main():
     init_dspy()
     print("DSPy inicializado!\n")
 
-    # Modo interativo
+    # Modo interativo — sem log (é interativo, não faz sentido)
     if args.interactive:
         print("\nEscolha o agente:")
         print("1. Gatekeeper (coletar contato)")
@@ -383,17 +428,49 @@ def main():
             print("Opção inválida")
         return
 
+    # Determina qual agente para nomear o log
+    agent_label = "all"
+    if args.gatekeeper and not args.closer:
+        agent_label = "gatekeeper"
+    elif args.closer and not args.gatekeeper:
+        agent_label = "closer"
+
+    # Inicia logger (após init_dspy para ter settings disponível)
+    logger = setup_logger(agent_label)
+
+    # Contadores globais de pass/fail
+    total_passed = 0
+    total_failed = 0
+    failures = []
+
     # Cenários Gatekeeper
     if args.gatekeeper or args.all:
         print("\n" + "#"*60)
         print("# TESTES GATEKEEPER")
         print("#"*60)
 
+        g_passed = g_failed = 0
         for scenario in GATEKEEPER_SCENARIOS:
             try:
-                run_gatekeeper_test(scenario)
+                result = run_gatekeeper_test(scenario)
+                expected = scenario.get("expected_stage")
+                actual = result["conversation_stage"]
+                if expected and actual == expected:
+                    g_passed += 1
+                elif expected:
+                    g_failed += 1
+                    failures.append(f"GATEKEEPER | {scenario['name']} | esperado: {expected} | obtido: {actual}")
             except Exception as e:
+                g_failed += 1
+                failures.append(f"GATEKEEPER | {scenario['name']} | ERRO: {e}")
                 print(f"\n❌ ERRO no cenário '{scenario['name']}': {e}")
+
+        total_passed += g_passed
+        total_failed += g_failed
+        total_g = g_passed + g_failed
+        print(f"\n{'='*60}")
+        print(f"GATEKEEPER: {g_passed}/{total_g} ({100*g_passed//total_g if total_g else 0}%)")
+        print(f"{'='*60}")
 
     # Cenários Closer
     if args.closer or args.all:
@@ -401,15 +478,44 @@ def main():
         print("# TESTES CLOSER")
         print("#"*60)
 
+        c_passed = c_failed = 0
         for scenario in CLOSER_SCENARIOS:
             try:
-                run_closer_test(scenario)
+                result = run_closer_test(scenario)
+                expected = scenario.get("expected_stage")
+                actual = result["conversation_stage"]
+                if expected and actual == expected:
+                    c_passed += 1
+                elif expected:
+                    c_failed += 1
+                    failures.append(f"CLOSER | {scenario['name']} | esperado: {expected} | obtido: {actual}")
             except Exception as e:
+                c_failed += 1
+                failures.append(f"CLOSER | {scenario['name']} | ERRO: {e}")
                 print(f"\n❌ ERRO no cenário '{scenario['name']}': {e}")
 
-    print("\n" + "="*60)
-    print("Testes concluídos!")
-    print("="*60)
+        total_passed += c_passed
+        total_failed += c_failed
+        total_c = c_passed + c_failed
+        print(f"\n{'='*60}")
+        print(f"CLOSER: {c_passed}/{total_c} ({100*c_passed//total_c if total_c else 0}%)")
+        print(f"{'='*60}")
+
+    # Sumário final
+    total = total_passed + total_failed
+    pct = 100 * total_passed // total if total else 0
+    print(f"\n{'='*60}")
+    print(f"RESULTADO FINAL: {total_passed}/{total} ({pct}%)")
+    if failures:
+        print(f"\n⚠️  FALHAS ({len(failures)}):")
+        for f in failures:
+            print(f"   • {f}")
+    else:
+        print("✅ Todos os cenários passaram!")
+    print(f"{'='*60}")
+    print(f"\nTimestamp: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+
+    logger.close()
 
 
 if __name__ == "__main__":

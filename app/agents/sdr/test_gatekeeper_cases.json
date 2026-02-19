@@ -269,5 +269,355 @@
     ],
     "latest_message": "O número do Dr. Carlos é 11999887766.",
     "expected_stage": "success"
+  },
+  {
+    "name": "Pedido de Apresentacao",
+    "clinic_name": "Clinica Bem Estar",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Oi, tudo bem? Aqui é da empresa X, gostaria de falar com o responsavel pela clinica."
+      },
+      {
+        "role": "human",
+        "content": "Pode mandar uma apresentacao?"
+      }
+    ],
+    "latest_message": "Pode mandar uma apresentacao?",
+    "expected_stage": "handling_objection"
+  },
+  {
+    "name": "Numero Fornecido Formatado",
+    "clinic_name": "Dental Sorriso",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Preciso do contato do gestor de marketing."
+      },
+      {
+        "role": "human",
+        "content": "O numero dele e (11) 9 9999-8888"
+      }
+    ],
+    "latest_message": "O numero dele e (11) 9 9999-8888",
+    "expected_stage": "success"
+  },
+  {
+    "name": "Retorno Futuro",
+    "clinic_name": "Posto de Saude Central",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, tem algum responsavel disponivel?"
+      },
+      {
+        "role": "human",
+        "content": "Ele nao esta, retorne amanha."
+      }
+    ],
+    "latest_message": "Ele nao esta, retorne amanha.",
+    "expected_stage": "handling_objection"
+  },
+  {
+    "name": "Recepcionista Rude",
+    "clinic_name": "Clinica Medica Rapida",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Ola, gostaria de falar com a diretoria."
+      },
+      {
+        "role": "human",
+        "content": "Que gestor?! Sem interesse!"
+      }
+    ],
+    "latest_message": "Que gestor?! Sem interesse!",
+    "expected_stage": "handling_objection"
+  },
+  {
+    "name": "Transferencia com Numero",
+    "clinic_name": "Hospital Santa Rita",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Qual o whatsapp do proprietario?"
+      },
+      {
+        "role": "human",
+        "content": "Vou transferir, mas tente no 11988887777"
+      }
+    ],
+    "latest_message": "Vou transferir, mas tente no 11988887777",
+    "expected_stage": "success"
+  },
+  {
+    "name": "Confusao sobre Gestor",
+    "clinic_name": "Clinica Multi-Especialista",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Preciso falar com o gerente."
+      },
+      {
+        "role": "human",
+        "content": "Qual gestor? Tem varios aqui."
+      }
+    ],
+    "latest_message": "Qual gestor? Tem varios aqui.",
+    "expected_stage": "handling_objection"
+  },
+  {
+    "name": "Recepcionista e o Gestor",
+    "clinic_name": "Clinica Familiar",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Ola, poderia me passar o contato do dono?"
+      },
+      {
+        "role": "human",
+        "content": "Sou eu mesmo o gestor, pode falar."
+      }
+    ],
+    "latest_message": "Sou eu mesmo o gestor, pode falar.",
+    "expected_stage": "requesting"
+  },
+  {
+    "name": "Pergunta sobre Empresa",
+    "clinic_name": "Clinica Estetica Bella",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Ola, temos uma proposta para a clinica."
+      },
+      {
+        "role": "human",
+        "content": "Me fala o nome da empresa."
+      }
+    ],
+    "latest_message": "Me fala o nome da empresa.",
+    "expected_stage": "handling_objection"
+  },
+  {
+    "name": "Primeiro Contato",
+    "clinic_name": "Clinica Sao Joao",
+    "conversation_history": [],
+    "latest_message": null,
+    "expected_stage": "opening"
+  },
+  {
+    "name": "Recusa Definitiva",
+    "clinic_name": "Clinica Fechada",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Ola, tudo bem? Gostaria de falar com o gerente."
+      },
+      {
+        "role": "human",
+        "content": "Nao temos interesse."
+      },
+      {
+        "role": "agent",
+        "content": "Entendo, mas e uma solucao que pode ajudar muito."
+      },
+      {
+        "role": "human",
+        "content": "Ja disse que nao, pare de mandar mensagens."
+      }
+    ],
+    "latest_message": "Ja disse que nao, pare de mandar mensagens.",
+    "expected_stage": "failed"
+  },
+  {
+    "name": "Conversa longa com múltiplas objeções",
+    "clinic_name": "Clínica OdontoBem",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Oi, tudo bem? Falo com o Dr. Ricardo?"
+      },
+      {
+        "role": "human",
+        "content": "Ele está em cirurgia. Quem é?"
+      },
+      {
+        "role": "agent",
+        "content": "Sou da empresa X, gostaria de falar sobre o sistema de gestão."
+      },
+      {
+        "role": "human",
+        "content": "Não temos interesse em sistemas, já usamos um."
+      },
+      {
+        "role": "agent",
+        "content": "Entendo, mas o nosso tem IA. Posso deixar o contato do Dr. Ricardo?"
+      },
+      {
+        "role": "human",
+        "content": "Olha, ele não gosta de recados de vendas. Tente mês que vem."
+      }
+    ],
+    "latest_message": "Olha, ele não gosta de recados de vendas. Tente mês que vem.",
+    "expected_stage": "handling_objection"
+  },
+  {
+    "name": "Sucesso com link WhatsApp",
+    "clinic_name": "Estética Glow",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Boa tarde! Gostaria de falar com a responsável pela clínica."
+      },
+      {
+        "role": "human",
+        "content": "É a Fernanda. Ela atende em outro número. Clica aqui: wa.me/5511999998888"
+      }
+    ],
+    "latest_message": "É a Fernanda. Ela atende em outro número. Clica aqui: wa.me/5511999998888",
+    "expected_stage": "success"
+  },
+  {
+    "name": "Promessa ambígua de repasse",
+    "clinic_name": "Dermo Clínica",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Oi, gostaria de falar com o Dr. Fábio."
+      },
+      {
+        "role": "human",
+        "content": "Ele saiu. Me passa o assunto que eu vejo se encaminho pra ele."
+      }
+    ],
+    "latest_message": "Ele saiu. Me passa o assunto que eu vejo se encaminho pra ele.",
+    "expected_stage": "handling_objection"
+  },
+  {
+    "name": "Pedido para ligar canal voz",
+    "clinic_name": "Clínica Psicologia Mental",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Olá, preciso falar com o sócio gestor sobre parceria."
+      },
+      {
+        "role": "human",
+        "content": "Aqui não aceitamos abordagem por texto. Se quiser, liga no fixo 1133334444."
+      }
+    ],
+    "latest_message": "Aqui não aceitamos abordagem por texto. Se quiser, liga no fixo 1133334444.",
+    "expected_stage": "handling_objection"
+  },
+  {
+    "name": "Gestor pede proposta antes",
+    "clinic_name": "OrtoVida",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Falo com o proprietário?"
+      },
+      {
+        "role": "human",
+        "content": "Sou eu. O que deseja?"
+      },
+      {
+        "role": "agent",
+        "content": "Somos especializados em marketing para ortodontia. Podemos marcar um papo?"
+      },
+      {
+        "role": "human",
+        "content": "Não tenho tempo para papo. Manda a proposta no email que eu leio."
+      }
+    ],
+    "latest_message": "Não tenho tempo para papo. Manda a proposta no email que eu leio.",
+    "expected_stage": "handling_objection"
+  },
+  {
+    "name": "Resposta em inglês",
+    "clinic_name": "Rio Cosmetic Surgery",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Olá, gostaria de falar com o diretor da clínica."
+      },
+      {
+        "role": "human",
+        "content": "Hello! We assist international patients only. How can I help you?"
+      }
+    ],
+    "latest_message": "Hello! We assist international patients only. How can I help you?",
+    "expected_stage": "handling_objection"
+  },
+  {
+    "name": "Recepção questiona se é robô",
+    "clinic_name": "Clínica Dermos",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Olá, boa tarde! Aqui é da empresa TechHealth, gostaria de falar com o responsável pelo agendamento."
+      },
+      {
+        "role": "human",
+        "content": "Nossa, você respondeu rápido demais. É robô ou pessoa real falando aí?"
+      }
+    ],
+    "latest_message": "Nossa, você respondeu rápido demais. É robô ou pessoa real falando aí?",
+    "expected_stage": "handling_objection"
+  },
+  {
+    "name": "Número de telefone incompleto",
+    "clinic_name": "Odonto Centro Sul",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Preciso falar com a dra. Carla para apresentar o novo sistema."
+      },
+      {
+        "role": "human",
+        "content": "Ela não está no consultório agora, tenta falar com ela no 9999."
+      }
+    ],
+    "latest_message": "Ela não está no consultório agora, tenta falar com ela no 9999.",
+    "expected_stage": "handling_objection"
+  },
+  {
+    "name": "Primeiro contato veterinária",
+    "clinic_name": "PetVida Clínica Veterinária",
+    "conversation_history": [],
+    "latest_message": null,
+    "expected_stage": "opening"
+  },
+  {
+    "name": "Duas objeções e conversão final",
+    "clinic_name": "Clínica Bem Estar",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Oi, tudo bem? Aqui é da ConnectMed. Falo com quem cuida da agenda?"
+      },
+      {
+        "role": "human",
+        "content": "Olha, estamos apenas retornando do recesso, sem tempo para novidades agora."
+      },
+      {
+        "role": "agent",
+        "content": "Entendo, justamente para ajudar no retorno temos uma ferramenta. Alguém indicou nossa empresa?"
+      },
+      {
+        "role": "human",
+        "content": "Não, ninguém indicou não, não conheço vocês."
+      },
+      {
+        "role": "agent",
+        "content": "Sem problemas! Trabalhamos com clínicas há anos. Consegue me passar o contato do responsável para eu explicar melhor?"
+      },
+      {
+        "role": "human",
+        "content": "Ah tá, pode mandar mensagem pra ele no 11988887777."
+      }
+    ],
+    "latest_message": "Ah tá, pode mandar mensagem pra ele no 11988887777.",
+    "expected_stage": "success"
   }
 ]
