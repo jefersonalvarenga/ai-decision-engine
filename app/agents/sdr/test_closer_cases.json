@@ -263,12 +263,30 @@
     "clinic_name": "OdontoVida",
     "clinic_specialty": "odonto",
     "conversation_history": [
-      {"role": "agent", "content": "Boa tarde Dr. Marcos, aqui é Jeferson da EasyScale. Tudo bem?"},
-      {"role": "human", "content": "Oi, tudo bem. Em que posso ajudar?"},
-      {"role": "agent", "content": "Nossa empresa ajuda clínicas de odonto a duplicarem o faturamento dando ferramentas de tecnologia para a equipe de atendimento. Faria sentido batermos um papo?"},
-      {"role": "human", "content": "Sim, podemos conversar."},
-      {"role": "agent", "content": "Ótimo! Amanhã às 15h seria um bom horário? São só 20 minutinhos."},
-      {"role": "human", "content": "Pode ser, 15h tá ótimo. Até amanhã!"}
+      {
+        "role": "agent",
+        "content": "Boa tarde Dr. Marcos, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Oi, tudo bem. Em que posso ajudar?"
+      },
+      {
+        "role": "agent",
+        "content": "Nossa empresa ajuda clínicas de odonto a duplicarem o faturamento dando ferramentas de tecnologia para a equipe de atendimento. Faria sentido batermos um papo?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, podemos conversar."
+      },
+      {
+        "role": "agent",
+        "content": "Ótimo! Amanhã às 15h seria um bom horário? São só 20 minutinhos."
+      },
+      {
+        "role": "human",
+        "content": "Pode ser, 15h tá ótimo. Até amanhã!"
+      }
     ],
     "latest_message": "Pode ser, 15h tá ótimo. Até amanhã!",
     "expected_stage": "scheduled"
@@ -280,12 +298,30 @@
     "clinic_name": "Estética Bela",
     "clinic_specialty": "estética",
     "conversation_history": [
-      {"role": "agent", "content": "Boa tarde Dra. Lucia, aqui é Jeferson da EasyScale."},
-      {"role": "human", "content": "Boa tarde."},
-      {"role": "agent", "content": "Ajudamos clínicas de estética a duplicar faturamento com tecnologia. Podemos bater um papo?"},
-      {"role": "human", "content": "Podemos marcar sim."},
-      {"role": "agent", "content": "Que tal amanhã às 10h?"},
-      {"role": "human", "content": "10h não dá, pode ser às 14h?"}
+      {
+        "role": "agent",
+        "content": "Boa tarde Dra. Lucia, aqui é Jeferson da EasyScale."
+      },
+      {
+        "role": "human",
+        "content": "Boa tarde."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de estética a duplicar faturamento com tecnologia. Podemos bater um papo?"
+      },
+      {
+        "role": "human",
+        "content": "Podemos marcar sim."
+      },
+      {
+        "role": "agent",
+        "content": "Que tal amanhã às 10h?"
+      },
+      {
+        "role": "human",
+        "content": "10h não dá, pode ser às 14h?"
+      }
     ],
     "latest_message": "10h não dá, pode ser às 14h?",
     "expected_stage": "confirming"
@@ -297,9 +333,18 @@
     "clinic_name": "DermaCenter",
     "clinic_specialty": "dermatologia",
     "conversation_history": [
-      {"role": "agent", "content": "Boa tarde Dr. Rafael, aqui é Jeferson da EasyScale. Tudo bem?"},
-      {"role": "human", "content": "Tudo bem."},
-      {"role": "agent", "content": "Ajudamos clínicas de dermatologia a duplicar faturamento. Faria sentido batermos um papo?"}
+      {
+        "role": "agent",
+        "content": "Boa tarde Dr. Rafael, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Tudo bem."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de dermatologia a duplicar faturamento. Faria sentido batermos um papo?"
+      }
     ],
     "latest_message": "Mas como exatamente vocês fazem isso?",
     "expected_stage": "pitching"
@@ -311,12 +356,21 @@
     "clinic_name": "OdontoPlus",
     "clinic_specialty": "odonto",
     "conversation_history": [
-      {"role": "agent", "content": "Bom dia Dr. Henrique, aqui é Jeferson da EasyScale. Tudo bem?"},
-      {"role": "human", "content": "Oi, tudo ótimo."},
-      {"role": "agent", "content": "Ajudamos clínicas de odonto a duplicar faturamento. Faria sentido batermos um papo?"}
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Henrique, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Oi, tudo ótimo."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de odonto a duplicar faturamento. Faria sentido batermos um papo?"
+      }
     ],
     "latest_message": "Parece interessante, mas agora não é um bom momento. Me procura semana que vem.",
-    "expected_stage": "pitching"
+    "expected_stage": "proposing_time"
   },
   {
     "name": "Gestor pede para ligar",
@@ -325,9 +379,18 @@
     "clinic_name": "Clínica Renova",
     "clinic_specialty": "estética",
     "conversation_history": [
-      {"role": "agent", "content": "Boa tarde Dr. Paulo, aqui é Jeferson da EasyScale."},
-      {"role": "human", "content": "Boa tarde."},
-      {"role": "agent", "content": "Ajudamos clínicas de estética a dobrar o faturamento. Podemos conversar?"}
+      {
+        "role": "agent",
+        "content": "Boa tarde Dr. Paulo, aqui é Jeferson da EasyScale."
+      },
+      {
+        "role": "human",
+        "content": "Boa tarde."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de estética a dobrar o faturamento. Podemos conversar?"
+      }
     ],
     "latest_message": "Não gosto de conversa por texto. Me liga no fixo da clínica.",
     "expected_stage": "pitching"
@@ -339,8 +402,14 @@
     "clinic_name": "Saúde e Vida",
     "clinic_specialty": "saúde",
     "conversation_history": [
-      {"role": "agent", "content": "Boa tarde Dra. Camila, aqui é Jeferson da EasyScale. Tudo bem?"},
-      {"role": "human", "content": "Quem passou meu número?"}
+      {
+        "role": "agent",
+        "content": "Boa tarde Dra. Camila, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Quem passou meu número?"
+      }
     ],
     "latest_message": "Quem passou meu número?",
     "expected_stage": "pitching"
@@ -352,8 +421,14 @@
     "clinic_name": "OdontoCare",
     "clinic_specialty": "odonto",
     "conversation_history": [
-      {"role": "agent", "content": "Bom dia Dr. Tiago, aqui é Jeferson da EasyScale. Tudo bem?"},
-      {"role": "human", "content": "Ah sim, EasyScale! Já ouvi falar de vocês. O que mudou?"}
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Tiago, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Ah sim, EasyScale! Já ouvi falar de vocês. O que mudou?"
+      }
     ],
     "latest_message": "Ah sim, EasyScale! Já ouvi falar de vocês. O que mudou?",
     "expected_stage": "pitching"
@@ -365,15 +440,42 @@
     "clinic_name": "Clínica Bella Donna",
     "clinic_specialty": "estética",
     "conversation_history": [
-      {"role": "agent", "content": "Boa tarde Dra. Beatriz, aqui é Jeferson da EasyScale."},
-      {"role": "human", "content": "Oi, tudo bem?"},
-      {"role": "agent", "content": "Ajudamos clínicas de estética a dobrar faturamento. Faria sentido batermos um papo?"},
-      {"role": "human", "content": "Agora não dá."},
-      {"role": "agent", "content": "Entendo! Que tal amanhã às 15h? São só 20 minutinhos."},
-      {"role": "human", "content": "Não, essa semana não."},
-      {"role": "agent", "content": "Sem problemas. Semana que vem então? Segunda às 10h?"},
-      {"role": "human", "content": "Olha, não sei se faz sentido."},
-      {"role": "agent", "content": "Entendo. Sem compromisso, prometo ser breve. Posso ligar quinta?"}
+      {
+        "role": "agent",
+        "content": "Boa tarde Dra. Beatriz, aqui é Jeferson da EasyScale."
+      },
+      {
+        "role": "human",
+        "content": "Oi, tudo bem?"
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de estética a dobrar faturamento. Faria sentido batermos um papo?"
+      },
+      {
+        "role": "human",
+        "content": "Agora não dá."
+      },
+      {
+        "role": "agent",
+        "content": "Entendo! Que tal amanhã às 15h? São só 20 minutinhos."
+      },
+      {
+        "role": "human",
+        "content": "Não, essa semana não."
+      },
+      {
+        "role": "agent",
+        "content": "Sem problemas. Semana que vem então? Segunda às 10h?"
+      },
+      {
+        "role": "human",
+        "content": "Olha, não sei se faz sentido."
+      },
+      {
+        "role": "agent",
+        "content": "Entendo. Sem compromisso, prometo ser breve. Posso ligar quinta?"
+      }
     ],
     "latest_message": "Não, obrigada. Não tenho interesse.",
     "expected_stage": "lost"
@@ -385,13 +487,34 @@
     "clinic_name": "DermaVida",
     "clinic_specialty": "dermatologia",
     "conversation_history": [
-      {"role": "agent", "content": "Bom dia Dr. Fernando, aqui é Jeferson da EasyScale. Tudo bem?"},
-      {"role": "human", "content": "Oi, tudo bem."},
-      {"role": "agent", "content": "Ajudamos clínicas a dobrar faturamento com tecnologia. Podemos bater um papo?"},
-      {"role": "human", "content": "Pode sim."},
-      {"role": "agent", "content": "Amanhã às 10h funciona?"},
-      {"role": "human", "content": "Combinado, amanhã às 10h."},
-      {"role": "agent", "content": "Perfeito! Até amanhã às 10h!"}
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Fernando, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Oi, tudo bem."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas a dobrar faturamento com tecnologia. Podemos bater um papo?"
+      },
+      {
+        "role": "human",
+        "content": "Pode sim."
+      },
+      {
+        "role": "agent",
+        "content": "Amanhã às 10h funciona?"
+      },
+      {
+        "role": "human",
+        "content": "Combinado, amanhã às 10h."
+      },
+      {
+        "role": "agent",
+        "content": "Perfeito! Até amanhã às 10h!"
+      }
     ],
     "latest_message": "Opa, surgiu um imprevisto. Tem como mudar pra quinta?",
     "expected_stage": "confirming"
@@ -403,9 +526,18 @@
     "clinic_name": "Clínica Vitalis",
     "clinic_specialty": "estética",
     "conversation_history": [
-      {"role": "agent", "content": "Boa tarde Dra. Patrícia, aqui é Jeferson da EasyScale. Tudo bem?"},
-      {"role": "human", "content": "Oi, tudo."},
-      {"role": "agent", "content": "Ajudamos clínicas de estética a duplicar faturamento. Faria sentido batermos um papo?"}
+      {
+        "role": "agent",
+        "content": "Boa tarde Dra. Patrícia, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Oi, tudo."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de estética a duplicar faturamento. Faria sentido batermos um papo?"
+      }
     ],
     "latest_message": "Pode sim, quando você tem disponível?",
     "expected_stage": "pitching",
@@ -418,11 +550,26 @@
     "clinic_name": "OdontoMax",
     "clinic_specialty": "odonto",
     "conversation_history": [
-      {"role": "agent", "content": "Bom dia Dr. Sérgio, aqui é Jeferson da EasyScale. Tudo bem?"},
-      {"role": "human", "content": "Oi, tudo certo."},
-      {"role": "agent", "content": "Ajudamos clínicas de odonto a dobrar faturamento. Podemos bater um papo?"},
-      {"role": "human", "content": "Podemos conversar sim."},
-      {"role": "agent", "content": "Ótimo! Quinta às 14h funciona?"}
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Sérgio, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Oi, tudo certo."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de odonto a dobrar faturamento. Podemos bater um papo?"
+      },
+      {
+        "role": "human",
+        "content": "Podemos conversar sim."
+      },
+      {
+        "role": "agent",
+        "content": "Ótimo! Quinta às 14h funciona?"
+      }
     ],
     "latest_message": "Pode ser às 14h, mas no máximo 15 minutos ok?",
     "expected_stage": "confirming"
@@ -434,11 +581,26 @@
     "clinic_name": "Estética Prime",
     "clinic_specialty": "estética",
     "conversation_history": [
-      {"role": "agent", "content": "Bom dia Dra. Renata, aqui é Jeferson da EasyScale. Tudo bem?"},
-      {"role": "human", "content": "Oi, tudo bem."},
-      {"role": "agent", "content": "Ajudamos clínicas de estética a dobrar faturamento. Podemos conversar?"},
-      {"role": "human", "content": "Sim, estou interessada."},
-      {"role": "agent", "content": "Terça às 15h funciona pra você?"}
+      {
+        "role": "agent",
+        "content": "Bom dia Dra. Renata, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Oi, tudo bem."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de estética a dobrar faturamento. Podemos conversar?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, estou interessada."
+      },
+      {
+        "role": "agent",
+        "content": "Terça às 15h funciona pra você?"
+      }
     ],
     "latest_message": "Terça às 15h? Então seria dia 25? Confirma pra mim.",
     "expected_stage": "confirming"
@@ -450,11 +612,26 @@
     "clinic_name": "Clínica Moderna",
     "clinic_specialty": "estética",
     "conversation_history": [
-      {"role": "agent", "content": "Bom dia Dr. Augusto, aqui é Jeferson da EasyScale. Tudo bem?"},
-      {"role": "human", "content": "Quem?"},
-      {"role": "agent", "content": "Sou Jeferson da EasyScale, ajudamos clínicas a dobrar faturamento. Posso explicar rapidamente?"},
-      {"role": "human", "content": "Não tenho interesse nenhum."},
-      {"role": "agent", "content": "Entendo! Sem compromisso, são só 20 minutinhos. Posso te ligar amanhã?"}
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Augusto, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Quem?"
+      },
+      {
+        "role": "agent",
+        "content": "Sou Jeferson da EasyScale, ajudamos clínicas a dobrar faturamento. Posso explicar rapidamente?"
+      },
+      {
+        "role": "human",
+        "content": "Não tenho interesse nenhum."
+      },
+      {
+        "role": "agent",
+        "content": "Entendo! Sem compromisso, são só 20 minutinhos. Posso te ligar amanhã?"
+      }
     ],
     "latest_message": "Já disse que não. Para de mandar mensagem. Vou bloquear.",
     "expected_stage": "lost"
@@ -466,8 +643,14 @@
     "clinic_name": "OdontoSmart",
     "clinic_specialty": "odonto",
     "conversation_history": [
-      {"role": "agent", "content": "Bom dia Dr. Leonardo, aqui é Jeferson da EasyScale. Tudo bem?"},
-      {"role": "human", "content": "[audio]"}
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Leonardo, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "[audio]"
+      }
     ],
     "latest_message": "[audio]",
     "expected_stage": "pitching"
@@ -479,13 +662,34 @@
     "clinic_name": "Clínica Renascer",
     "clinic_specialty": "estética",
     "conversation_history": [
-      {"role": "agent", "content": "Boa tarde Dra. Sandra, aqui é Jeferson da EasyScale."},
-      {"role": "human", "content": "Oi, do que se trata?"},
-      {"role": "agent", "content": "Ajudamos clínicas de estética a dobrar faturamento com tecnologia pro atendimento."},
-      {"role": "human", "content": "Já tenho sistema."},
-      {"role": "agent", "content": "Entendo! Muitos clientes nossos também tinham. Posso mostrar o diferencial em uma call rápida?"},
-      {"role": "human", "content": "Quanto custa?"},
-      {"role": "agent", "content": "O investimento varia conforme o tamanho da clínica. Na call eu mostro as opções e o ROI esperado."}
+      {
+        "role": "agent",
+        "content": "Boa tarde Dra. Sandra, aqui é Jeferson da EasyScale."
+      },
+      {
+        "role": "human",
+        "content": "Oi, do que se trata?"
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de estética a dobrar faturamento com tecnologia pro atendimento."
+      },
+      {
+        "role": "human",
+        "content": "Já tenho sistema."
+      },
+      {
+        "role": "agent",
+        "content": "Entendo! Muitos clientes nossos também tinham. Posso mostrar o diferencial em uma call rápida?"
+      },
+      {
+        "role": "human",
+        "content": "Quanto custa?"
+      },
+      {
+        "role": "agent",
+        "content": "O investimento varia conforme o tamanho da clínica. Na call eu mostro as opções e o ROI esperado."
+      }
     ],
     "latest_message": "Tá, pode ser. Quando você pode?",
     "expected_stage": "proposing_time"
@@ -497,11 +701,26 @@
     "clinic_name": "OdontoVip",
     "clinic_specialty": "odonto",
     "conversation_history": [
-      {"role": "agent", "content": "Bom dia Dr. Vinícius, aqui é Jeferson da EasyScale. Tudo bem?"},
-      {"role": "human", "content": "Oi, tudo bem."},
-      {"role": "agent", "content": "Ajudamos clínicas de odonto a dobrar faturamento. Podemos bater um papo?"},
-      {"role": "human", "content": "Pode sim."},
-      {"role": "agent", "content": "Quarta às 10h funciona? São só 20 minutinhos."}
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Vinícius, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Oi, tudo bem."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de odonto a dobrar faturamento. Podemos bater um papo?"
+      },
+      {
+        "role": "human",
+        "content": "Pode sim."
+      },
+      {
+        "role": "agent",
+        "content": "Quarta às 10h funciona? São só 20 minutinhos."
+      }
     ],
     "latest_message": "Quarta às 10h está perfeito. Combinado!",
     "expected_stage": "scheduled"
@@ -513,8 +732,14 @@
     "clinic_name": "Clínica Harmonia",
     "clinic_specialty": "estética",
     "conversation_history": [
-      {"role": "agent", "content": "Boa tarde Dra. Mariana, aqui é Jeferson da EasyScale. Tudo bem?"},
-      {"role": "human", "content": "Como conseguiu meu número? Quem te indicou?"}
+      {
+        "role": "agent",
+        "content": "Boa tarde Dra. Mariana, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Como conseguiu meu número? Quem te indicou?"
+      }
     ],
     "latest_message": "Como conseguiu meu número? Quem te indicou?",
     "expected_stage": "pitching"
@@ -526,9 +751,18 @@
     "clinic_name": "DermaPlus",
     "clinic_specialty": "dermatologia",
     "conversation_history": [
-      {"role": "agent", "content": "Bom dia Dr. Bruno, aqui é Jeferson da EasyScale. Tudo bem?"},
-      {"role": "human", "content": "Oi."},
-      {"role": "agent", "content": "Ajudamos clínicas de dermatologia a dobrar faturamento. Faria sentido batermos um papo?"}
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Bruno, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Oi."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de dermatologia a dobrar faturamento. Faria sentido batermos um papo?"
+      }
     ],
     "latest_message": "Não tenho interesse no momento.",
     "expected_stage": "pitching"

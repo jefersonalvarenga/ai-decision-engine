@@ -58,8 +58,8 @@ class CloserSignature(dspy.Signature):
       - Gestor respondeu saudação e agente precisa fazer pitch
       - Gestor fez pergunta sobre EasyScale ("do que se trata?", "como funciona?")
       - Gestor levantou objeção SUAVE (não tenho tempo, manda material, já tenho sistema)
-      - Gestor demonstra interesse mas ADIA ("semana que vem", "agora não dá", "fala comigo amanhã")
-        * CUIDADO: adiar NÃO é aceitar! "Fala comigo amanhã" = pitching, NÃO proposing_time!
+      - Gestor adia de forma VAGA sem sugerir quando ("depois a gente vê", "agora não dá")
+        * CUIDADO: adiamento VAGO sem marco temporal ≠ interesse, é pitching!
       - Gestor responde fora do contexto ("quem indicou?", "como conseguiu meu número?")
       - Gestor já conhece EasyScale mas quer saber novidades
       - Gestor pede para LIGAR ou mudar canal ("me liga no fixo", "prefiro ligação")
@@ -78,10 +78,11 @@ class CloserSignature(dspy.Signature):
     --- proposing_time ---
     É proposing_time:
       - Gestor EXPLICITAMENTE aceitou conversar/bater papo ("pode sim", "vamos lá", "claro")
-      - Gestor pediu os horários disponíveis ("me manda horários", "quando pode?")
+      - Gestor pediu os horários disponíveis ("me manda horários", "quando pode?", "sim, me manda horários")
       - Gestor superou objeções e finalmente aceitou o papo
+      - Gestor propôs retorno em momento específico ("fala comigo amanhã", "me liga semana que vem")
+        → Isso indica INTERESSE, proponha slot específico para o momento que ele sugeriu
     NÃO é proposing_time:
-      - Gestor apenas ADIOU ("fala comigo amanhã", "semana que vem") → pitching!
       - Gestor está negociando horário específico ("10h não dá, pode ser 14h?") → confirming
       - Gestor fez outra pergunta ignorando o CTA → pitching
       - Gestor pediu para ligar/mudar canal (não aceitou horário) → pitching
@@ -96,10 +97,15 @@ class CloserSignature(dspy.Signature):
       - Gestor pede CONFIRMAÇÃO: "então seria dia 25 às 15h? Confirma pra mim"
       - Gestor pede REAGENDAMENTO de algo já combinado: "surgiu imprevisto, pode mudar?"
       - Gestor aceita mas em tom PARCIAL (não é confirmação definitiva ainda)
+
+      IMPORTANTE: confirming SÓ é atingido APÓS o agente já ter proposto horário específico.
+      Se o gestor pede horários sem prévia proposta do agente → é proposing_time, NÃO confirming.
+
     NÃO é confirming:
       - Gestor disse "combinado!", "perfeito!", "fechado!" de forma DEFINITIVA → scheduled
       - Gestor está perguntando sobre produto, não sobre horário → pitching
       - Gestor rejeitou o horário e NÃO propôs alternativa → proposing_time (proponha outro)
+      - Gestor pediu horários SEM o agente ter proposto um horário antes → proposing_time
 
     --- scheduled ---
     É scheduled:
@@ -118,6 +124,11 @@ class CloserSignature(dspy.Signature):
       - Gestor pediu para parar: "para de mandar mensagem", "vou bloquear"
       - Gestor pediu para não entrar mais em contato
       - attempt_count >= 5 E conversa NÃO progrediu para proposing_time ou adiante
+
+      ⚠️ REGRA ABSOLUTA: Mesmo que gestor diga "não tenho interesse", "não quero" ou similar,
+      NUNCA classifique como lost se attempt_count < 2. Sempre tente contornar UMA VEZ primeiro.
+      Só é lost quando: (a) rejeitou 2+ vezes, (b) pediu para parar, ou (c) 5+ tentativas sem evolução.
+
     NÃO é lost:
       - PRIMEIRA rejeição suave → AINDA É pitching! Tente contornar.
       - Gestor adiou ("semana que vem", "agora não") → AINDA É pitching!
@@ -138,7 +149,7 @@ class CloserSignature(dspy.Signature):
     === EXEMPLOS AMBÍGUOS — RESOLUÇÃO DEFINITIVA ===
 
     CASO: "Agora não posso, fala comigo amanhã"
-    → É pitching! Gestor ADIOU, não aceitou. Responda contornando a objeção.
+    → É proposing_time! Gestor indicou interesse ao sugerir "amanhã". Proponha slot específico.
 
     CASO: "Me liga no fixo da clínica" / "Prefiro ligação"
     → É pitching! Gestor pediu mudança de canal, NÃO aceitou horário. Responda adaptando.
@@ -151,6 +162,10 @@ class CloserSignature(dspy.Signature):
 
     CASO: "Pode ser, 15h tá ótimo. Até amanhã!"
     → É scheduled! Confirmação DEFINITIVA. EXTRAIA meeting_datetime.
+
+    CASO: "Mas como exatamente vocês fazem isso?" (após CTA "Faria sentido batermos um papo?")
+    → É pitching! Gestor IGNOROU o CTA e fez pergunta sobre produto. Continue o pitch.
+    → Só é proposing_time se gestor usar palavra de ACEITAÇÃO ("pode sim", "vamos lá", "claro").
 
     === TRATANDO OBJEÇÕES (TAXONOMIA) ===
 
@@ -165,8 +180,9 @@ class CloserSignature(dspy.Signature):
     3. "Já tenho sistema" / "Já uso outro"
        → "Entendo! Muitos clientes nossos também tinham. Posso mostrar o diferencial em uma call rápida?"
 
-    4. "Preciso pensar" / "Depois a gente vê" / "Semana que vem"
+    4. "Preciso pensar" / "Depois a gente vê"
        → "Sem problemas! Posso te ligar [slot] só pra tirar dúvidas? Sem compromisso."
+       NOTA: se gestor citar marco temporal ("semana que vem", "amanhã") → proposing_time, proponha slot
 
     5. "Preciso ver com meu sócio" / "Vou falar com minha equipe"
        → "Faz sentido! Que tal marcarmos juntos? Assim eu explico e ele já tira as dúvidas."

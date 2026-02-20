@@ -126,9 +126,16 @@ class CloserAgent(dspy.Module):
 
         # --- SMART FALLBACKS (mirroring gatekeeper patterns) ---
 
-        # 1. If datetime extracted, force scheduled (but respect confirming)
-        if meeting_datetime and stage not in ["scheduled", "confirming", "lost"]:
-            stage = "scheduled"
+        # 1. If datetime extracted but LLM didn't classify as scheduled/confirming,
+        #    clear the datetime (LLM likely hallucinated it during pitch/propose)
+        if meeting_datetime and stage not in ["scheduled", "confirming"]:
+            meeting_datetime = None
+
+        # 1b. If scheduled but latest_message is a question (contains "?"),
+        #     it's likely a counter-proposal, not a confirmation → downgrade to confirming
+        if stage == "scheduled" and latest_message and "?" in latest_message:
+            stage = "confirming"
+            meeting_datetime = None
 
         # 2. If scheduled but no datetime, downgrade to confirming
         if stage == "scheduled" and not meeting_datetime:
