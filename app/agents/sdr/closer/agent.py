@@ -131,11 +131,16 @@ class CloserAgent(dspy.Module):
         if meeting_datetime and stage not in ["scheduled", "confirming"]:
             meeting_datetime = None
 
-        # 1b. If scheduled but latest_message is a question (contains "?"),
-        #     it's likely a counter-proposal, not a confirmation → downgrade to confirming
+        # 1b. If scheduled but latest_message is a counter-proposal question about time,
+        #     downgrade to confirming. Ignore logistic questions (link, endereço, etc.)
         if stage == "scheduled" and latest_message and "?" in latest_message:
-            stage = "confirming"
-            meeting_datetime = None
+            msg_lower = latest_message.lower()
+            time_keywords = ["não dá", "pode ser", "melhor", "prefiro", "trocar", "mudar",
+                             "outro horário", "outro dia", "remarcar", "adiar", "seria"]
+            is_counter_proposal = any(kw in msg_lower for kw in time_keywords)
+            if is_counter_proposal:
+                stage = "confirming"
+                meeting_datetime = None
 
         # 2. If scheduled but no datetime, downgrade to confirming
         if stage == "scheduled" and not meeting_datetime:
