@@ -104,15 +104,23 @@ class CloserAgent(dspy.Module):
             attempt_count=str(attempt_count),
         )
 
+        # Safe attribute access — GLM-5 sometimes returns malformed types
+        def safe_str(val, default="") -> str:
+            if val is None:
+                return default
+            if isinstance(val, str):
+                return val
+            return str(val)
+
         # Parse datetime if meeting was scheduled
-        meeting_datetime = self._parse_datetime(result.meeting_datetime)
+        meeting_datetime = self._parse_datetime(safe_str(result.meeting_datetime, "null"))
 
         # Determine if should continue
-        should_continue = result.should_continue.lower().strip() == "true"
+        should_continue = safe_str(result.should_continue, "true").lower().strip() == "true"
 
         # Validate stage
         valid_stages = ["greeting", "pitching", "proposing_time", "confirming", "scheduled", "lost"]
-        stage = result.conversation_stage.lower().strip()
+        stage = safe_str(result.conversation_stage, "pitching").lower().strip()
         if stage not in valid_stages:
             stage = "pitching"  # Safe default
 
@@ -140,10 +148,10 @@ class CloserAgent(dspy.Module):
             should_continue = False
 
         # Get response message (may contain multiple messages)
-        response_message = result.response_message.strip()
+        response_message = safe_str(result.response_message, "Podemos continuar?").strip()
 
         return {
-            "reasoning": result.reasoning,
+            "reasoning": safe_str(result.reasoning, ""),
             "response_message": response_message,
             "conversation_stage": stage,
             "meeting_datetime": meeting_datetime,
