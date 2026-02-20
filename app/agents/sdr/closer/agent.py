@@ -133,12 +133,18 @@ class CloserAgent(dspy.Module):
 
         # 1b. If scheduled but latest_message is a counter-proposal question about time,
         #     downgrade to confirming. Ignore logistic questions (link, endereço, etc.)
-        if stage == "scheduled" and latest_message and "?" in latest_message:
+        if stage == "scheduled" and latest_message:
             msg_lower = latest_message.lower()
-            time_keywords = ["não dá", "pode ser", "melhor", "prefiro", "trocar", "mudar",
-                             "outro horário", "outro dia", "remarcar", "adiar", "seria"]
-            is_counter_proposal = any(kw in msg_lower for kw in time_keywords)
-            if is_counter_proposal:
+            # Keywords that indicate reschedule/cancel (NOT a confirmation)
+            reschedule_keywords = ["não dá", "trocar", "mudar", "muda",
+                                   "outro horário", "outro dia", "remarcar", "adiar",
+                                   "reagendar", "cancelar", "cancela", "imprevisto"]
+            # Confirmation words that override reschedule detection
+            confirm_words = ["ótimo", "combinado", "perfeito", "fechado", "até lá",
+                             "até amanhã", "tá ótimo", "tá bom"]
+            has_reschedule = any(kw in msg_lower for kw in reschedule_keywords)
+            has_confirm = any(cw in msg_lower for cw in confirm_words)
+            if has_reschedule and not has_confirm:
                 stage = "confirming"
                 meeting_datetime = None
 

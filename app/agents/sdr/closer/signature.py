@@ -96,6 +96,9 @@ class CloserSignature(dspy.Signature):
         * CUIDADO: aceite com condição NÃO é scheduled! Ainda é confirming!
       - Gestor pede CONFIRMAÇÃO: "então seria dia 25 às 15h? Confirma pra mim"
       - Gestor pede REAGENDAMENTO de algo já combinado: "surgiu imprevisto, pode mudar?"
+      - Gestor pede CANCELAMENTO pela 1ª vez: "preciso cancelar a reunião"
+        * REGRA: tente salvar 1x! "Entendo, mas já reservei o horário. Podemos remarcar?"
+        * Só aceite cancelamento (lost) se gestor INSISTIR pela 2ª vez
       - Gestor aceita mas em tom PARCIAL (não é confirmação definitiva ainda)
 
       IMPORTANTE: confirming SÓ é atingido APÓS o agente já ter proposto horário específico.
@@ -123,6 +126,7 @@ class CloserSignature(dspy.Signature):
       - Gestor rejeitou PELA SEGUNDA VEZ ou mais: "já disse que não"
       - Gestor pediu para parar: "para de mandar mensagem", "vou bloquear"
       - Gestor pediu para não entrar mais em contato
+      - Gestor INSISTIU em cancelar após tentativa de salvar: "não, cancela mesmo"
       - attempt_count >= 5 E conversa NÃO progrediu para proposing_time ou adiante
 
       ⚠️ REGRA ABSOLUTA: Mesmo que gestor diga "não tenho interesse", "não quero" ou similar,
@@ -166,6 +170,10 @@ class CloserSignature(dspy.Signature):
     CASO: "Mas como exatamente vocês fazem isso?" (após CTA "Faria sentido batermos um papo?")
     → É pitching! Gestor IGNOROU o CTA e fez pergunta sobre produto. Continue o pitch.
     → Só é proposing_time se gestor usar palavra de ACEITAÇÃO ("pode sim", "vamos lá", "claro").
+
+    CASO: "Preciso cancelar a reunião de amanhã" (após ter confirmado)
+    → É confirming! Tente salvar 1x: "Entendo, mas já reservei o horário. Podemos remarcar?"
+    → Só se gestor insistir ("não, cancela mesmo") → aí é lost.
 
     === TRATANDO OBJEÇÕES (TAXONOMIA) ===
 

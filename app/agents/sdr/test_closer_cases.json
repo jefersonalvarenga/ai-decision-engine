@@ -7,7 +7,8 @@
     "clinic_specialty": "estética",
     "conversation_history": [],
     "latest_message": null,
-    "expected_stage": "greeting"
+    "expected_stage": "greeting",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor responde saudação",
@@ -26,7 +27,8 @@
       }
     ],
     "latest_message": "Tudo bem e você?",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor aceita conversar rapidamente",
@@ -45,7 +47,8 @@
       }
     ],
     "latest_message": "Pode sim",
-    "expected_stage": "proposing_time"
+    "expected_stage": "proposing_time",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor ocupado pede objetividade",
@@ -64,7 +67,8 @@
       }
     ],
     "latest_message": "Pode falar rápido, estou corrido.",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor pergunta do que se trata",
@@ -83,7 +87,8 @@
       }
     ],
     "latest_message": "Sobre o que exatamente?",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor desconfiado",
@@ -102,7 +107,8 @@
       }
     ],
     "latest_message": "Isso é marketing? Não gosto dessas coisas.",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor pede prova social",
@@ -121,7 +127,8 @@
       }
     ],
     "latest_message": "Vocês já trabalham com quais clínicas?",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor pede valores direto",
@@ -140,7 +147,8 @@
       }
     ],
     "latest_message": "Quanto custa?",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor quer material antes",
@@ -159,7 +167,8 @@
       }
     ],
     "latest_message": "Me manda material primeiro.",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor pede para falar com sócio",
@@ -178,7 +187,8 @@
       }
     ],
     "latest_message": "Preciso ver com meu sócio antes.",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor rejeita diretamente",
@@ -197,7 +207,8 @@
       }
     ],
     "latest_message": "Não tenho interesse.",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor aceita e pede agenda",
@@ -216,7 +227,8 @@
       }
     ],
     "latest_message": "Sim, me manda horários.",
-    "expected_stage": "proposing_time"
+    "expected_stage": "proposing_time",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor responde curto",
@@ -235,7 +247,8 @@
       }
     ],
     "latest_message": "Sim",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor pede retorno depois",
@@ -254,7 +267,8 @@
       }
     ],
     "latest_message": "Agora não posso, fala comigo amanhã.",
-    "expected_stage": "proposing_time"
+    "expected_stage": "proposing_time",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor confirma horário proposto",
@@ -289,7 +303,10 @@
       }
     ],
     "latest_message": "Pode ser, 15h tá ótimo. Até amanhã!",
-    "expected_stage": "scheduled"
+    "expected_stage": "scheduled",
+    "expected_meeting_confirmed": true,
+    "expected_should_continue": false,
+    "expected_datetime_format": "iso"
   },
   {
     "name": "Gestor contrapropõe horário",
@@ -324,7 +341,8 @@
       }
     ],
     "latest_message": "10h não dá, pode ser às 14h?",
-    "expected_stage": "confirming"
+    "expected_stage": "confirming",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor ignora CTA e faz nova pergunta",
@@ -347,7 +365,8 @@
       }
     ],
     "latest_message": "Mas como exatamente vocês fazem isso?",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor demonstra interesse mas adia",
@@ -370,7 +389,8 @@
       }
     ],
     "latest_message": "Parece interessante, mas agora não é um bom momento. Me procura semana que vem.",
-    "expected_stage": "proposing_time"
+    "expected_stage": "proposing_time",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor pede para ligar",
@@ -393,7 +413,8 @@
       }
     ],
     "latest_message": "Não gosto de conversa por texto. Me liga no fixo da clínica.",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor responde fora do contexto",
@@ -412,7 +433,8 @@
       }
     ],
     "latest_message": "Quem passou meu número?",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor já conhece a EasyScale",
@@ -431,7 +453,8 @@
       }
     ],
     "latest_message": "Ah sim, EasyScale! Já ouvi falar de vocês. O que mudou?",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Conversa longa que não evolui - 5 tentativas",
@@ -478,7 +501,9 @@
       }
     ],
     "latest_message": "Não, obrigada. Não tenho interesse.",
-    "expected_stage": "lost"
+    "expected_stage": "lost",
+    "expected_should_continue": false,
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor confirma mas pede reagendamento",
@@ -517,7 +542,8 @@
       }
     ],
     "latest_message": "Opa, surgiu um imprevisto. Tem como mudar pra quinta?",
-    "expected_stage": "confirming"
+    "expected_stage": "confirming",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Slots vazios - gestor aceita mas sem horários",
@@ -541,7 +567,8 @@
     ],
     "latest_message": "Pode sim, quando você tem disponível?",
     "expected_stage": "pitching",
-    "available_slots_override": []
+    "available_slots_override": [],
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor aceita com condição",
@@ -572,7 +599,8 @@
       }
     ],
     "latest_message": "Pode ser às 14h, mas no máximo 15 minutos ok?",
-    "expected_stage": "confirming"
+    "expected_stage": "confirming",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor pede confirmação do horário",
@@ -603,7 +631,8 @@
       }
     ],
     "latest_message": "Terça às 15h? Então seria dia 25? Confirma pra mim.",
-    "expected_stage": "confirming"
+    "expected_stage": "confirming",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor rejeita com bloqueio definitivo",
@@ -634,7 +663,9 @@
       }
     ],
     "latest_message": "Já disse que não. Para de mandar mensagem. Vou bloquear.",
-    "expected_stage": "lost"
+    "expected_stage": "lost",
+    "expected_should_continue": false,
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor responde com indicativo de áudio",
@@ -653,7 +684,8 @@
       }
     ],
     "latest_message": "[audio]",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Múltiplas objeções superadas até aceite",
@@ -692,7 +724,8 @@
       }
     ],
     "latest_message": "Tá, pode ser. Quando você pode?",
-    "expected_stage": "proposing_time"
+    "expected_stage": "proposing_time",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Confirmação explícita com data e hora",
@@ -723,7 +756,10 @@
       }
     ],
     "latest_message": "Quarta às 10h está perfeito. Combinado!",
-    "expected_stage": "scheduled"
+    "expected_stage": "scheduled",
+    "expected_meeting_confirmed": true,
+    "expected_should_continue": false,
+    "expected_datetime_format": "iso"
   },
   {
     "name": "Gestor desconfiado - quem indicou",
@@ -742,7 +778,8 @@
       }
     ],
     "latest_message": "Como conseguiu meu número? Quem te indicou?",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Primeira rejeição suave - não deve ser lost",
@@ -765,7 +802,8 @@
       }
     ],
     "latest_message": "Não tenho interesse no momento.",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor aceita entusiasmado",
@@ -784,7 +822,8 @@
       }
     ],
     "latest_message": "Olá, Lucas! Que ótimo saber! Sim, fico feliz em conversar. Como a EasyScale pode ajudar exatamente? Estou super interessado!",
-    "expected_stage": "proposing_time"
+    "expected_stage": "proposing_time",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor responde depois de dias",
@@ -803,7 +842,8 @@
       }
     ],
     "latest_message": "Oi Paula, peça desculpas pelo atraso na resposta. Estive em uma conferência médica. Sim, fico em aberto para ouvir mais sobre a solução.",
-    "expected_stage": "proposing_time"
+    "expected_stage": "proposing_time",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor confunde com spam",
@@ -822,7 +862,8 @@
       }
     ],
     "latest_message": "Ricardo, você pode me dizer de onde obteve meu contato? Parece mais uma mensagem de marketing genérico. Não costumo responder a esse tipo de abordagem.",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor delega para secretária",
@@ -841,7 +882,8 @@
       }
     ],
     "latest_message": "Bom dia, Felipe. Não posso atender agora. Por favor, fale com minha secretária, a Patrícia. Ela gerencia toda a parte de agenda e pode avaliar por mim. Pode passar o contato?",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor pede desconto",
@@ -860,7 +902,8 @@
       }
     ],
     "latest_message": "Oi Mariana, a proposta parece interessante, mas o orçamento da clínica é apertado. Vocês têm algum plano especial para pequenas clínicas ou algum desconto?",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor menciona concorrente",
@@ -883,7 +926,8 @@
       }
     ],
     "latest_message": "Já utilizamos a ConciliAgenda e estamos satisfeitos. O que a EasyScale oferece de diferente?",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor aceita mas muda de horário depois",
@@ -914,7 +958,10 @@
       }
     ],
     "latest_message": "Na terça às 14h funciona. Pode me confirmar o link da reunião por favor?",
-    "expected_stage": "scheduled"
+    "expected_stage": "scheduled",
+    "expected_meeting_confirmed": true,
+    "expected_should_continue": false,
+    "expected_datetime_format": "iso"
   },
   {
     "name": "Gestor confirma por áudio",
@@ -933,7 +980,10 @@
       }
     ],
     "latest_message": "Isabela, bom dia. Quinta às 10h ótimo. Pode mandar o link? Prefiro conversar por áudio, estou mais à vontade.",
-    "expected_stage": "confirming"
+    "expected_stage": "scheduled",
+    "expected_meeting_confirmed": true,
+    "expected_should_continue": false,
+    "expected_datetime_format": "iso"
   },
   {
     "name": "Conversa bilíngue (PT/EN)",
@@ -952,7 +1002,8 @@
       }
     ],
     "latest_message": "Hi Jeferson! Yes, Im fine. We have many international patients here. What does EasyScale do exactly?",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor aceita mas sem horários disponíveis",
@@ -972,7 +1023,8 @@
     ],
     "latest_message": "Oi Vanessa, obrigada pelo contato. A proposta parece ótima. Posso marcar? Meu calendário está super chegado esta semana, vejo se libero algo.",
     "expected_stage": "pitching",
-    "available_slots_override": []
+    "available_slots_override": [],
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor confirma com condição",
@@ -991,6 +1043,205 @@
       }
     ],
     "latest_message": "A quarta às 16h funciona, mas só se a demonstração for rápida. Tenho uma cirurgia às 17h.",
-    "expected_stage": "confirming"
+    "expected_stage": "confirming",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor pede data natural - terça à tarde",
+    "manager_name": "Dr. Flávio",
+    "manager_phone": "11955554444",
+    "clinic_name": "OdontoSmile",
+    "clinic_specialty": "odonto",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Flávio, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Tudo certo."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de odonto a duplicar faturamento. Faria sentido batermos um papo?"
+      },
+      {
+        "role": "human",
+        "content": "Pode sim, mas só consigo na parte da tarde."
+      }
+    ],
+    "latest_message": "Pode sim, mas só consigo na parte da tarde.",
+    "expected_stage": "proposing_time",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor pede amanhã de manhã",
+    "manager_name": "Dra. Beatriz",
+    "manager_phone": "11944443333",
+    "clinic_name": "Clínica Pele Viva",
+    "clinic_specialty": "dermatologia",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dra. Beatriz, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Oi, tudo."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de dermatologia a dobrar faturamento. Podemos conversar?"
+      },
+      {
+        "role": "human",
+        "content": "Pode ser amanhã de manhã, tenho um horário livre entre 9 e 11h."
+      }
+    ],
+    "latest_message": "Pode ser amanhã de manhã, tenho um horário livre entre 9 e 11h.",
+    "expected_stage": "confirming",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor cancela reunião - 1ª vez (tentar salvar)",
+    "manager_name": "Dr. Thiago",
+    "manager_phone": "11933332222",
+    "clinic_name": "Visão Total",
+    "clinic_specialty": "oftalmologia",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Thiago, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Tudo bem."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de oftalmologia a duplicar faturamento. Podemos bater um papo?"
+      },
+      {
+        "role": "human",
+        "content": "Vamos sim."
+      },
+      {
+        "role": "agent",
+        "content": "Amanhã às 14h funciona? São só 20 minutinhos."
+      },
+      {
+        "role": "human",
+        "content": "Combinado, amanhã às 14h."
+      },
+      {
+        "role": "agent",
+        "content": "Perfeito! Até amanhã às 14h, Dr. Thiago!"
+      }
+    ],
+    "latest_message": "Olha, surgiu um imprevisto. Preciso cancelar a reunião de amanhã.",
+    "expected_stage": "confirming",
+    "expected_meeting_confirmed": false,
+    "expected_should_continue": true
+  },
+  {
+    "name": "Gestor insiste em cancelar - 2ª vez (aceitar)",
+    "manager_name": "Dr. Thiago",
+    "manager_phone": "11933332222",
+    "clinic_name": "Visão Total",
+    "clinic_specialty": "oftalmologia",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Thiago, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Tudo bem."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de oftalmologia a duplicar faturamento. Podemos bater um papo?"
+      },
+      {
+        "role": "human",
+        "content": "Vamos sim."
+      },
+      {
+        "role": "agent",
+        "content": "Amanhã às 14h funciona? São só 20 minutinhos."
+      },
+      {
+        "role": "human",
+        "content": "Combinado, amanhã às 14h."
+      },
+      {
+        "role": "agent",
+        "content": "Perfeito! Até amanhã às 14h, Dr. Thiago!"
+      },
+      {
+        "role": "human",
+        "content": "Surgiu um imprevisto. Preciso cancelar a reunião."
+      },
+      {
+        "role": "agent",
+        "content": "Entendo, Dr. Thiago! Que tal remarcarmos? Tenho horários na quinta e sexta."
+      }
+    ],
+    "latest_message": "Não, por enquanto não vai dar mesmo. Cancela.",
+    "expected_stage": "lost",
+    "expected_meeting_confirmed": false,
+    "expected_should_continue": false
+  },
+  {
+    "name": "Gestor pede reagendamento com data específica",
+    "manager_name": "Dra. Camila",
+    "manager_phone": "11922221111",
+    "clinic_name": "Ortoclin",
+    "clinic_specialty": "ortopedia",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dra. Camila, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Oi, tudo certo."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de ortopedia a aumentar faturamento. Podemos conversar?"
+      },
+      {
+        "role": "human",
+        "content": "Pode sim."
+      },
+      {
+        "role": "agent",
+        "content": "Terça às 10h funciona?"
+      },
+      {
+        "role": "human",
+        "content": "Combinado!"
+      },
+      {
+        "role": "agent",
+        "content": "Perfeito, até terça às 10h!"
+      }
+    ],
+    "latest_message": "Jeferson, muda a reunião pra quinta às 15h por favor. Terça não vai dar mais.",
+    "expected_stage": "confirming",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Greeting com current_hour=20 (boa noite)",
+    "manager_name": "Dr. André",
+    "manager_phone": "11911110000",
+    "clinic_name": "PetCare Veterinária",
+    "clinic_specialty": "veterinária",
+    "conversation_history": [],
+    "latest_message": null,
+    "expected_stage": "greeting",
+    "expected_meeting_confirmed": false,
+    "current_hour_override": 20
   }
 ]
