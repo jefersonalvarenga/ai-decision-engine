@@ -116,9 +116,28 @@ class CloserAgent(dspy.Module):
         if stage not in valid_stages:
             stage = "pitching"  # Safe default
 
-        # If we have a confirmed datetime, stage should be scheduled
-        if meeting_datetime and stage not in ["scheduled", "lost"]:
+        # --- SMART FALLBACKS (mirroring gatekeeper patterns) ---
+
+        # 1. If datetime extracted, force scheduled (but respect confirming)
+        if meeting_datetime and stage not in ["scheduled", "confirming", "lost"]:
             stage = "scheduled"
+
+        # 2. If scheduled but no datetime, downgrade to confirming
+        if stage == "scheduled" and not meeting_datetime:
+            stage = "confirming"
+
+        # 3. Can't propose time without available slots
+        if stage == "proposing_time" and not available_slots:
+            stage = "pitching"
+
+        # 4. Force lost if 5+ attempts without progress
+        if attempt_count >= 5 and stage in ["greeting", "pitching"]:
+            stage = "lost"
+            should_continue = False
+
+        # 5. Terminal stages always stop
+        if stage in ["scheduled", "lost"]:
+            should_continue = False
 
         # Get response message (may contain multiple messages)
         response_message = result.response_message.strip()

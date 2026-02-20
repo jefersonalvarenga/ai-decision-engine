@@ -212,8 +212,8 @@ def run_closer_test(scenario: Dict, verbose: bool = True):
         if t["role"] == "agent"
     ])
 
-    # Gera slots disponíveis
-    available_slots = get_available_slots()
+    # Gera slots disponíveis (permite override do cenário para testar edge cases)
+    available_slots = scenario.get("available_slots_override", get_available_slots())
 
     # Invoca o grafo
     result = closer_graph.invoke({
