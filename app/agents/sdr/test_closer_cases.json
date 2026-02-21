@@ -7,7 +7,8 @@
     "clinic_specialty": "estética",
     "conversation_history": [],
     "latest_message": null,
-    "expected_stage": "greeting"
+    "expected_stage": "greeting",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor responde saudação",
@@ -26,7 +27,8 @@
       }
     ],
     "latest_message": "Tudo bem e você?",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor aceita conversar rapidamente",
@@ -45,7 +47,8 @@
       }
     ],
     "latest_message": "Pode sim",
-    "expected_stage": "proposing_time"
+    "expected_stage": "proposing_time",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor ocupado pede objetividade",
@@ -64,7 +67,8 @@
       }
     ],
     "latest_message": "Pode falar rápido, estou corrido.",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor pergunta do que se trata",
@@ -83,7 +87,8 @@
       }
     ],
     "latest_message": "Sobre o que exatamente?",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor desconfiado",
@@ -102,7 +107,8 @@
       }
     ],
     "latest_message": "Isso é marketing? Não gosto dessas coisas.",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor pede prova social",
@@ -121,7 +127,8 @@
       }
     ],
     "latest_message": "Vocês já trabalham com quais clínicas?",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor pede valores direto",
@@ -140,7 +147,8 @@
       }
     ],
     "latest_message": "Quanto custa?",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor quer material antes",
@@ -159,7 +167,8 @@
       }
     ],
     "latest_message": "Me manda material primeiro.",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor pede para falar com sócio",
@@ -178,7 +187,8 @@
       }
     ],
     "latest_message": "Preciso ver com meu sócio antes.",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor rejeita diretamente",
@@ -197,7 +207,8 @@
       }
     ],
     "latest_message": "Não tenho interesse.",
-    "expected_stage": "lost"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor aceita e pede agenda",
@@ -216,7 +227,8 @@
       }
     ],
     "latest_message": "Sim, me manda horários.",
-    "expected_stage": "proposing_time"
+    "expected_stage": "proposing_time",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor responde curto",
@@ -235,7 +247,8 @@
       }
     ],
     "latest_message": "Sim",
-    "expected_stage": "pitching"
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
   },
   {
     "name": "Gestor pede retorno depois",
@@ -254,6 +267,981 @@
       }
     ],
     "latest_message": "Agora não posso, fala comigo amanhã.",
-    "expected_stage": "pitching"
+    "expected_stage": "proposing_time",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor confirma horário proposto",
+    "manager_name": "Dr. Marcos",
+    "manager_phone": "11988887766",
+    "clinic_name": "OdontoVida",
+    "clinic_specialty": "odonto",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Boa tarde Dr. Marcos, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Oi, tudo bem. Em que posso ajudar?"
+      },
+      {
+        "role": "agent",
+        "content": "Nossa empresa ajuda clínicas de odonto a duplicarem o faturamento dando ferramentas de tecnologia para a equipe de atendimento. Faria sentido batermos um papo?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, podemos conversar."
+      },
+      {
+        "role": "agent",
+        "content": "Ótimo! Amanhã às 15h seria um bom horário? São só 20 minutinhos."
+      },
+      {
+        "role": "human",
+        "content": "Pode ser, 15h tá ótimo. Até amanhã!"
+      }
+    ],
+    "latest_message": "Pode ser, 15h tá ótimo. Até amanhã!",
+    "expected_stage": "scheduled",
+    "expected_meeting_confirmed": true,
+    "expected_should_continue": false,
+    "expected_datetime_format": "iso"
+  },
+  {
+    "name": "Gestor contrapropõe horário",
+    "manager_name": "Dra. Lucia",
+    "manager_phone": "11977776655",
+    "clinic_name": "Estética Bela",
+    "clinic_specialty": "estética",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Boa tarde Dra. Lucia, aqui é Jeferson da EasyScale."
+      },
+      {
+        "role": "human",
+        "content": "Boa tarde."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de estética a duplicar faturamento com tecnologia. Podemos bater um papo?"
+      },
+      {
+        "role": "human",
+        "content": "Podemos marcar sim."
+      },
+      {
+        "role": "agent",
+        "content": "Que tal amanhã às 10h?"
+      },
+      {
+        "role": "human",
+        "content": "10h não dá, pode ser às 14h?"
+      }
+    ],
+    "latest_message": "10h não dá, pode ser às 14h?",
+    "expected_stage": "confirming",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor ignora CTA e faz nova pergunta",
+    "manager_name": "Dr. Rafael",
+    "manager_phone": "11966665544",
+    "clinic_name": "DermaCenter",
+    "clinic_specialty": "dermatologia",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Boa tarde Dr. Rafael, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Tudo bem."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de dermatologia a duplicar faturamento. Faria sentido batermos um papo?"
+      }
+    ],
+    "latest_message": "Mas como exatamente vocês fazem isso?",
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor demonstra interesse mas adia",
+    "manager_name": "Dr. Henrique",
+    "manager_phone": "11955554433",
+    "clinic_name": "OdontoPlus",
+    "clinic_specialty": "odonto",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Henrique, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Oi, tudo ótimo."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de odonto a duplicar faturamento. Faria sentido batermos um papo?"
+      }
+    ],
+    "latest_message": "Parece interessante, mas agora não é um bom momento. Me procura semana que vem.",
+    "expected_stage": "proposing_time",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor pede para ligar",
+    "manager_name": "Dr. Paulo",
+    "manager_phone": "11944443322",
+    "clinic_name": "Clínica Renova",
+    "clinic_specialty": "estética",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Boa tarde Dr. Paulo, aqui é Jeferson da EasyScale."
+      },
+      {
+        "role": "human",
+        "content": "Boa tarde."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de estética a dobrar o faturamento. Podemos conversar?"
+      }
+    ],
+    "latest_message": "Não gosto de conversa por texto. Me liga no fixo da clínica.",
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor responde fora do contexto",
+    "manager_name": "Dra. Camila",
+    "manager_phone": "11933332211",
+    "clinic_name": "Saúde e Vida",
+    "clinic_specialty": "saúde",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Boa tarde Dra. Camila, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Quem passou meu número?"
+      }
+    ],
+    "latest_message": "Quem passou meu número?",
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor já conhece a EasyScale",
+    "manager_name": "Dr. Tiago",
+    "manager_phone": "11922221100",
+    "clinic_name": "OdontoCare",
+    "clinic_specialty": "odonto",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Tiago, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Ah sim, EasyScale! Já ouvi falar de vocês. O que mudou?"
+      }
+    ],
+    "latest_message": "Ah sim, EasyScale! Já ouvi falar de vocês. O que mudou?",
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Conversa longa que não evolui - 5 tentativas",
+    "manager_name": "Dra. Beatriz",
+    "manager_phone": "11911110099",
+    "clinic_name": "Clínica Bella Donna",
+    "clinic_specialty": "estética",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Boa tarde Dra. Beatriz, aqui é Jeferson da EasyScale."
+      },
+      {
+        "role": "human",
+        "content": "Oi, tudo bem?"
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de estética a dobrar faturamento. Faria sentido batermos um papo?"
+      },
+      {
+        "role": "human",
+        "content": "Agora não dá."
+      },
+      {
+        "role": "agent",
+        "content": "Entendo! Que tal amanhã às 15h? São só 20 minutinhos."
+      },
+      {
+        "role": "human",
+        "content": "Não, essa semana não."
+      },
+      {
+        "role": "agent",
+        "content": "Sem problemas. Semana que vem então? Segunda às 10h?"
+      },
+      {
+        "role": "human",
+        "content": "Olha, não sei se faz sentido."
+      },
+      {
+        "role": "agent",
+        "content": "Entendo. Sem compromisso, prometo ser breve. Posso ligar quinta?"
+      }
+    ],
+    "latest_message": "Não, obrigada. Não tenho interesse.",
+    "expected_stage": "lost",
+    "expected_should_continue": false,
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor confirma mas pede reagendamento",
+    "manager_name": "Dr. Fernando",
+    "manager_phone": "31998889999",
+    "clinic_name": "DermaVida",
+    "clinic_specialty": "dermatologia",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Fernando, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Oi, tudo bem."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas a dobrar faturamento com tecnologia. Podemos bater um papo?"
+      },
+      {
+        "role": "human",
+        "content": "Pode sim."
+      },
+      {
+        "role": "agent",
+        "content": "Amanhã às 10h funciona?"
+      },
+      {
+        "role": "human",
+        "content": "Combinado, amanhã às 10h."
+      },
+      {
+        "role": "agent",
+        "content": "Perfeito! Até amanhã às 10h!"
+      }
+    ],
+    "latest_message": "Opa, surgiu um imprevisto. Tem como mudar pra quinta?",
+    "expected_stage": "confirming",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Slots vazios - gestor aceita mas sem horários",
+    "manager_name": "Dra. Patrícia",
+    "manager_phone": "11988887777",
+    "clinic_name": "Clínica Vitalis",
+    "clinic_specialty": "estética",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Boa tarde Dra. Patrícia, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Oi, tudo."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de estética a duplicar faturamento. Faria sentido batermos um papo?"
+      }
+    ],
+    "latest_message": "Pode sim, quando você tem disponível?",
+    "expected_stage": "pitching",
+    "available_slots_override": [],
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor aceita com condição",
+    "manager_name": "Dr. Sérgio",
+    "manager_phone": "11977776666",
+    "clinic_name": "OdontoMax",
+    "clinic_specialty": "odonto",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Sérgio, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Oi, tudo certo."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de odonto a dobrar faturamento. Podemos bater um papo?"
+      },
+      {
+        "role": "human",
+        "content": "Podemos conversar sim."
+      },
+      {
+        "role": "agent",
+        "content": "Ótimo! Quinta às 14h funciona?"
+      }
+    ],
+    "latest_message": "Pode ser às 14h, mas no máximo 15 minutos ok?",
+    "expected_stage": "confirming",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor pede confirmação do horário",
+    "manager_name": "Dra. Renata",
+    "manager_phone": "11966665555",
+    "clinic_name": "Estética Prime",
+    "clinic_specialty": "estética",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dra. Renata, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Oi, tudo bem."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de estética a dobrar faturamento. Podemos conversar?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, estou interessada."
+      },
+      {
+        "role": "agent",
+        "content": "Terça às 15h funciona pra você?"
+      }
+    ],
+    "latest_message": "Terça às 15h? Então seria dia 25? Confirma pra mim.",
+    "expected_stage": "confirming",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor rejeita com bloqueio definitivo",
+    "manager_name": "Dr. Augusto",
+    "manager_phone": "11955554444",
+    "clinic_name": "Clínica Moderna",
+    "clinic_specialty": "estética",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Augusto, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Quem?"
+      },
+      {
+        "role": "agent",
+        "content": "Sou Jeferson da EasyScale, ajudamos clínicas a dobrar faturamento. Posso explicar rapidamente?"
+      },
+      {
+        "role": "human",
+        "content": "Não tenho interesse nenhum."
+      },
+      {
+        "role": "agent",
+        "content": "Entendo! Sem compromisso, são só 20 minutinhos. Posso te ligar amanhã?"
+      }
+    ],
+    "latest_message": "Já disse que não. Para de mandar mensagem. Vou bloquear.",
+    "expected_stage": "lost",
+    "expected_should_continue": false,
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor responde com indicativo de áudio",
+    "manager_name": "Dr. Leonardo",
+    "manager_phone": "11944443333",
+    "clinic_name": "OdontoSmart",
+    "clinic_specialty": "odonto",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Leonardo, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "[audio]"
+      }
+    ],
+    "latest_message": "[audio]",
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Múltiplas objeções superadas até aceite",
+    "manager_name": "Dra. Sandra",
+    "manager_phone": "21996665544",
+    "clinic_name": "Clínica Renascer",
+    "clinic_specialty": "estética",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Boa tarde Dra. Sandra, aqui é Jeferson da EasyScale."
+      },
+      {
+        "role": "human",
+        "content": "Oi, do que se trata?"
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de estética a dobrar faturamento com tecnologia pro atendimento."
+      },
+      {
+        "role": "human",
+        "content": "Já tenho sistema."
+      },
+      {
+        "role": "agent",
+        "content": "Entendo! Muitos clientes nossos também tinham. Posso mostrar o diferencial em uma call rápida?"
+      },
+      {
+        "role": "human",
+        "content": "Quanto custa?"
+      },
+      {
+        "role": "agent",
+        "content": "O investimento varia conforme o tamanho da clínica. Na call eu mostro as opções e o ROI esperado."
+      }
+    ],
+    "latest_message": "Tá, pode ser. Quando você pode?",
+    "expected_stage": "proposing_time",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Confirmação explícita com data e hora",
+    "manager_name": "Dr. Vinícius",
+    "manager_phone": "47994443322",
+    "clinic_name": "OdontoVip",
+    "clinic_specialty": "odonto",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Vinícius, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Oi, tudo bem."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de odonto a dobrar faturamento. Podemos bater um papo?"
+      },
+      {
+        "role": "human",
+        "content": "Pode sim."
+      },
+      {
+        "role": "agent",
+        "content": "Quarta às 10h funciona? São só 20 minutinhos."
+      }
+    ],
+    "latest_message": "Quarta às 10h está perfeito. Combinado!",
+    "expected_stage": "scheduled",
+    "expected_meeting_confirmed": true,
+    "expected_should_continue": false,
+    "expected_datetime_format": "iso"
+  },
+  {
+    "name": "Gestor desconfiado - quem indicou",
+    "manager_name": "Dra. Mariana",
+    "manager_phone": "11995554433",
+    "clinic_name": "Clínica Harmonia",
+    "clinic_specialty": "estética",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Boa tarde Dra. Mariana, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Como conseguiu meu número? Quem te indicou?"
+      }
+    ],
+    "latest_message": "Como conseguiu meu número? Quem te indicou?",
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Primeira rejeição suave - não deve ser lost",
+    "manager_name": "Dr. Bruno",
+    "manager_phone": "21992221100",
+    "clinic_name": "DermaPlus",
+    "clinic_specialty": "dermatologia",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Bruno, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Oi."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de dermatologia a dobrar faturamento. Faria sentido batermos um papo?"
+      }
+    ],
+    "latest_message": "Não tenho interesse no momento.",
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor aceita entusiasmado",
+    "manager_name": "Dr. Ana Costa",
+    "manager_phone": "11988888888",
+    "clinic_name": "Clínica Saúde Integrada",
+    "clinic_specialty": "Medicina Integrativa",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Olá, Dr. Ana! Meu nome é Lucas e sou da EasyScale. Vi o excelente trabalho da Clínica Saúde Integrada e acredito que podemos ajudar a otimizar ainda mais a gestão de agendas. Teria 5 minutos para uma breve conversa esta semana?"
+      },
+      {
+        "role": "human",
+        "content": "Olá, Lucas! Que ótimo saber! Sim, fico feliz em conversar. Como a EasyScale pode ajudar exatamente? Estou super interessado!"
+      }
+    ],
+    "latest_message": "Olá, Lucas! Que ótimo saber! Sim, fico feliz em conversar. Como a EasyScale pode ajudar exatamente? Estou super interessado!",
+    "expected_stage": "proposing_time",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor responde depois de dias",
+    "manager_name": "Dr. Carlos Mendes",
+    "manager_phone": "11777777777",
+    "clinic_name": "Clínica Ortopédia Avançada",
+    "clinic_specialty": "Ortopedia",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Prezado Dr. Carlos, sou a Paula, da EasyScale. Vi a Clínica Ortopédia Avançada e gostaria de apresentar uma solução que pode reduzir o tempo de agendamento em 30%. Poderia me retornar quando tiver um momento?"
+      },
+      {
+        "role": "human",
+        "content": "Oi Paula, peça desculpas pelo atraso na resposta. Estive em uma conferência médica. Sim, fico em aberto para ouvir mais sobre a solução."
+      }
+    ],
+    "latest_message": "Oi Paula, peça desculpas pelo atraso na resposta. Estive em uma conferência médica. Sim, fico em aberto para ouvir mais sobre a solução.",
+    "expected_stage": "proposing_time",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor confunde com spam",
+    "manager_name": "Dr. Marina Silva",
+    "manager_phone": "11666666666",
+    "clinic_name": "Dra. Marina - Odontologia Estética",
+    "clinic_specialty": "Odontologia",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Olá, Dra. Marina! Meu nome é Ricardo e trabalho na EasyScale. Estamos desenvolvendo uma ferramenta de gestão para clínicas e gostaríamos de saber se você teria interesse em uma demonstração."
+      },
+      {
+        "role": "human",
+        "content": "Ricardo, você pode me dizer de onde obteve meu contato? Parece mais uma mensagem de marketing genérico. Não costumo responder a esse tipo de abordagem."
+      }
+    ],
+    "latest_message": "Ricardo, você pode me dizer de onde obteve meu contato? Parece mais uma mensagem de marketing genérico. Não costumo responder a esse tipo de abordagem.",
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor delega para secretária",
+    "manager_name": "Dr. Bruno Ferreira",
+    "manager_phone": "11555555555",
+    "clinic_name": "Clínica Cardiológica do Centro",
+    "clinic_specialty": "Cardiologia",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, Dr. Bruno! Sou o Felipe da EasyScale. Tenho uma proposta que pode otimizar a agenda da sua clínica. Poderia me passar um momento?"
+      },
+      {
+        "role": "human",
+        "content": "Bom dia, Felipe. Não posso atender agora. Por favor, fale com minha secretária, a Patrícia. Ela gerencia toda a parte de agenda e pode avaliar por mim. Pode passar o contato?"
+      }
+    ],
+    "latest_message": "Bom dia, Felipe. Não posso atender agora. Por favor, fale com minha secretária, a Patrícia. Ela gerencia toda a parte de agenda e pode avaliar por mim. Pode passar o contato?",
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor pede desconto",
+    "manager_name": "Dr. Sofia Almeida",
+    "manager_phone": "11444444444",
+    "clinic_name": "Clín Pediátrica Pequenos Príncipes",
+    "clinic_specialty": "Pediatria",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Olá, Dra. Sofia! Meu nome é Mariana e sou da EasyScale. Vi a Clínica Pequenos Príncipes e acredito que podemos ajudar a reduzir o no-show. Gostaria de agendar uma breve apresentação?"
+      },
+      {
+        "role": "human",
+        "content": "Oi Mariana, a proposta parece interessante, mas o orçamento da clínica é apertado. Vocês têm algum plano especial para pequenas clínicas ou algum desconto?"
+      }
+    ],
+    "latest_message": "Oi Mariana, a proposta parece interessante, mas o orçamento da clínica é apertado. Vocês têm algum plano especial para pequenas clínicas ou algum desconto?",
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor menciona concorrente",
+    "manager_name": "Dr. Ricardo",
+    "manager_phone": "11333333333",
+    "clinic_name": "Clínica Fisioterapia & Performance",
+    "clinic_specialty": "Fisioterapia",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Ricardo, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Bom dia."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de fisioterapia a melhorar retenção de pacientes. Faria sentido batermos um papo?"
+      }
+    ],
+    "latest_message": "Já utilizamos a ConciliAgenda e estamos satisfeitos. O que a EasyScale oferece de diferente?",
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor aceita mas muda de horário depois",
+    "manager_name": "Dra. Paula",
+    "manager_phone": "11222222222",
+    "clinic_name": "Clínica Dermatológica Capricho",
+    "clinic_specialty": "Dermatologia",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dra. Paula, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Bom dia, tudo certo."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de dermatologia a duplicar faturamento. Podemos bater um papo?"
+      },
+      {
+        "role": "human",
+        "content": "Pode sim, me fala mais."
+      },
+      {
+        "role": "agent",
+        "content": "Ótimo! Terça às 14h funciona pra você? São só 20 minutinhos."
+      }
+    ],
+    "latest_message": "Na terça às 14h funciona. Pode me confirmar o link da reunião por favor?",
+    "expected_stage": "scheduled",
+    "expected_meeting_confirmed": true,
+    "expected_should_continue": false,
+    "expected_datetime_format": "iso"
+  },
+  {
+    "name": "Gestor confirma por áudio",
+    "manager_name": "Dr. Eduardo Santos",
+    "manager_phone": "11111111111",
+    "clinic_name": "Clínica Oftalmológica Visão Clara",
+    "clinic_specialty": "Oftalmologia",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, Dr. Eduardo! Sou a Isabela da EasyScale. Vi a clínica e gostaria de agendar uma chamada para discutir otimização de agenda. Quinta-feira, às 10h, serve?"
+      },
+      {
+        "role": "human",
+        "content": "Isabela, bom dia. Quinta às 10h ótimo. Pode mandar o link? Prefiro conversar por áudio, estou mais à vontade."
+      }
+    ],
+    "latest_message": "Isabela, bom dia. Quinta às 10h ótimo. Pode mandar o link? Prefiro conversar por áudio, estou mais à vontade.",
+    "expected_stage": "scheduled",
+    "expected_meeting_confirmed": true,
+    "expected_should_continue": false,
+    "expected_datetime_format": "iso"
+  },
+  {
+    "name": "Conversa bilíngue (PT/EN)",
+    "manager_name": "Dr. Miguel",
+    "manager_phone": "11000000000",
+    "clinic_name": "International Health Clinic",
+    "clinic_specialty": "Medicina Geral",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Miguel, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Hi Jeferson! Yes, Im fine. We have many international patients here. What does EasyScale do exactly?"
+      }
+    ],
+    "latest_message": "Hi Jeferson! Yes, Im fine. We have many international patients here. What does EasyScale do exactly?",
+    "expected_stage": "pitching",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor aceita mas sem horários disponíveis",
+    "manager_name": "Dra. Carla Rocha",
+    "manager_phone": "19999999999",
+    "clinic_name": "Clínica de Nutrição Equilíbrio",
+    "clinic_specialty": "Nutrição",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Olá, Dra. Carla! Sou a Vanessa da EasyScale. Vi a Clínica de Nutrição Equilíbrio e gostaria de apresentar nossa solução de gestão. Teria 10 minutos esta semana?"
+      },
+      {
+        "role": "human",
+        "content": "Oi Vanessa, obrigada pelo contato. A proposta parece ótima. Posso marcar? Meu calendário está super chegado esta semana, vejo se libero algo."
+      }
+    ],
+    "latest_message": "Oi Vanessa, obrigada pelo contato. A proposta parece ótima. Posso marcar? Meu calendário está super chegado esta semana, vejo se libero algo.",
+    "expected_stage": "pitching",
+    "available_slots_override": [],
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor confirma com condição",
+    "manager_name": "Dr. Henrique Castro",
+    "manager_phone": "18888888888",
+    "clinic_name": "Clínica Veterinária Amigos de Quatro Patas",
+    "clinic_specialty": "Medicina Veterinária",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Henrique, aqui é Jeferson da EasyScale. Posso te mostrar uma solução na quarta, às 16h? São só 20 minutinhos."
+      },
+      {
+        "role": "human",
+        "content": "A quarta às 16h funciona, mas só se a demonstração for rápida. Tenho uma cirurgia às 17h."
+      }
+    ],
+    "latest_message": "A quarta às 16h funciona, mas só se a demonstração for rápida. Tenho uma cirurgia às 17h.",
+    "expected_stage": "confirming",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor pede data natural - terça à tarde",
+    "manager_name": "Dr. Flávio",
+    "manager_phone": "11955554444",
+    "clinic_name": "OdontoSmile",
+    "clinic_specialty": "odonto",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Flávio, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Tudo certo."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de odonto a duplicar faturamento. Faria sentido batermos um papo?"
+      },
+      {
+        "role": "human",
+        "content": "Pode sim, mas só consigo na parte da tarde."
+      }
+    ],
+    "latest_message": "Pode sim, mas só consigo na parte da tarde.",
+    "expected_stage": "proposing_time",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor pede amanhã de manhã",
+    "manager_name": "Dra. Beatriz",
+    "manager_phone": "11944443333",
+    "clinic_name": "Clínica Pele Viva",
+    "clinic_specialty": "dermatologia",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dra. Beatriz, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Oi, tudo."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de dermatologia a dobrar faturamento. Podemos conversar?"
+      },
+      {
+        "role": "human",
+        "content": "Pode ser amanhã de manhã, tenho um horário livre entre 9 e 11h."
+      }
+    ],
+    "latest_message": "Pode ser amanhã de manhã, tenho um horário livre entre 9 e 11h.",
+    "expected_stage": "confirming",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Gestor cancela reunião - 1ª vez (tentar salvar)",
+    "manager_name": "Dr. Thiago",
+    "manager_phone": "11933332222",
+    "clinic_name": "Visão Total",
+    "clinic_specialty": "oftalmologia",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Thiago, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Tudo bem."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de oftalmologia a duplicar faturamento. Podemos bater um papo?"
+      },
+      {
+        "role": "human",
+        "content": "Vamos sim."
+      },
+      {
+        "role": "agent",
+        "content": "Amanhã às 14h funciona? São só 20 minutinhos."
+      },
+      {
+        "role": "human",
+        "content": "Combinado, amanhã às 14h."
+      },
+      {
+        "role": "agent",
+        "content": "Perfeito! Até amanhã às 14h, Dr. Thiago!"
+      }
+    ],
+    "latest_message": "Olha, surgiu um imprevisto. Preciso cancelar a reunião de amanhã.",
+    "expected_stage": "confirming",
+    "expected_meeting_confirmed": false,
+    "expected_should_continue": true
+  },
+  {
+    "name": "Gestor insiste em cancelar - 2ª vez (aceitar)",
+    "manager_name": "Dr. Thiago",
+    "manager_phone": "11933332222",
+    "clinic_name": "Visão Total",
+    "clinic_specialty": "oftalmologia",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dr. Thiago, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Tudo bem."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de oftalmologia a duplicar faturamento. Podemos bater um papo?"
+      },
+      {
+        "role": "human",
+        "content": "Vamos sim."
+      },
+      {
+        "role": "agent",
+        "content": "Amanhã às 14h funciona? São só 20 minutinhos."
+      },
+      {
+        "role": "human",
+        "content": "Combinado, amanhã às 14h."
+      },
+      {
+        "role": "agent",
+        "content": "Perfeito! Até amanhã às 14h, Dr. Thiago!"
+      },
+      {
+        "role": "human",
+        "content": "Surgiu um imprevisto. Preciso cancelar a reunião."
+      },
+      {
+        "role": "agent",
+        "content": "Entendo, Dr. Thiago! Que tal remarcarmos? Tenho horários na quinta e sexta."
+      }
+    ],
+    "latest_message": "Não, por enquanto não vai dar mesmo. Cancela.",
+    "expected_stage": "lost",
+    "expected_meeting_confirmed": false,
+    "expected_should_continue": false
+  },
+  {
+    "name": "Gestor pede reagendamento com data específica",
+    "manager_name": "Dra. Camila",
+    "manager_phone": "11922221111",
+    "clinic_name": "Ortoclin",
+    "clinic_specialty": "ortopedia",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia Dra. Camila, aqui é Jeferson da EasyScale. Tudo bem?"
+      },
+      {
+        "role": "human",
+        "content": "Oi, tudo certo."
+      },
+      {
+        "role": "agent",
+        "content": "Ajudamos clínicas de ortopedia a aumentar faturamento. Podemos conversar?"
+      },
+      {
+        "role": "human",
+        "content": "Pode sim."
+      },
+      {
+        "role": "agent",
+        "content": "Terça às 10h funciona?"
+      },
+      {
+        "role": "human",
+        "content": "Combinado!"
+      },
+      {
+        "role": "agent",
+        "content": "Perfeito, até terça às 10h!"
+      }
+    ],
+    "latest_message": "Jeferson, muda a reunião pra quinta às 15h por favor. Terça não vai dar mais.",
+    "expected_stage": "confirming",
+    "expected_meeting_confirmed": false
+  },
+  {
+    "name": "Greeting com current_hour=20 (boa noite)",
+    "manager_name": "Dr. André",
+    "manager_phone": "11911110000",
+    "clinic_name": "PetCare Veterinária",
+    "clinic_specialty": "veterinária",
+    "conversation_history": [],
+    "latest_message": null,
+    "expected_stage": "greeting",
+    "expected_meeting_confirmed": false,
+    "current_hour_override": 20
   }
 ]

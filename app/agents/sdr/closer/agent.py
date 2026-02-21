@@ -104,27 +104,72 @@ class CloserAgent(dspy.Module):
             attempt_count=str(attempt_count),
         )
 
+        # Safe attribute access — GLM-5 sometimes returns malformed types
+        def safe_str(val, default="") -> str:
+            if val is None:
+                return default
+            if isinstance(val, str):
+                return val
+            return str(val)
+
         # Parse datetime if meeting was scheduled
-        meeting_datetime = self._parse_datetime(result.meeting_datetime)
+        meeting_datetime = self._parse_datetime(safe_str(result.meeting_datetime, "null"))
 
         # Determine if should continue
-        should_continue = result.should_continue.lower().strip() == "true"
+        should_continue = safe_str(result.should_continue, "true").lower().strip() == "true"
 
         # Validate stage
         valid_stages = ["greeting", "pitching", "proposing_time", "confirming", "scheduled", "lost"]
-        stage = result.conversation_stage.lower().strip()
+        stage = safe_str(result.conversation_stage, "pitching").lower().strip()
         if stage not in valid_stages:
             stage = "pitching"  # Safe default
 
-        # If we have a confirmed datetime, stage should be scheduled
-        if meeting_datetime and stage not in ["scheduled", "lost"]:
-            stage = "scheduled"
+        # --- SMART FALLBACKS (mirroring gatekeeper patterns) ---
+
+        # 1. If datetime extracted but LLM didn't classify as scheduled/confirming,
+        #    clear the datetime (LLM likely hallucinated it during pitch/propose)
+        if meeting_datetime and stage not in ["scheduled", "confirming"]:
+            meeting_datetime = None
+
+        # 1b. If scheduled but latest_message is a counter-proposal question about time,
+        #     downgrade to confirming. Ignore logistic questions (link, endereço, etc.)
+        if stage == "scheduled" and latest_message:
+            msg_lower = latest_message.lower()
+            # Keywords that indicate reschedule/cancel (NOT a confirmation)
+            reschedule_keywords = ["não dá", "trocar", "mudar", "muda",
+                                   "outro horário", "outro dia", "remarcar", "adiar",
+                                   "reagendar", "cancelar", "cancela", "imprevisto"]
+            # Confirmation words that override reschedule detection
+            confirm_words = ["ótimo", "combinado", "perfeito", "fechado", "até lá",
+                             "até amanhã", "tá ótimo", "tá bom"]
+            has_reschedule = any(kw in msg_lower for kw in reschedule_keywords)
+            has_confirm = any(cw in msg_lower for cw in confirm_words)
+            if has_reschedule and not has_confirm:
+                stage = "confirming"
+                meeting_datetime = None
+
+        # 2. If scheduled but no datetime, downgrade to confirming
+        if stage == "scheduled" and not meeting_datetime:
+            stage = "confirming"
+
+        # 3. Can't propose time without available slots
+        if stage == "proposing_time" and not available_slots:
+            stage = "pitching"
+
+        # 4. Force lost if 5+ attempts without progress
+        if attempt_count >= 5 and stage in ["greeting", "pitching"]:
+            stage = "lost"
+            should_continue = False
+
+        # 5. Terminal stages always stop
+        if stage in ["scheduled", "lost"]:
+            should_continue = False
 
         # Get response message (may contain multiple messages)
-        response_message = result.response_message.strip()
+        response_message = safe_str(result.response_message, "Podemos continuar?").strip()
 
         return {
-            "reasoning": result.reasoning,
+            "reasoning": safe_str(result.reasoning, ""),
             "response_message": response_message,
             "conversation_stage": stage,
             "meeting_datetime": meeting_datetime,

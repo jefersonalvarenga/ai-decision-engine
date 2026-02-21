@@ -212,8 +212,8 @@ def run_closer_test(scenario: Dict, verbose: bool = True):
         if t["role"] == "agent"
     ])
 
-    # Gera slots disponíveis
-    available_slots = get_available_slots()
+    # Gera slots disponíveis (permite override do cenário para testar edge cases)
+    available_slots = scenario.get("available_slots_override", get_available_slots())
 
     # Invoca o grafo
     result = closer_graph.invoke({
@@ -224,7 +224,7 @@ def run_closer_test(scenario: Dict, verbose: bool = True):
         "conversation_history": scenario.get("conversation_history", []),
         "latest_message": scenario.get("latest_message"),
         "available_slots": available_slots,
-        "current_hour": datetime.now().hour,
+        "current_hour": scenario.get("current_hour_override", datetime.now().hour),
         "attempt_count": attempt_count,
     })
 
@@ -484,11 +484,51 @@ def main():
                 result = run_closer_test(scenario)
                 expected = scenario.get("expected_stage")
                 actual = result["conversation_stage"]
-                if expected and actual == expected:
+                scenario_ok = True
+                fail_reasons = []
+
+                # Check 1: Stage classification
+                if expected and actual != expected:
+                    scenario_ok = False
+                    fail_reasons.append(f"stage: esperado={expected}, obtido={actual}")
+
+                # Check 2: meeting_confirmed (if annotated)
+                if "expected_meeting_confirmed" in scenario:
+                    if result.get("meeting_confirmed") != scenario["expected_meeting_confirmed"]:
+                        scenario_ok = False
+                        fail_reasons.append(
+                            f"meeting_confirmed: esperado={scenario['expected_meeting_confirmed']}, "
+                            f"obtido={result.get('meeting_confirmed')}"
+                        )
+
+                # Check 3: should_send_message (if annotated)
+                if "expected_should_continue" in scenario:
+                    if result.get("should_send_message") != scenario["expected_should_continue"]:
+                        scenario_ok = False
+                        fail_reasons.append(
+                            f"should_send_message: esperado={scenario['expected_should_continue']}, "
+                            f"obtido={result.get('should_send_message')}"
+                        )
+
+                # Check 4: meeting_datetime ISO format (if annotated)
+                if scenario.get("expected_datetime_format") == "iso":
+                    dt_val = result.get("meeting_datetime")
+                    if not dt_val:
+                        scenario_ok = False
+                        fail_reasons.append("meeting_datetime: esperado ISO, obtido=None")
+                    else:
+                        try:
+                            datetime.fromisoformat(dt_val)
+                        except (ValueError, TypeError):
+                            scenario_ok = False
+                            fail_reasons.append(f"meeting_datetime: formato inválido '{dt_val}'")
+
+                if scenario_ok:
                     c_passed += 1
-                elif expected:
+                else:
                     c_failed += 1
-                    failures.append(f"CLOSER | {scenario['name']} | esperado: {expected} | obtido: {actual}")
+                    reason_str = " | ".join(fail_reasons)
+                    failures.append(f"CLOSER | {scenario['name']} | {reason_str}")
             except Exception as e:
                 c_failed += 1
                 failures.append(f"CLOSER | {scenario['name']} | ERRO: {e}")
