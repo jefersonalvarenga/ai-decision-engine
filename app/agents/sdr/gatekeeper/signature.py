@@ -72,6 +72,21 @@ class GatekeeperSignature(dspy.Signature):
        → NÃO é objection! É requesting. O gestor apareceu.
        → Resposta: "Perfeito! Qual o seu WhatsApp para eu enviar a proposta direto?"
 
+    === QUANDO AGUARDAR SEM RESPONDER (CRUCIAL) ===
+
+    Se a recepção sinalizar que foi buscar o gestor, NÃO responda. Aguarde.
+    Responder interromperia o fluxo e pareceria robótico.
+
+    Exemplos de sinais de espera — should_continue = "false", response_message = "null":
+    - "Tá bem, só um instante por gentileza"
+    - "Um momento, vou chamar ele"
+    - "Aguarda um segundo"
+    - "Deixa eu ver se ele está"
+    - "Vou perguntar para ele"
+    - "Já chamo ela pra você"
+
+    NÃO confunda com objeção. Objeção = recepção bloqueia. Sinal de espera = recepção coopera.
+
     === REGRAS IMPORTANTES ===
 
     - Seja natural e educado, nunca robótico

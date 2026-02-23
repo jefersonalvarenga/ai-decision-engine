@@ -156,11 +156,11 @@ def run_gatekeeper_test(scenario: Dict, verbose: bool = True):
     if scenario.get("latest_message"):
         print(f"\nÚltima msg recebida: \"{scenario['latest_message']}\"")
 
-    # Conta tentativas
-    attempt_count = len([
+    # Conta tentativas (permite override para testar fallback de max attempts)
+    attempt_count = scenario.get("attempt_count_override", len([
         t for t in scenario.get("conversation_history", [])
         if t["role"] == "agent"
-    ])
+    ]))
 
     # Invoca o grafo
     result = gatekeeper_graph.invoke({
@@ -178,13 +178,6 @@ def run_gatekeeper_test(scenario: Dict, verbose: bool = True):
     print(f"   Nome extraído: {result.get('extracted_manager_name')}")
     print(f"   Enviar msg: {result['should_send_message']}")
     print(f"\n💭 Reasoning: {result['reasoning']}")
-
-    # Verifica expectativa
-    if scenario.get("expected_stage"):
-        expected = scenario["expected_stage"]
-        actual = result["conversation_stage"]
-        status = "✅" if actual == expected else "⚠️"
-        print(f"\n{status} Stage esperado: {expected}, obtido: {actual}")
 
     return result
 
@@ -206,11 +199,11 @@ def run_closer_test(scenario: Dict, verbose: bool = True):
     if scenario.get("latest_message"):
         print(f"\nÚltima msg recebida: \"{scenario['latest_message']}\"")
 
-    # Conta tentativas
-    attempt_count = len([
+    # Conta tentativas (permite override para testar fallback 4 — max attempts)
+    attempt_count = scenario.get("attempt_count_override", len([
         t for t in scenario.get("conversation_history", [])
         if t["role"] == "agent"
-    ])
+    ]))
 
     # Gera slots disponíveis (permite override do cenário para testar edge cases)
     available_slots = scenario.get("available_slots_override", get_available_slots())
@@ -453,13 +446,31 @@ def main():
         for scenario in GATEKEEPER_SCENARIOS:
             try:
                 result = run_gatekeeper_test(scenario)
+                scenario_ok = True
+                fail_reasons = []
+
+                # Check 1: Stage classification
                 expected = scenario.get("expected_stage")
                 actual = result["conversation_stage"]
-                if expected and actual == expected:
+                if expected and actual != expected:
+                    scenario_ok = False
+                    fail_reasons.append(f"stage: esperado={expected}, obtido={actual}")
+
+                # Check 2: should_send_message (if annotated)
+                if "expected_should_continue" in scenario:
+                    if result.get("should_send_message") != scenario["expected_should_continue"]:
+                        scenario_ok = False
+                        fail_reasons.append(
+                            f"should_send_message: esperado={scenario['expected_should_continue']}, "
+                            f"obtido={result.get('should_send_message')}"
+                        )
+
+                if scenario_ok:
                     g_passed += 1
-                elif expected:
+                else:
                     g_failed += 1
-                    failures.append(f"GATEKEEPER | {scenario['name']} | esperado: {expected} | obtido: {actual}")
+                    reason_str = " | ".join(fail_reasons)
+                    failures.append(f"GATEKEEPER | {scenario['name']} | {reason_str}")
             except Exception as e:
                 g_failed += 1
                 failures.append(f"GATEKEEPER | {scenario['name']} | ERRO: {e}")

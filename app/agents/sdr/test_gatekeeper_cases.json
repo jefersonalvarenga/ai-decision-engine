@@ -619,5 +619,81 @@
     ],
     "latest_message": "Ah tá, pode mandar mensagem pra ele no 11988887777.",
     "expected_stage": "success"
+  },
+  {
+    "name": "Recepção pede para aguardar — 'só um instante'",
+    "clinic_name": "Clínica Sofia",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Boa tarde! Gostaria de falar com o gestor da clínica."
+      },
+      {
+        "role": "human",
+        "content": "Sobre o que seria?"
+      },
+      {
+        "role": "agent",
+        "content": "Seria sobre assunto comercial."
+      },
+      {
+        "role": "human",
+        "content": "Tá bem, só um instante por gentileza"
+      }
+    ],
+    "latest_message": "Tá bem, só um instante por gentileza",
+    "expected_stage": "requesting",
+    "expected_should_continue": false
+  },
+  {
+    "name": "Recepção pede para aguardar — 'vou chamar ele'",
+    "clinic_name": "OdontoMax",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia! Gostaria de falar com o gestor."
+      },
+      {
+        "role": "human",
+        "content": "Um momento, vou chamar ele"
+      }
+    ],
+    "latest_message": "Um momento, vou chamar ele",
+    "expected_stage": "requesting",
+    "expected_should_continue": false
+  },
+  {
+    "name": "Recepção pede para aguardar — 'aguarda um segundo'",
+    "clinic_name": "Derma Clinic",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Boa tarde! Posso falar com o gestor?"
+      },
+      {
+        "role": "human",
+        "content": "Aguarda um segundo"
+      }
+    ],
+    "latest_message": "Aguarda um segundo",
+    "expected_stage": "requesting",
+    "expected_should_continue": false
+  },
+  {
+    "name": "response_message null — não deve enviar",
+    "clinic_name": "Clínica Alfa",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia! Gostaria de falar com o gestor."
+      },
+      {
+        "role": "human",
+        "content": "Deixa eu ver se ele está disponível"
+      }
+    ],
+    "latest_message": "Deixa eu ver se ele está disponível",
+    "expected_stage": "requesting",
+    "expected_should_continue": false
   }
 ]
