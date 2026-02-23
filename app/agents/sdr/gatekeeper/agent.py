@@ -95,20 +95,20 @@ class GatekeeperAgent(dspy.Module):
         Returns:
             dict with response_message, conversation_stage, extracted info, etc.
         """
-        # --- SMART FALLBACK 0: Wait signal — don't reply at all ---
+        # --- SMART FALLBACK 0: Wait signal — acknowledge briefly and hold ---
         # Reception said "só um instante" / "um momento" / "vou chamar" etc.
-        # Replying here would interrupt the flow. Hold and wait for next message.
+        # Reply with a short "Certo!" to confirm we're alive, then wait.
         if self._is_wait_signal(latest_message):
             return {
                 "reasoning": (
                     f"Reception signaled to wait: '{latest_message}'. "
-                    "Holding — no message sent until they return."
+                    "Sending short acknowledgment and holding for next message."
                 ),
-                "response_message": "",
+                "response_message": "Certo!",
                 "conversation_stage": "requesting",
                 "extracted_manager_contact": None,
                 "extracted_manager_name": None,
-                "should_send_message": False,
+                "should_send_message": True,
             }
 
         result = self.process(

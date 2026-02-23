@@ -643,7 +643,8 @@
     ],
     "latest_message": "Tá bem, só um instante por gentileza",
     "expected_stage": "requesting",
-    "expected_should_continue": false
+    "expected_should_continue": true,
+    "expected_response": "Certo!"
   },
   {
     "name": "Recepção pede para aguardar — 'vou chamar ele'",
@@ -660,7 +661,8 @@
     ],
     "latest_message": "Um momento, vou chamar ele",
     "expected_stage": "requesting",
-    "expected_should_continue": false
+    "expected_should_continue": true,
+    "expected_response": "Certo!"
   },
   {
     "name": "Recepção pede para aguardar — 'aguarda um segundo'",
@@ -677,10 +679,11 @@
     ],
     "latest_message": "Aguarda um segundo",
     "expected_stage": "requesting",
-    "expected_should_continue": false
+    "expected_should_continue": true,
+    "expected_response": "Certo!"
   },
   {
-    "name": "response_message null — não deve enviar",
+    "name": "Recepção pede para aguardar — 'deixa eu ver'",
     "clinic_name": "Clínica Alfa",
     "conversation_history": [
       {
@@ -694,6 +697,7 @@
     ],
     "latest_message": "Deixa eu ver se ele está disponível",
     "expected_stage": "requesting",
-    "expected_should_continue": false
+    "expected_should_continue": true,
+    "expected_response": "Certo!"
   }
 ]
