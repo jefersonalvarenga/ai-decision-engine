@@ -67,7 +67,7 @@
 --   lead_score = ROUND(score_ads + score_rep + score_web, 2)
 --
 -- DEPENDÊNCIAS (executar sdr_schema.sql primeiro):
---   - sdr_contacts: rastreia clínicas abordadas e conversões (status='scheduled')
+--   - clinic_decisors: rastreia clínicas abordadas e conversões (status='scheduled')
 --   - google_maps_signals: dados da clínica (phone_e164, rating, reviews, website)
 --   - google_ads_signals: dados de anúncios (ads_count, place_id)
 --
@@ -115,9 +115,9 @@ BEGIN
 
     -- ================================================================
     -- 1. Calcular tentativas e conversões por grupo
-    --    Tentativas = clínicas em sdr_contacts (qualquer status)
-    --    Conversões = sdr_contacts.status = 'scheduled'
-    --    Join via place_id (disponível em sdr_contacts)
+    --    Tentativas = clínicas em clinic_decisors (qualquer status)
+    --    Conversões = clinic_decisors.status = 'scheduled'
+    --    Join via place_id (disponível em clinic_decisors)
     -- ================================================================
     SELECT
         COALESCE(SUM(st.conv), 0),
@@ -143,7 +143,7 @@ BEGIN
             COUNT(sc.id) FILTER (WHERE sc.status = 'scheduled')    AS conv
         FROM google_maps_signals gms
         JOIN google_ads_signals  gas ON gas.place_id = gms.place_id
-        LEFT JOIN sdr_contacts   sc  ON sc.place_id  = gms.place_id
+        LEFT JOIN clinic_decisors   sc  ON sc.place_id  = gms.place_id
         WHERE gas.ads_count > 0
         GROUP BY grp
     ) st;
@@ -191,7 +191,7 @@ BEGIN
 
     -- ================================================================
     -- 4. Selecionar clínica candidata do grupo escolhido
-    --    Exclui clínicas com place_id já em sdr_contacts (qualquer status)
+    --    Exclui clínicas com place_id já em clinic_decisors (qualquer status)
     --    Ordena por lead_score com ruído para variar seleção
     --
     -- FÓRMULA DO LEAD SCORE (baseada em percentis reais):
@@ -239,7 +239,7 @@ BEGIN
           AND gms.phone_e164 IS NOT NULL
           AND gms.phone_e164 != ''
           AND gms.place_id NOT IN (
-              SELECT sc.place_id FROM sdr_contacts sc
+              SELECT sc.place_id FROM clinic_decisors sc
               WHERE sc.place_id IS NOT NULL
           )
     )

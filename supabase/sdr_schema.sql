@@ -4,10 +4,10 @@
 -- Tabelas centrais do pipeline SDR que conectam Gatekeeper → Closer.
 --
 -- FLUXO:
---   pick_next_clinic() → gk_leads → [Gatekeeper] → sdr_contacts
---   sdr_contacts → closer_conversations + closer_messages → [Closer]
---   Closer 'scheduled' → sdr_contacts.status = 'scheduled'
---   pick_next_clinic() usa sdr_contacts para medir conversões por grupo
+--   pick_next_clinic() → gk_leads → [Gatekeeper] → clinic_decisors
+--   clinic_decisors → closer_conversations + closer_messages → [Closer]
+--   Closer 'scheduled' → clinic_decisors.status = 'scheduled'
+--   pick_next_clinic() usa clinic_decisors para medir conversões por grupo
 --
 -- EXECUTAR NO SQL EDITOR DO SUPABASE em ordem.
 -- ============================================================================
@@ -27,11 +27,11 @@ $$ LANGUAGE plpgsql;
 
 
 -- ============================================================================
--- TABELA 1: sdr_contacts
--- Gestores capturados pelo Gatekeeper.
+-- TABELA 1: clinic_decisors
+-- Gestores de clínicas capturados pelo Gatekeeper.
 -- Ponto de entrada para o Closer e fonte de dados para o bandit (pick_next_clinic).
 -- ============================================================================
-CREATE TABLE IF NOT EXISTS sdr_contacts (
+CREATE TABLE IF NOT EXISTS clinic_decisors (
     id                  UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 
     -- Origem — link com Google Maps e Gatekeeper
@@ -68,23 +68,23 @@ CREATE TABLE IF NOT EXISTS sdr_contacts (
 );
 
 -- Índices
-CREATE INDEX IF NOT EXISTS idx_sdr_contacts_status
-    ON sdr_contacts(status);
+CREATE INDEX IF NOT EXISTS idx_clinic_decisors_status
+    ON clinic_decisors(status);
 
-CREATE INDEX IF NOT EXISTS idx_sdr_contacts_place_id
-    ON sdr_contacts(place_id);
+CREATE INDEX IF NOT EXISTS idx_clinic_decisors_place_id
+    ON clinic_decisors(place_id);
 
-CREATE INDEX IF NOT EXISTS idx_sdr_contacts_clinic_phone
-    ON sdr_contacts(clinic_phone);
+CREATE INDEX IF NOT EXISTS idx_clinic_decisors_clinic_phone
+    ON clinic_decisors(clinic_phone);
 
 -- Garante que o mesmo gestor (por WhatsApp) não seja abordado duas vezes
-CREATE UNIQUE INDEX IF NOT EXISTS idx_sdr_contacts_manager_phone
-    ON sdr_contacts(manager_phone)
+CREATE UNIQUE INDEX IF NOT EXISTS idx_clinic_decisors_manager_phone
+    ON clinic_decisors(manager_phone)
     WHERE manager_phone IS NOT NULL;
 
 -- Trigger para updated_at
-CREATE TRIGGER trg_sdr_contacts_updated_at
-BEFORE UPDATE ON sdr_contacts
+CREATE TRIGGER trg_clinic_decisors_updated_at
+BEFORE UPDATE ON clinic_decisors
 FOR EACH ROW EXECUTE FUNCTION update_updated_at();
 
 
@@ -96,7 +96,7 @@ CREATE TABLE IF NOT EXISTS closer_conversations (
     id                  UUID DEFAULT gen_random_uuid() PRIMARY KEY,
 
     -- Vínculo com o pipeline
-    sdr_contact_id      UUID REFERENCES sdr_contacts(id) ON DELETE CASCADE,
+    clinic_decisor_id   UUID REFERENCES clinic_decisors(id) ON DELETE CASCADE,
     manager_phone       VARCHAR(50)  NOT NULL,
     remote_jid          VARCHAR(60)  GENERATED ALWAYS AS (manager_phone || '@s.whatsapp.net') STORED,
 
@@ -135,8 +135,8 @@ CREATE INDEX IF NOT EXISTS idx_closer_conv_manager_phone
 CREATE INDEX IF NOT EXISTS idx_closer_conv_status
     ON closer_conversations(status);
 
-CREATE INDEX IF NOT EXISTS idx_closer_conv_sdr_contact
-    ON closer_conversations(sdr_contact_id);
+CREATE INDEX IF NOT EXISTS idx_closer_conv_clinic_decisor
+    ON closer_conversations(clinic_decisor_id);
 
 CREATE INDEX IF NOT EXISTS idx_closer_conv_expires
     ON closer_conversations(expires_at)
@@ -172,10 +172,10 @@ CREATE INDEX IF NOT EXISTS idx_closer_messages_conv
 -- ============================================================================
 -- GRANTS (para o role que o n8n usa)
 -- ============================================================================
-GRANT ALL ON sdr_contacts          TO service_role;
-GRANT ALL ON closer_conversations  TO service_role;
-GRANT ALL ON closer_messages       TO service_role;
+GRANT ALL ON clinic_decisors         TO service_role;
+GRANT ALL ON closer_conversations    TO service_role;
+GRANT ALL ON closer_messages         TO service_role;
 
-GRANT SELECT, INSERT, UPDATE ON sdr_contacts         TO anon;
-GRANT SELECT, INSERT, UPDATE ON closer_conversations TO anon;
-GRANT SELECT, INSERT         ON closer_messages      TO anon;
+GRANT SELECT, INSERT, UPDATE ON clinic_decisors        TO anon;
+GRANT SELECT, INSERT, UPDATE ON closer_conversations   TO anon;
+GRANT SELECT, INSERT         ON closer_messages        TO anon;
