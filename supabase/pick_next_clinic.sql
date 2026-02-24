@@ -31,6 +31,41 @@
 --   40 reuniões → epsilon = 0.20 → 20% explore, 80% exploit
 --   50+ reuniões → epsilon = 0.20 → estabiliza (nunca para de explorar)
 --
+-- ============================================================================
+-- LEAD SCORE (0–100 pts) — fórmula baseada em percentis reais do banco
+-- ============================================================================
+--
+-- Dados reais (clínicas elegíveis: ads>0, phone preenchido):
+--   ads_count : p50=7,  p75=23,  p90=300, max=900
+--   reviews   : p50=47, p75=82,  p90=188, max=36284
+--   rating    : avg=4.78, p50=5.0, p75=5.0  (quase sem variação)
+--
+-- PROBLEMA da fórmula antiga:
+--   - cap em 10 ads → 23 ads e 900 ads parecem iguais
+--   - cap em 300 reviews → 300 reviews e 36000 reviews parecem iguais
+--   - rating isolado (×4) → 4.8 e 5.0 diferem só 0.8 pts (inútil)
+--
+-- SOLUÇÃO — escala logarítmica + reputação credível:
+--
+--   score_ads  = LN(ads_count + 1) / LN(901) * 35
+--     → 35 pts, normalizado pelo max real (900 ads → 35 pts)
+--     → 7 ads (p50)  → LN(8)/LN(901)  * 35 ≈ 11.7 pts
+--     → 23 ads (p75) → LN(24)/LN(901) * 35 ≈ 19.3 pts
+--     → 300 ads (p90)→ LN(301)/LN(901)* 35 ≈ 30.5 pts
+--
+--   score_rep  = rating * LN(reviews + 1) / (5.0 * LN(189)) * 55
+--     → 55 pts, reputação ponderada pelo volume de reviews
+--     → normalizado por 5★ com 188 reviews (p90) = 55 pts máximo "esperado"
+--     → clínicas acima de p90 em reviews podem ultrapassar 55 (score > 100 possível,
+--       mas extremamente raro e justo — essas clínicas são outliers positivos)
+--     → 4.8★ × 3000 reviews → 4.8 * LN(3001) / (5*LN(189)) * 55 ≈ 57.3 pts
+--     → 5.0★ × 12 reviews   → 5.0 * LN(13)   / (5*LN(189)) * 55 ≈ 15.6 pts
+--     → 4.8★ × 47 reviews   → 4.8 * LN(48)   / (5*LN(189)) * 55 ≈ 29.4 pts
+--
+--   score_web  = 10 pts se tem website (presença digital confirmada)
+--
+--   lead_score = ROUND(score_ads + score_rep + score_web, 2)
+--
 -- DEPENDÊNCIAS (executar sdr_schema.sql primeiro):
 --   - sdr_contacts: rastreia clínicas abordadas e conversões (status='scheduled')
 --   - google_maps_signals: dados da clínica (phone_e164, rating, reviews, website)
@@ -40,6 +75,8 @@
 --   POST /rest/v1/rpc/pick_next_clinic
 --   Body: {}
 -- ============================================================================
+
+DROP FUNCTION IF EXISTS pick_next_clinic();
 
 CREATE OR REPLACE FUNCTION pick_next_clinic()
 RETURNS TABLE (
@@ -156,6 +193,19 @@ BEGIN
     -- 4. Selecionar clínica candidata do grupo escolhido
     --    Exclui clínicas com place_id já em sdr_contacts (qualquer status)
     --    Ordena por lead_score com ruído para variar seleção
+    --
+    -- FÓRMULA DO LEAD SCORE (baseada em percentis reais):
+    --
+    --   score_ads = LN(ads_count + 1) / LN(901) * 35
+    --     → 35pts, escala log normalizada pelo max real (900 ads)
+    --
+    --   score_rep = rating * LN(reviews + 1) / (5.0 * LN(189)) * 55
+    --     → 55pts, reputação credível — rating ponderado por volume
+    --     → normalizado por 5★ com 188 reviews (p90 dos dados reais)
+    --     → garante que 4.8★×3000 reviews >> 5★×12 reviews
+    --
+    --   score_web = 10 se tem website, 0 se não tem
+    --
     -- ================================================================
     RETURN QUERY
     WITH candidates AS (
@@ -164,9 +214,14 @@ BEGIN
             gms.name                    AS c_clinic_name,
             gms.phone_e164              AS c_clinic_phone,
             ROUND(
-                  LEAST(gas.ads_count, 10) * 4.0
-                + LEAST(COALESCE(gms.reviews_count, 0), 300) * 0.1
-                + COALESCE(gms.rating, 0) * 4.0
+                -- Ads: escala log, normalizada pelo máximo real (900 ads)
+                LN(gas.ads_count::NUMERIC + 1) / LN(901.0) * 35.0
+
+                -- Reputação credível: rating × volume (p90 de reviews = 188)
+                + COALESCE(gms.rating, 0) * LN(COALESCE(gms.reviews_count, 0)::NUMERIC + 1)
+                  / (5.0 * LN(189.0)) * 55.0
+
+                -- Website: bônus de presença digital
                 + CASE WHEN gms.website IS NOT NULL AND gms.website != ''
                        THEN 10.0 ELSE 0.0 END
             , 2)                        AS c_lead_score,
