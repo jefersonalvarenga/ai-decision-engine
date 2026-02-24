@@ -1,0 +1,242 @@
+name: SDR Agent CI
+
+on:
+  push:
+    branches: [main, "feature/**", "gatekeeper-mvp", "closer-mvp"]
+  pull_request:
+    branches: [main]
+
+# ============================================================================
+# MODEL CONFIGURATION
+# Troque os modelos aqui sem tocar no código.
+#
+# Tarefas simples (rodar testes, formatar resultado):
+#   - anthropic: claude-haiku-4-5   → rápido, barato
+#   - glm:       glm-4.7            → gratuito, suficiente para análise básica
+#
+# Tarefas complexas (analisar falhas, sugerir fix, gerar cenários):
+#   - anthropic: claude-opus-4-5    → melhor raciocínio
+#   - glm:       glm-5              → melhor do ZhipuAI
+# ============================================================================
+env:
+  # Provider: "anthropic" ou "glm"
+  AI_PROVIDER: "anthropic"
+
+  # Modelos por complexidade
+  AI_MODEL_FAST: "claude-haiku-4-5"      # análise simples, comentários de PR
+  AI_MODEL_SMART: "claude-opus-4-5"      # análise de falhas, geração de cenários
+
+  # Thresholds
+  MIN_PASS_RATE: "90"                    # % mínima para não bloquear merge
+  WARN_PASS_RATE: "95"                   # % abaixo da qual posta aviso no PR
+
+jobs:
+  # ============================================================================
+  # JOB 1: Testes do Gatekeeper
+  # ============================================================================
+  test-gatekeeper:
+    name: "🛡️ Gatekeeper Tests"
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run Gatekeeper tests
+        id: run_tests
+        env:
+          DSPY_PROVIDER: ${{ secrets.DSPY_PROVIDER }}
+          DSPY_MODEL: ${{ secrets.DSPY_MODEL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
+        run: |
+          python -m app.agents.sdr.test_sdr_agents --gatekeeper 2>&1 | tee test_output.txt
+          echo "exit_code=${PIPESTATUS[0]}" >> $GITHUB_OUTPUT
+
+      - name: Parse test results
+        id: parse_results
+        run: |
+          python scripts/parse_test_results.py test_output.txt >> $GITHUB_OUTPUT
+
+      - name: Upload test log
+        uses: actions/upload-artifact@v4
+        with:
+          name: gatekeeper-test-log
+          path: |
+            test_output.txt
+            app/agents/sdr/logs/*.log
+          retention-days: 30
+
+      - name: Analyze failures with AI
+        if: steps.parse_results.outputs.failed_count != '0'
+        env:
+          AI_PROVIDER: ${{ env.AI_PROVIDER }}
+          AI_MODEL: ${{ env.AI_MODEL_SMART }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
+          FAILED_SCENARIOS: ${{ steps.parse_results.outputs.failed_scenarios }}
+          PASS_RATE: ${{ steps.parse_results.outputs.pass_rate }}
+        run: |
+          python scripts/analyze_failures.py \
+            --agent gatekeeper \
+            --test-log test_output.txt \
+            --output analysis.md
+
+      - name: Comment PR with results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const passRate = '${{ steps.parse_results.outputs.pass_rate }}';
+            const passed = '${{ steps.parse_results.outputs.passed_count }}';
+            const failed = '${{ steps.parse_results.outputs.failed_count }}';
+            const total = '${{ steps.parse_results.outputs.total_count }}';
+            const minRate = parseInt('${{ env.MIN_PASS_RATE }}');
+            const warnRate = parseInt('${{ env.WARN_PASS_RATE }}');
+            const rate = parseFloat(passRate);
+
+            let emoji = '✅';
+            let status = 'Aprovado';
+            if (rate < minRate) { emoji = '❌'; status = 'Bloqueado'; }
+            else if (rate < warnRate) { emoji = '⚠️'; status = 'Atenção'; }
+
+            let body = `## ${emoji} Gatekeeper Tests — ${status}\n\n`;
+            body += `| Passed | Failed | Total | Taxa |\n`;
+            body += `|--------|--------|-------|------|\n`;
+            body += `| ${passed} | ${failed} | ${total} | **${passRate}%** |\n\n`;
+
+            // Adiciona análise de IA se existir
+            if (fs.existsSync('analysis.md')) {
+              body += `### 🤖 Análise de Falhas (${process.env.AI_MODEL_SMART})\n\n`;
+              body += fs.readFileSync('analysis.md', 'utf8');
+            }
+
+            body += `\n---\n_Modelo de teste: \`${{ secrets.DSPY_MODEL }}\` | `;
+            body += `Análise: \`${{ env.AI_MODEL_SMART }}\`_`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+      - name: Fail if below minimum pass rate
+        if: steps.parse_results.outputs.pass_rate != ''
+        run: |
+          RATE=${{ steps.parse_results.outputs.pass_rate }}
+          MIN=${{ env.MIN_PASS_RATE }}
+          echo "Taxa de aprovação: ${RATE}% (mínimo: ${MIN}%)"
+          if (( $(echo "$RATE < $MIN" | bc -l) )); then
+            echo "❌ Taxa abaixo do mínimo permitido para merge!"
+            exit 1
+          fi
+
+  # ============================================================================
+  # JOB 2: Deploy automático (apenas merge em main)
+  # ============================================================================
+  deploy:
+    name: "🚀 Deploy VPS"
+    needs: test-gatekeeper
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.VPS_HOST }}
+          username: ${{ secrets.VPS_USER }}
+          key: ${{ secrets.VPS_SSH_KEY }}
+          script: |
+            set -e
+            cd /root/ai-decision-engine
+            git pull origin main
+            pip install -r requirements.txt --quiet
+            systemctl restart ai-decision-engine
+            sleep 3
+            systemctl is-active --quiet ai-decision-engine && echo "✅ Service running" || exit 1
+
+      - name: Health check
+        run: |
+          sleep 5
+          curl -f https://ade.easyscale.co/v1/health || exit 1
+          echo "✅ Health check passed"
+
+  # ============================================================================
+  # JOB 3: Geração de novos cenários (semanal ou manual)
+  # Chame manualmente: Actions → "SDR Agent CI" → "Run workflow"
+  # ============================================================================
+  generate-scenarios:
+    name: "🧠 Generate Test Scenarios"
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate new scenarios with AI
+        env:
+          AI_PROVIDER: ${{ env.AI_PROVIDER }}
+          AI_MODEL: ${{ env.AI_MODEL_SMART }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
+          AGENT: ${{ github.event.inputs.agent || 'gatekeeper' }}
+        run: |
+          python scripts/generate_scenarios.py \
+            --agent $AGENT \
+            --count ${{ github.event.inputs.count || '10' }} \
+            --output-file app/agents/sdr/test_${AGENT}_cases_new.json
+
+      - name: Open PR with new scenarios
+        uses: peter-evans/create-pull-request@v6
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          commit-message: "feat: add AI-generated test scenarios for ${{ github.event.inputs.agent || 'gatekeeper' }}"
+          title: "🤖 New test scenarios — ${{ github.event.inputs.agent || 'gatekeeper' }} (${{ env.AI_MODEL_SMART }})"
+          body: |
+            ## Novos cenários gerados automaticamente
+
+            - **Agente:** `${{ github.event.inputs.agent || 'gatekeeper' }}`
+            - **Modelo usado:** `${{ env.AI_MODEL_SMART }}`
+            - **Quantidade:** `${{ github.event.inputs.count || '10' }}`
+
+            Revise os cenários antes de mergear. Eles foram gerados com base
+            nos cenários existentes e nas lacunas identificadas na cobertura atual.
+          branch: "feat/ai-scenarios-${{ github.run_number }}"
+          base: main
+
+    # Inputs para disparo manual
+    inputs: {}
+
+# Inputs para workflow_dispatch
+workflow_dispatch:
+  inputs:
+    agent:
+      description: "Agente para gerar cenários (gatekeeper ou closer)"
+      required: false
+      default: "gatekeeper"
+    count:
+      description: "Número de cenários a gerar"
+      required: false
+      default: "10"
