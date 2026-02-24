@@ -249,10 +249,10 @@ BEGIN
 
               UNION
 
-              -- Já está no pipeline do Gatekeeper (pending ou sent)
+              -- Já está no pipeline do Gatekeeper (em abordagem ativa)
               SELECT gk.clinic_phone
               FROM gk_leads gk
-              WHERE gk.status IN ('pending', 'sent')
+              WHERE gk.status IN ('created', 'gathering_decisor')
           )
     )
     SELECT

@@ -55,13 +55,17 @@ CREATE TABLE IF NOT EXISTS clinic_decisors (
     lead_score          NUMERIC(5,2),
     ads_group           VARCHAR(20),             -- 'ads_high' | 'ads_mid' | 'ads_low'
 
-    -- Status do pipeline SDR completo
+    -- Status do pipeline SDR completo (controlado pelo Closer após 'captured')
     status              VARCHAR(30) NOT NULL DEFAULT 'captured',
-    -- 'captured'    → gestor obtido, aguardando Closer
-    -- 'closer_sent' → Closer enviou primeira mensagem
-    -- 'scheduled'   → reunião agendada ✅
-    -- 'lost'        → Closer perdeu após tentativas
-    -- 'no_show'     → gestor não apareceu na reunião
+    -- 'captured'         → gestor obtido pelo GK, aguardando Closer
+    -- 'greeted'          → Closer enviou primeira mensagem
+    -- 'initial_approach' → conversa iniciada
+    -- 'proposal_offered' → proposta apresentada
+    -- 'negotiating'      → em negociação
+    -- 'scheduled'        → reunião agendada ✅
+    -- 'success'          → cliente comprou 🎉
+    -- 'lost'             → recusou definitivamente
+    -- 'no_show'          → não compareceu à reunião
 
     created_at          TIMESTAMPTZ DEFAULT NOW(),
     updated_at          TIMESTAMPTZ DEFAULT NOW()
