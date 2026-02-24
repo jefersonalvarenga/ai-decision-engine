@@ -43,15 +43,15 @@
 
 CREATE OR REPLACE FUNCTION pick_next_clinic()
 RETURNS TABLE (
-    place_id         TEXT,
-    clinic_name      TEXT,
-    clinic_phone     TEXT,
-    lead_score       NUMERIC,
-    ads_group        TEXT,     -- 'ads_high' | 'ads_mid' | 'ads_low'
-    google_ads_count INT,
-    google_reviews   INT,
-    google_rating    NUMERIC,
-    selection_mode   TEXT      -- 'explore' | 'exploit'
+    out_place_id         TEXT,
+    out_clinic_name      TEXT,
+    out_clinic_phone     TEXT,
+    out_lead_score       NUMERIC,
+    out_ads_group        TEXT,
+    out_google_ads_count INT,
+    out_google_reviews   INT,
+    out_google_rating    NUMERIC,
+    out_selection_mode   TEXT
 )
 LANGUAGE plpgsql
 AS $$
@@ -84,12 +84,12 @@ BEGIN
     -- ================================================================
     SELECT
         COALESCE(SUM(st.conv), 0),
-        COALESCE(SUM(st.att)  FILTER (WHERE st.ads_group = 'ads_high'), 0),
-        COALESCE(SUM(st.conv) FILTER (WHERE st.ads_group = 'ads_high'), 0),
-        COALESCE(SUM(st.att)  FILTER (WHERE st.ads_group = 'ads_mid'),  0),
-        COALESCE(SUM(st.conv) FILTER (WHERE st.ads_group = 'ads_mid'),  0),
-        COALESCE(SUM(st.att)  FILTER (WHERE st.ads_group = 'ads_low'),  0),
-        COALESCE(SUM(st.conv) FILTER (WHERE st.ads_group = 'ads_low'),  0)
+        COALESCE(SUM(st.att)  FILTER (WHERE st.grp = 'ads_high'), 0),
+        COALESCE(SUM(st.conv) FILTER (WHERE st.grp = 'ads_high'), 0),
+        COALESCE(SUM(st.att)  FILTER (WHERE st.grp = 'ads_mid'),  0),
+        COALESCE(SUM(st.conv) FILTER (WHERE st.grp = 'ads_mid'),  0),
+        COALESCE(SUM(st.att)  FILTER (WHERE st.grp = 'ads_low'),  0),
+        COALESCE(SUM(st.conv) FILTER (WHERE st.grp = 'ads_low'),  0)
     INTO
         v_total_scheduled,
         v_att_high, v_conv_high,
@@ -101,14 +101,14 @@ BEGIN
                 WHEN gas.ads_count >= 5 THEN 'ads_high'
                 WHEN gas.ads_count >= 2 THEN 'ads_mid'
                 ELSE 'ads_low'
-            END AS ads_group,
+            END AS grp,
             COUNT(sc.id)                                            AS att,
             COUNT(sc.id) FILTER (WHERE sc.status = 'scheduled')    AS conv
         FROM google_maps_signals gms
         JOIN google_ads_signals  gas ON gas.place_id = gms.place_id
         LEFT JOIN sdr_contacts   sc  ON sc.place_id  = gms.place_id
         WHERE gas.ads_count > 0
-        GROUP BY ads_group
+        GROUP BY grp
     ) st;
 
     -- ================================================================
@@ -160,48 +160,47 @@ BEGIN
     RETURN QUERY
     WITH candidates AS (
         SELECT
-            gms.place_id,
-            gms.name            AS clinic_name,
-            gms.phone_e164      AS clinic_phone,
+            gms.place_id                AS c_place_id,
+            gms.name                    AS c_clinic_name,
+            gms.phone_e164              AS c_clinic_phone,
             ROUND(
                   LEAST(gas.ads_count, 10) * 4.0
                 + LEAST(COALESCE(gms.reviews_count, 0), 300) * 0.1
                 + COALESCE(gms.rating, 0) * 4.0
                 + CASE WHEN gms.website IS NOT NULL AND gms.website != ''
                        THEN 10.0 ELSE 0.0 END
-            , 2) AS lead_score,
+            , 2)                        AS c_lead_score,
             CASE
                 WHEN gas.ads_count >= 5 THEN 'ads_high'
                 WHEN gas.ads_count >= 2 THEN 'ads_mid'
                 ELSE 'ads_low'
-            END AS ads_group,
-            gas.ads_count       AS google_ads_count,
-            gms.reviews_count   AS google_reviews,
-            gms.rating          AS google_rating
+            END                         AS c_ads_group,
+            gas.ads_count               AS c_google_ads_count,
+            gms.reviews_count           AS c_google_reviews,
+            gms.rating                  AS c_google_rating
         FROM google_maps_signals gms
         JOIN google_ads_signals gas ON gas.place_id = gms.place_id
         WHERE gas.ads_count > 0
           AND gms.phone_e164 IS NOT NULL
           AND gms.phone_e164 != ''
-          -- Exclui clínicas que já estão no pipeline (abordadas ou em andamento)
           AND gms.place_id NOT IN (
-              SELECT place_id FROM sdr_contacts
-              WHERE place_id IS NOT NULL
+              SELECT sc.place_id FROM sdr_contacts sc
+              WHERE sc.place_id IS NOT NULL
           )
     )
     SELECT
-        c.place_id,
-        c.clinic_name,
-        c.clinic_phone,
-        c.lead_score,
-        c.ads_group,
-        c.google_ads_count,
-        c.google_reviews,
-        c.google_rating,
-        CASE WHEN v_exploit THEN 'exploit' ELSE 'explore' END AS selection_mode
+        c.c_place_id,
+        c.c_clinic_name,
+        c.c_clinic_phone,
+        c.c_lead_score,
+        c.c_ads_group,
+        c.c_google_ads_count,
+        c.c_google_reviews,
+        c.c_google_rating,
+        CASE WHEN v_exploit THEN 'exploit'::TEXT ELSE 'explore'::TEXT END
     FROM candidates c
-    WHERE c.ads_group = v_selected_group
-    ORDER BY (c.lead_score * POWER(random(), 0.5)) DESC
+    WHERE c.c_ads_group = v_selected_group
+    ORDER BY (c.c_lead_score * POWER(random(), 0.5)) DESC
     LIMIT 1;
 
 END;
