@@ -5,6 +5,16 @@ on:
     branches: [main, "feature/**", "gatekeeper-mvp", "closer-mvp"]
   pull_request:
     branches: [main]
+  workflow_dispatch:
+    inputs:
+      agent:
+        description: "Agente para gerar cenários (gatekeeper ou closer)"
+        required: false
+        default: "gatekeeper"
+      count:
+        description: "Número de cenários a gerar"
+        required: false
+        default: "10"
 
 # ============================================================================
 # MODEL CONFIGURATION
@@ -224,17 +234,3 @@ jobs:
           branch: "feat/ai-scenarios-${{ github.run_number }}"
           base: main
 
-    # Inputs para disparo manual
-    inputs: {}
-
-# Inputs para workflow_dispatch
-workflow_dispatch:
-  inputs:
-    agent:
-      description: "Agente para gerar cenários (gatekeeper ou closer)"
-      required: false
-      default: "gatekeeper"
-    count:
-      description: "Número de cenários a gerar"
-      required: false
-      default: "10"
