@@ -10,31 +10,31 @@
 --   ads_low  → ads_count = 1   (investe pouco)
 --
 -- ALGORITMO:
---   epsilon = max(0.2, 1 - total_conversions/50)
+--   epsilon = max(0.2, 1 - total_scheduled/50)
 --
 --   EXPLORE (epsilon % do tempo):
 --     Sorteia grupo uniformemente — garante cobertura de todos os segmentos
 --
 --   EXPLOIT (1-epsilon % do tempo):
 --     Sorteia grupo com peso proporcional à taxa de conversão de cada grupo
---     → Grupos que convertem mais recebem mais abordagens
+--     → Grupos que convertem mais (status='scheduled') recebem mais abordagens
 --     → O peso cresce gradualmente com os dados, sem saltos bruscos
 --
 -- DENTRO DO GRUPO SELECIONADO:
 --   ORDER BY (lead_score * POWER(random(), 0.5)) DESC LIMIT 1
---   → Favorece clínicas com maior score, mas com variação para não repetir sempre a mesma
+--   → Favorece clínicas com maior score, mas com variação para não repetir a mesma
 --
 -- EVOLUÇÃO DO EPSILON:
---   0 conversões  → epsilon = 1.00 → 100% exploração uniforme
---   10 conversões → epsilon = 0.80 → 80% explore, 20% exploit
---   25 conversões → epsilon = 0.50 → 50/50
---   40 conversões → epsilon = 0.20 → 20% explore, 80% exploit
---   50+ convers.  → epsilon = 0.20 → estabiliza (nunca para de explorar)
+--   0  reuniões → epsilon = 1.00 → 100% exploração uniforme
+--   10 reuniões → epsilon = 0.80 → 80% explore, 20% exploit
+--   25 reuniões → epsilon = 0.50 → 50/50
+--   40 reuniões → epsilon = 0.20 → 20% explore, 80% exploit
+--   50+ reuniões → epsilon = 0.20 → estabiliza (nunca para de explorar)
 --
--- PREMISSAS:
---   - sdr_contacts.place_id (TEXT) e sdr_contacts.stage (TEXT: 'success'/'failed'/'in_progress')
---   - google_maps_signals.phone_e164 preenchido para clínicas elegíveis
---   - google_ads_signals join via place_id (usa todos os scraps disponíveis)
+-- DEPENDÊNCIAS (executar sdr_schema.sql primeiro):
+--   - sdr_contacts: rastreia clínicas abordadas e conversões (status='scheduled')
+--   - google_maps_signals: dados da clínica (phone_e164, rating, reviews, website)
+--   - google_ads_signals: dados de anúncios (ads_count, place_id)
 --
 -- USO (n8n):
 --   POST /rest/v1/rpc/pick_next_clinic
@@ -56,21 +56,18 @@ RETURNS TABLE (
 LANGUAGE plpgsql
 AS $$
 DECLARE
-    -- Contadores globais
-    v_total_conversions INT;
-    v_total_attempts    INT;
-
-    -- Contadores por grupo
-    v_att_high  INT; v_conv_high INT;
-    v_att_mid   INT; v_conv_mid  INT;
-    v_att_low   INT; v_conv_low  INT;
+    -- Totais e contadores por grupo
+    v_total_scheduled INT;
+    v_att_high INT; v_conv_high INT;
+    v_att_mid  INT; v_conv_mid  INT;
+    v_att_low  INT; v_conv_low  INT;
 
     -- Algoritmo
     v_epsilon        NUMERIC;
     v_exploit        BOOLEAN;
     v_selected_group TEXT;
 
-    -- Taxas de conversão para exploit
+    -- Taxas para exploit
     v_rate_high  NUMERIC;
     v_rate_mid   NUMERIC;
     v_rate_low   NUMERIC;
@@ -81,19 +78,20 @@ BEGIN
 
     -- ================================================================
     -- 1. Calcular tentativas e conversões por grupo
-    --    (join clínicas scrapeadas com contatos já abordados)
+    --    Tentativas = clínicas em sdr_contacts (qualquer status)
+    --    Conversões = sdr_contacts.status = 'scheduled'
+    --    Join via place_id (disponível em sdr_contacts)
     -- ================================================================
     SELECT
-        COALESCE(SUM(st.conversions), 0),
-        COALESCE(SUM(st.attempts), 0),
-        COALESCE(SUM(st.attempts)     FILTER (WHERE st.ads_group = 'ads_high'), 0),
-        COALESCE(SUM(st.conversions)  FILTER (WHERE st.ads_group = 'ads_high'), 0),
-        COALESCE(SUM(st.attempts)     FILTER (WHERE st.ads_group = 'ads_mid'),  0),
-        COALESCE(SUM(st.conversions)  FILTER (WHERE st.ads_group = 'ads_mid'),  0),
-        COALESCE(SUM(st.attempts)     FILTER (WHERE st.ads_group = 'ads_low'),  0),
-        COALESCE(SUM(st.conversions)  FILTER (WHERE st.ads_group = 'ads_low'),  0)
+        COALESCE(SUM(st.conv), 0),
+        COALESCE(SUM(st.att)  FILTER (WHERE st.ads_group = 'ads_high'), 0),
+        COALESCE(SUM(st.conv) FILTER (WHERE st.ads_group = 'ads_high'), 0),
+        COALESCE(SUM(st.att)  FILTER (WHERE st.ads_group = 'ads_mid'),  0),
+        COALESCE(SUM(st.conv) FILTER (WHERE st.ads_group = 'ads_mid'),  0),
+        COALESCE(SUM(st.att)  FILTER (WHERE st.ads_group = 'ads_low'),  0),
+        COALESCE(SUM(st.conv) FILTER (WHERE st.ads_group = 'ads_low'),  0)
     INTO
-        v_total_conversions, v_total_attempts,
+        v_total_scheduled,
         v_att_high, v_conv_high,
         v_att_mid,  v_conv_mid,
         v_att_low,  v_conv_low
@@ -104,27 +102,23 @@ BEGIN
                 WHEN gas.ads_count >= 2 THEN 'ads_mid'
                 ELSE 'ads_low'
             END AS ads_group,
-            COUNT(sc.place_id)                                          AS attempts,
-            COUNT(sc.place_id) FILTER (WHERE sc.stage = 'success')     AS conversions
+            COUNT(sc.id)                                            AS att,
+            COUNT(sc.id) FILTER (WHERE sc.status = 'scheduled')    AS conv
         FROM google_maps_signals gms
-        JOIN google_ads_signals gas ON gms.place_id = gas.place_id
-        LEFT JOIN sdr_contacts sc   ON sc.place_id  = gms.place_id
+        JOIN google_ads_signals  gas ON gas.place_id = gms.place_id
+        LEFT JOIN sdr_contacts   sc  ON sc.place_id  = gms.place_id
         WHERE gas.ads_count > 0
         GROUP BY ads_group
     ) st;
 
     -- ================================================================
-    -- 2. Calcular epsilon — decresce com conversões, mínimo 0.20
+    -- 2. Epsilon decrescente — mínimo 20% de exploração sempre
     -- ================================================================
-    v_epsilon := GREATEST(0.20, 1.0 - (v_total_conversions::NUMERIC / 50.0));
-
-    -- ================================================================
-    -- 3. Decidir explore vs exploit
-    -- ================================================================
+    v_epsilon := GREATEST(0.20, 1.0 - (v_total_scheduled::NUMERIC / 50.0));
     v_exploit := (random() > v_epsilon);
 
     -- ================================================================
-    -- 4. Selecionar grupo
+    -- 3. Selecionar grupo
     -- ================================================================
     IF NOT v_exploit THEN
         -- EXPLORE: uniforme entre os 3 grupos
@@ -149,18 +143,18 @@ BEGIN
             ELSE                       v_selected_group := 'ads_low';
             END IF;
         ELSE
-            -- Roleta ponderada pela taxa de conversão
+            -- Roleta ponderada
             v_rand := random() * v_rate_total;
-            IF    v_rand < v_rate_high                    THEN v_selected_group := 'ads_high';
-            ELSIF v_rand < (v_rate_high + v_rate_mid)     THEN v_selected_group := 'ads_mid';
-            ELSE                                               v_selected_group := 'ads_low';
+            IF    v_rand < v_rate_high                THEN v_selected_group := 'ads_high';
+            ELSIF v_rand < (v_rate_high + v_rate_mid) THEN v_selected_group := 'ads_mid';
+            ELSE                                           v_selected_group := 'ads_low';
             END IF;
         END IF;
     END IF;
 
     -- ================================================================
-    -- 5. Selecionar clínica candidata do grupo escolhido
-    --    Exclui clínicas já abordadas (qualquer stage em sdr_contacts)
+    -- 4. Selecionar clínica candidata do grupo escolhido
+    --    Exclui clínicas com place_id já em sdr_contacts (qualquer status)
     --    Ordena por lead_score com ruído para variar seleção
     -- ================================================================
     RETURN QUERY
@@ -175,24 +169,24 @@ BEGIN
                 + COALESCE(gms.rating, 0) * 4.0
                 + CASE WHEN gms.website IS NOT NULL AND gms.website != ''
                        THEN 10.0 ELSE 0.0 END
-            , 2)                AS lead_score,
+            , 2) AS lead_score,
             CASE
                 WHEN gas.ads_count >= 5 THEN 'ads_high'
                 WHEN gas.ads_count >= 2 THEN 'ads_mid'
-                ELSE                        'ads_low'
-            END                 AS ads_group,
+                ELSE 'ads_low'
+            END AS ads_group,
             gas.ads_count       AS google_ads_count,
             gms.reviews_count   AS google_reviews,
             gms.rating          AS google_rating
         FROM google_maps_signals gms
-        JOIN google_ads_signals gas
-            ON gms.place_id = gas.place_id
+        JOIN google_ads_signals gas ON gas.place_id = gms.place_id
         WHERE gas.ads_count > 0
           AND gms.phone_e164 IS NOT NULL
           AND gms.phone_e164 != ''
-          -- Excluir clínicas já abordadas (independente do resultado)
+          -- Exclui clínicas que já estão no pipeline (abordadas ou em andamento)
           AND gms.place_id NOT IN (
               SELECT place_id FROM sdr_contacts
+              WHERE place_id IS NOT NULL
           )
     )
     SELECT
@@ -214,7 +208,7 @@ END;
 $$;
 
 -- ============================================================================
--- GRANT para o role que o n8n usa (anon ou service_role)
+-- GRANTS
 -- ============================================================================
 GRANT EXECUTE ON FUNCTION pick_next_clinic() TO anon;
 GRANT EXECUTE ON FUNCTION pick_next_clinic() TO service_role;
