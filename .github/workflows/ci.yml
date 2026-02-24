@@ -47,6 +47,9 @@ jobs:
   test-gatekeeper:
     name: "🛡️ Gatekeeper Tests"
     runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
 
     steps:
       - name: Checkout
