@@ -93,6 +93,10 @@ RETURNS TABLE (
 LANGUAGE plpgsql
 AS $$
 DECLARE
+    -- Configuração de ambiente
+    v_environment   TEXT;
+    v_homolog_phone TEXT;
+
     -- Totais e contadores por grupo
     v_total_scheduled INT;
     v_att_high INT; v_conv_high INT;
@@ -112,6 +116,13 @@ DECLARE
 
     v_rand NUMERIC;
 BEGIN
+
+    -- ================================================================
+    -- 0. Ler configuração de ambiente (homolog vs production)
+    -- ================================================================
+    SELECT environment, homolog_phone
+    INTO v_environment, v_homolog_phone
+    FROM sdr_config WHERE id = 1;
 
     -- ================================================================
     -- 1. Calcular tentativas e conversões por grupo
@@ -258,13 +269,16 @@ BEGIN
     SELECT
         c.c_place_id,
         c.c_clinic_name,
-        c.c_clinic_phone,
+        -- Modo homolog: substitui apenas o telefone — todos os outros dados são reais
+        CASE WHEN v_environment = 'homolog' THEN v_homolog_phone ELSE c.c_clinic_phone END,
         c.c_lead_score,
         c.c_ads_group,
         c.c_google_ads_count,
         c.c_google_reviews,
         c.c_google_rating,
-        CASE WHEN v_exploit THEN 'exploit'::TEXT ELSE 'explore'::TEXT END
+        -- out_selection_mode indica o modo de operação atual
+        CASE WHEN v_environment = 'homolog' THEN 'homolog'::TEXT
+             WHEN v_exploit THEN 'exploit'::TEXT ELSE 'explore'::TEXT END
     FROM candidates c
     WHERE c.c_ads_group = v_selected_group
     ORDER BY (c.c_lead_score * POWER(random(), 0.5)) DESC
