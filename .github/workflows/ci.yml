@@ -20,11 +20,11 @@ on:
 # ============================================================================
 env:
   # Provider: "anthropic" ou "glm"
-  AI_PROVIDER: "anthropic"
+  AI_PROVIDER: "glm"
 
   # Modelos por complexidade
-  AI_MODEL_FAST: "claude-haiku-4-5"      # análise simples, comentários de PR
-  AI_MODEL_SMART: "claude-opus-4-5"      # análise de falhas, geração de cenários
+  AI_MODEL_FAST: "glm-4.7"              # análise simples, comentários de PR (gratuito)
+  AI_MODEL_SMART: "glm-5"              # análise de falhas, geração de cenários
 
   # Thresholds
   MIN_PASS_RATE: "90"                    # % mínima para não bloquear merge
@@ -81,7 +81,6 @@ jobs:
         env:
           AI_PROVIDER: ${{ env.AI_PROVIDER }}
           AI_MODEL: ${{ env.AI_MODEL_SMART }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
           FAILED_SCENARIOS: ${{ steps.parse_results.outputs.failed_scenarios }}
           PASS_RATE: ${{ steps.parse_results.outputs.pass_rate }}
@@ -199,7 +198,6 @@ jobs:
         env:
           AI_PROVIDER: ${{ env.AI_PROVIDER }}
           AI_MODEL: ${{ env.AI_MODEL_SMART }}
-          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
           GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
           AGENT: ${{ github.event.inputs.agent || 'gatekeeper' }}
         run: |
