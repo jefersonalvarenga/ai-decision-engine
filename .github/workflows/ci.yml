@@ -155,37 +155,6 @@ jobs:
           fi
 
   # ============================================================================
-  # JOB 2: Deploy automático (apenas merge em main)
-  # ============================================================================
-  deploy:
-    name: "🚀 Deploy VPS"
-    needs: test-gatekeeper
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
-
-    steps:
-      - name: Deploy via SSH
-        uses: appleboy/ssh-action@v1
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: ${{ secrets.VPS_USER }}
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            set -e
-            cd /root/ai-decision-engine
-            git pull origin main
-            pip install -r requirements.txt --quiet
-            systemctl restart ai-decision-engine
-            sleep 3
-            systemctl is-active --quiet ai-decision-engine && echo "✅ Service running" || exit 1
-
-      - name: Health check
-        run: |
-          sleep 5
-          curl -f https://ade.easyscale.co/v1/health || exit 1
-          echo "✅ Health check passed"
-
-  # ============================================================================
   # JOB 3: Geração de novos cenários (semanal ou manual)
   # Chame manualmente: Actions → "SDR Agent CI" → "Run workflow"
   # ============================================================================
