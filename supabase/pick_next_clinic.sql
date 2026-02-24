@@ -191,7 +191,9 @@ BEGIN
 
     -- ================================================================
     -- 4. Selecionar clínica candidata do grupo escolhido
-    --    Exclui clínicas com place_id já em clinic_decisors (qualquer status)
+    --    Exclui clínicas já em qualquer estágio do pipeline:
+    --      - gk_leads (pending/sent): Gatekeeper em processo
+    --      - clinic_decisors (captured/closer_sent/scheduled/lost/no_show): já abordadas
     --    Ordena por lead_score com ruído para variar seleção
     --
     -- FÓRMULA DO LEAD SCORE (baseada em percentis reais):
@@ -238,9 +240,19 @@ BEGIN
         WHERE gas.ads_count > 0
           AND gms.phone_e164 IS NOT NULL
           AND gms.phone_e164 != ''
-          AND gms.place_id NOT IN (
-              SELECT sc.place_id FROM clinic_decisors sc
-              WHERE sc.place_id IS NOT NULL
+          AND gms.phone_e164 NOT IN (
+              -- Já tem gestor capturado (clinic_decisors — qualquer status)
+              SELECT gms2.phone_e164
+              FROM clinic_decisors cd
+              JOIN google_maps_signals gms2 ON gms2.place_id = cd.place_id
+              WHERE cd.place_id IS NOT NULL
+
+              UNION
+
+              -- Já está no pipeline do Gatekeeper (pending ou sent)
+              SELECT gk.clinic_phone
+              FROM gk_leads gk
+              WHERE gk.status IN ('pending', 'sent')
           )
     )
     SELECT
