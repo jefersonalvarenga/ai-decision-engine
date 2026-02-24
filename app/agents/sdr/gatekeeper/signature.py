@@ -67,10 +67,34 @@ class GatekeeperSignature(dspy.Signature):
        → É objection! Na primeira vez, NÃO desista (failed).
        → Resposta: "É rápido, é sobre uma parceria para clínica. Posso mandar o contato?"
 
+    --- MUDANÇA DE CANAL (É objection!) ---
+    8. "Posso passar o telefone da clínica?" ou "Liga pra cá" ou "Manda email"
+       → É objection! Quer desviar do WhatsApp direto do gestor.
+       → Resposta: "Prefiro WhatsApp, é mais rápido. Qual o número dele?"
+
     --- NÃO É OBJECTION ---
-    8. "Sou eu mesmo o gestor"
-       → NÃO é objection! É requesting. O gestor apareceu.
+    9. "Sou eu mesmo o gestor" ou "Ele está aqui, pode falar"
+       → NÃO é objection! É requesting. O gestor apareceu ou está disponível.
        → Resposta: "Perfeito! Qual o seu WhatsApp para eu enviar a proposta direto?"
+
+    10. "Passa o contato que eu repasso para ele"
+       → NÃO é objection! É requesting. A recepção aceitou intermediar.
+       → Resposta: "Ótimo! Qual o número do WhatsApp dele?"
+
+    === QUANDO AGUARDAR SEM RESPONDER (CRUCIAL) ===
+
+    Se a recepção sinalizar que foi buscar o gestor, NÃO responda. Aguarde.
+    Responder interromperia o fluxo e pareceria robótico.
+
+    Exemplos de sinais de espera — should_continue = "false", response_message = "null":
+    - "Tá bem, só um instante por gentileza"
+    - "Um momento, vou chamar ele"
+    - "Aguarda um segundo"
+    - "Deixa eu ver se ele está"
+    - "Vou perguntar para ele"
+    - "Já chamo ela pra você"
+
+    NÃO confunda com objeção. Objeção = recepção bloqueia. Sinal de espera = recepção coopera.
 
     === REGRAS IMPORTANTES ===
 
@@ -102,6 +126,23 @@ class GatekeeperSignature(dspy.Signature):
 
     --- QUANDO É FAILED DE VERDADE ---
     - Se disserem "Já disse que não", "Pare de insistir" ou bloquearem (após 2+ tentativas).
+
+    === O QUE É requesting ===
+
+    É quando o gestor APARECE, está DISPONÍVEL, ou a recepção COOPERA ativamente.
+    Exemplos:
+    - "Sou eu o gestor" → requesting (gestor se identificou)
+    - "Ele está aqui, quer falar?" → requesting (gestor disponível)
+    - "Passa o contato que eu repasso" → requesting (recepção aceita intermediar)
+    - "Um momento, vou chamar ele" → requesting (foi buscar, aguardar)
+    NÃO confunda com handling_objection: requesting = situação FAVORÁVEL.
+
+    === O QUE É success ===
+
+    APENAS quando você RECEBEU o contato do gestor (WhatsApp/celular dele).
+    "Vou passar o telefone da clínica" NÃO é success (é número da clínica, não do gestor).
+    "Liga pra cá" NÃO é success (é mudança de canal, é objection).
+    Um número com 8+ dígitos fornecido como contato do gestor = success.
 
     === VALIDAÇÃO DE CONTATO (ANTES DE CLASSIFICAR SUCCESS) ===
 
