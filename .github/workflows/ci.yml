@@ -155,6 +155,147 @@ jobs:
           fi
 
   # ============================================================================
+  # JOB 2: Avaliação multi-turno com ReceptionistSimulator
+  # Roda Sofia (GatekeeperAgent) contra 6 cenários simulados de recepcionista.
+  # Detecta insistência excessiva (BLOCKED_RISK) e score abaixo do threshold.
+  # ============================================================================
+  eval-conversations:
+    name: "🎭 Conversation Eval (Sofia × Receptionist)"
+    runs-on: ubuntu-latest
+    permissions:
+      issues: write
+      pull-requests: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run conversation evaluation
+        id: eval
+        env:
+          DSPY_PROVIDER: ${{ secrets.DSPY_PROVIDER }}
+          DSPY_MODEL: ${{ secrets.DSPY_MODEL }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
+        run: |
+          python scripts/eval_conversations.py \
+            --runs 1 \
+            --output-json eval_results.json \
+            --output-md eval_report.md
+          echo "eval_exit=$?" >> $GITHUB_OUTPUT
+
+      - name: Upload evaluation artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: conversation-eval-report
+          path: |
+            eval_results.json
+            eval_report.md
+          retention-days: 30
+
+      - name: Analyze low-score scenarios with AI
+        if: always() && steps.eval.outputs.avg_score != '' && steps.eval.outputs.blocking_risk_count != '0' || steps.eval.outputs.pass_rate < env.WARN_PASS_RATE
+        env:
+          AI_PROVIDER: ${{ env.AI_PROVIDER }}
+          AI_MODEL: ${{ env.AI_MODEL_SMART }}
+          GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
+        run: |
+          if [ -f eval_report.md ]; then
+            python scripts/analyze_failures.py \
+              --agent gatekeeper \
+              --test-log eval_report.md \
+              --output eval_analysis.md || true
+          fi
+
+      - name: Comment PR with conversation eval results
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const avgScore = parseFloat('${{ steps.eval.outputs.avg_score }}' || '0');
+            const passRate = parseFloat('${{ steps.eval.outputs.pass_rate }}' || '0');
+            const blocking = parseInt('${{ steps.eval.outputs.blocking_risk_count }}' || '0');
+            const avgTurns = '${{ steps.eval.outputs.avg_agent_turns }}' || '?';
+            const total = '${{ steps.eval.outputs.total_conversations }}' || '?';
+            const minRate = parseFloat('${{ env.MIN_PASS_RATE }}');
+            const warnRate = parseFloat('${{ env.WARN_PASS_RATE }}');
+
+            let emoji = '✅';
+            let status = 'Aprovado';
+            if (blocking > 0) { emoji = '🚨'; status = 'BLOQUEIO DETECTADO'; }
+            else if (avgScore < minRate / 100) { emoji = '❌'; status = 'Reprovado'; }
+            else if (avgScore < warnRate / 100) { emoji = '⚠️'; status = 'Atenção'; }
+
+            let body = `## ${emoji} Eval Conversas (Sofia × Recepcionista) — ${status}\n\n`;
+            body += `| Métrica | Valor |\n`;
+            body += `|---------|-------|\n`;
+            body += `| Score médio | **${avgScore.toFixed(3)}** |\n`;
+            body += `| Taxa aprovação (≥0.70) | **${passRate.toFixed(1)}%** |\n`;
+            body += `| Turnos médios Sofia | ${avgTurns} |\n`;
+            body += `| BLOCKED_RISK | ${blocking > 0 ? '🚨 **' + blocking + '** — Sofia está insistente!' : '✅ 0'} |\n`;
+            body += `| Total conversas | ${total} |\n\n`;
+
+            if (blocking > 0) {
+              body += `> ⚠️ **Ação necessária:** BLOCKED_RISK detectado. Sofia está ultrapassando o limite de objeções.\n`;
+              body += `> Verifique \`MAX_OBJECTION_TURNS\` em \`agent.py\` e os padrões em \`IMMEDIATE_REJECTION_PATTERNS\`.\n\n`;
+            }
+
+            if (fs.existsSync('eval_report.md')) {
+              const report = fs.readFileSync('eval_report.md', 'utf8');
+              // Include the scenario score table (lines between "Score Médio por Cenário" and next "###")
+              const tableMatch = report.match(/### 🗂️ Score Médio por Cenário\n\n([\s\S]*?)(?=\n###)/);
+              if (tableMatch) {
+                body += `### 🗂️ Score por Cenário\n\n${tableMatch[1]}\n`;
+              }
+            }
+
+            if (fs.existsSync('eval_analysis.md')) {
+              body += `### 🤖 Análise AI (${process.env.AI_MODEL_SMART || 'AI'})\n\n`;
+              body += fs.readFileSync('eval_analysis.md', 'utf8');
+              body += '\n';
+            }
+
+            body += `\n---\n_Ver detalhes completos no artifact \`conversation-eval-report\` deste run._`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+      - name: Fail if blocking risk detected
+        if: steps.eval.outputs.blocking_risk_count != '0' && steps.eval.outputs.blocking_risk_count != ''
+        run: |
+          echo "🚨 BLOCKED_RISK detectado: ${{ steps.eval.outputs.blocking_risk_count }} conversa(s)"
+          echo "Sofia está sendo insistente — risco real de bloqueio no WhatsApp!"
+          exit 1
+
+      - name: Fail if avg score below minimum
+        if: steps.eval.outputs.avg_score != ''
+        run: |
+          AVG=${{ steps.eval.outputs.avg_score }}
+          MIN=${{ env.MIN_PASS_RATE }}
+          # Convert MIN from percentage (e.g. 90) to decimal (0.90) for comparison
+          MIN_DECIMAL=$(echo "scale=2; $MIN / 100" | bc)
+          echo "Score médio: ${AVG} (mínimo convertido: ${MIN_DECIMAL})"
+          if (( $(echo "$AVG < $MIN_DECIMAL" | bc -l) )); then
+            echo "❌ Score médio abaixo do mínimo!"
+            exit 1
+          fi
+
+  # ============================================================================
   # JOB 3: Geração de novos cenários (semanal ou manual)
   # Chame manualmente: Actions → "SDR Agent CI" → "Run workflow"
   # ============================================================================
