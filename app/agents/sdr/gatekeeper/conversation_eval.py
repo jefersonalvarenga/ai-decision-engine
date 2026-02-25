@@ -14,12 +14,40 @@ Scoring rubric:
 """
 
 import time
+import random
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, Callable, Any
 from datetime import datetime
 
 from .receptionist_sim import ReceptionistSimulator, ReceptionistScenario, SCENARIO_EXPECTED_OUTCOMES
 from .agent import GatekeeperAgent
+
+
+# ============================================================================
+# RETRY WITH EXPONENTIAL BACKOFF (handles 429 / rate limit errors)
+# ============================================================================
+
+def _call_with_retry(fn: Callable, *args, max_retries: int = 4, **kwargs) -> Any:
+    """
+    Call fn(*args, **kwargs) with exponential backoff on rate limit errors.
+    Handles OpenAI/LiteLLM 429 and transient network errors.
+    """
+    for attempt in range(max_retries):
+        try:
+            return fn(*args, **kwargs)
+        except Exception as e:
+            err_str = str(e).lower()
+            is_rate_limit = "429" in str(e) or "rate_limit" in err_str or "ratelimit" in err_str
+            is_transient = "500" in str(e) or "502" in str(e) or "503" in str(e) or "timeout" in err_str
+
+            if (is_rate_limit or is_transient) and attempt < max_retries - 1:
+                # Exponential backoff: 10s, 20s, 40s + jitter
+                wait = (10 * (2 ** attempt)) + random.uniform(0, 3)
+                print(f"  ⏳ {'Rate limit' if is_rate_limit else 'Transient error'} "
+                      f"(attempt {attempt + 1}/{max_retries}), aguardando {wait:.1f}s...")
+                time.sleep(wait)
+            else:
+                raise
 
 
 # ============================================================================
@@ -166,7 +194,8 @@ class ConversationEvaluator:
             # ---- Sofia's turn ----
             attempt_count = agent_turn_count  # messages already sent
 
-            sofia_result = self.gatekeeper.forward(
+            sofia_result = _call_with_retry(
+                self.gatekeeper.forward,
                 clinic_name=clinic_name,
                 conversation_history=history.copy(),
                 latest_message=history[-1]["content"] if history else None,
@@ -212,7 +241,8 @@ class ConversationEvaluator:
                     print(f"  ⏸  Sofia aguardando (should_send=False, stage={stage})")
 
             # ---- Receptionist's turn ----
-            receptionist_result = self.receptionist.forward(
+            receptionist_result = _call_with_retry(
+                self.receptionist.forward,
                 scenario=scenario,
                 clinic_name=clinic_name,
                 conversation_history=history.copy(),
@@ -266,6 +296,7 @@ class ConversationEvaluator:
         clinic_names: Optional[list[str]] = None,
         runs_per_scenario: int = 1,
         verbose: bool = False,
+        delay_between_runs: float = 5.0,
     ) -> list[ConversationResult]:
         """
         Run multiple conversations across all (or selected) scenarios.
@@ -307,6 +338,13 @@ class ConversationEvaluator:
                 if verbose:
                     emoji = "✅" if result.score >= 0.7 else ("⚠️" if result.score >= 0.3 else "❌")
                     print(f"\n  {emoji} Score: {result.score:.2f} ({result.score_label}) | {result.agent_turn_count} turns Sofia")
+
+                # Cooldown between conversations to avoid TPM rate limits
+                is_last = (i == len(scenarios) - 1) and (run == runs_per_scenario - 1)
+                if delay_between_runs > 0 and not is_last:
+                    if verbose:
+                        print(f"  ⏸  Cooldown {delay_between_runs}s...")
+                    time.sleep(delay_between_runs)
 
         return results
 

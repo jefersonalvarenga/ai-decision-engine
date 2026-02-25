@@ -302,6 +302,11 @@ def main() -> None:
         metavar="SCORE",
         help=f"Score médio mínimo para CI pass (padrão: {MIN_AVG_SCORE})",
     )
+    parser.add_argument(
+        "--delay", type=float, default=5.0,
+        metavar="SECS",
+        help="Delay em segundos entre conversas para evitar TPM rate limit (padrão: 5.0)",
+    )
     args = parser.parse_args()
 
     # ── Configure DSPy LM ─────────────────────────────────────────────────
@@ -327,6 +332,7 @@ def main() -> None:
         scenarios=scenarios,
         runs_per_scenario=args.runs,
         verbose=args.verbose,
+        delay_between_runs=args.delay,
     )
 
     summary = summarize_results(results)
