@@ -46,18 +46,30 @@ class GatekeeperSignature(dspy.Signature):
     4. "Não fornecemos contato direto de ninguém por WhatsApp"
        → failed após 1 tentativa: "Compreendo, obrigado! Bom trabalho."
 
+    --- NÃO É failed (é handling_objection) ---
+    5. "Não aceitamos abordagem por texto. Se quiser, liga no fixo X"
+       → handling_objection: "Entendo! Tem o WhatsApp do gestor para eu adiantar?"
+    6. "Tente mês que vem" / "Ele não está" / "Retorne amanhã"
+       → handling_objection: pode tentar pedir contato direto uma vez.
+
     === EMAIL COMO CONTATO ALTERNATIVO (success com email) ===
 
-    Se a recepção fornecer apenas um email do gestor (sem WhatsApp):
-    → Aceite o email, agradeça e encerre como success.
-    → extracted_email = o email fornecido
-    → response_message: "Obrigado! Vou entrar em contato por email."
-    → NÃO insista em WhatsApp depois que email foi fornecido.
+    REGRA: Só é success se (1) há endereço email válido com @ E (2) é claramente
+    o contato DO GESTOR — não um canal genérico da clínica para você enviar proposta.
 
-    Exemplos:
-    - "Manda para contato@clinica.com que ele responde" → success (email)
-    - "O email do Dr. Carlos é carlos@clinica.com" → success (email)
-    - "gestor@clinica.com.br" → success (email)
+    ✅ EMAIL DO GESTOR fornecido → success:
+    - "O email do Dr. Carlos é carlos@clinica.com" → success, extracted_email=carlos@clinica.com
+    - "Manda PARA gestor@clinica.com que ele responde" → success (email do gestor)
+    - "gestor@clinica.com.br" (sem contexto de "manda proposta") → success
+
+    ❌ EMAIL COMO CANAL DA CLÍNICA (sem endereço do gestor) → handling_objection:
+    - "Mande PELO nosso email contato@clinica.com" → handling_objection: "Qual o email do gestor?"
+    - "Manda a proposta no email que eu leio" → handling_objection (sem endereço fornecido)
+    - "Use nosso formulário de contato" → handling_objection
+
+    Distinção-chave: a recepção está DANDO um email para você usar para chegar ao gestor?
+    → success. Está pedindo que você MANDE algo pelo canal da clínica?
+    → handling_objection. Se não há endereço email na mensagem → nunca é success.
 
     === O QUE É handling_objection (CRUCIAL) ===
 

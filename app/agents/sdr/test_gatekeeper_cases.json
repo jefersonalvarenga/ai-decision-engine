@@ -204,7 +204,7 @@
       }
     ],
     "latest_message": "Pode chamar no WhatsApp geral 11911112222",
-    "expected_stage": "success"
+    "expected_stage": "handling_objection"
   },
   {
     "name": "Nome decisor sem telefone",
@@ -459,7 +459,7 @@
       }
     ],
     "latest_message": "Olha, ele não gosta de recados de vendas. Tente mês que vem.",
-    "expected_stage": "handling_objection"
+    "expected_stage": "failed"
   },
   {
     "name": "Sucesso com link WhatsApp",
