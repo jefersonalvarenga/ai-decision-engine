@@ -28,7 +28,7 @@ class EasyScaleSettings(BaseSettings):
     openai_api_key: Optional[str] = Field(default=None, env="OPENAI_API_KEY")
     anthropic_api_key: Optional[str] = Field(default=None, env="ANTHROPIC_API_KEY")
     groq_api_key: Optional[str] = Field(default=None, env="GROQ_API_KEY")
-    glm_api_key: Optional[str] = Field(default=None, validation_alias="GLM-API-KEY")
+    glm_api_key: Optional[str] = Field(default=None, env="GLM_API_KEY")
 
     # API Authentication
     api_key: Optional[str] = Field(default=None, env="API_KEY")
@@ -65,7 +65,7 @@ def init_dspy() -> None:
         # Novo padrão DSPy 2.5+
         if settings.dspy_provider == "glm":
             lm = dspy.LM(
-                model="openai/glm-5",
+                model=f"openai/{settings.dspy_model}",
                 api_key=api_key,
                 api_base="https://open.bigmodel.cn/api/paas/v4/",
                 temperature=settings.dspy_temperature,

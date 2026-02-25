@@ -34,6 +34,7 @@ _ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 if _ROOT not in sys.path:
     sys.path.insert(0, _ROOT)
 
+from app.core.config import init_dspy
 from app.agents.sdr.gatekeeper.conversation_eval import (
     ConversationEvaluator,
     ConversationResult,
@@ -302,6 +303,9 @@ def main() -> None:
         help=f"Score médio mínimo para CI pass (padrão: {MIN_AVG_SCORE})",
     )
     args = parser.parse_args()
+
+    # ── Configure DSPy LM ─────────────────────────────────────────────────
+    init_dspy()
 
     # ── Resolve scenarios ──────────────────────────────────────────────────
     if args.scenarios:
