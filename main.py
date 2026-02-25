@@ -103,6 +103,7 @@ class GatekeeperResponse(BaseModel):
     response_message: str
     conversation_stage: str
     extracted_manager_contact: Optional[str] = None
+    extracted_manager_email: Optional[str] = None
     extracted_manager_name: Optional[str] = None
     should_send_message: bool
     reasoning: str
@@ -267,6 +268,7 @@ async def sdr_gatekeeper(request: GatekeeperRequest):
             response_message=result.get("response_message", ""),
             conversation_stage=result.get("conversation_stage", "opening"),
             extracted_manager_contact=result.get("extracted_manager_contact"),
+            extracted_manager_email=result.get("extracted_manager_email"),
             extracted_manager_name=result.get("extracted_manager_name"),
             should_send_message=result.get("should_send_message", False),
             reasoning=result.get("reasoning", ""),
