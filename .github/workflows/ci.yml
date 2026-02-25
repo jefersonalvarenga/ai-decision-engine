@@ -188,7 +188,7 @@ jobs:
           # GLM não tem rate limit rígido de TPM e é gratuito, preservando
           # os créditos OpenAI para o job test-gatekeeper (cenários unitários).
           DSPY_PROVIDER: "glm"
-          DSPY_MODEL: "glm-4-flash"
+          DSPY_MODEL: "glm-4.7"
           GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
         run: |
           python scripts/eval_conversations.py \
