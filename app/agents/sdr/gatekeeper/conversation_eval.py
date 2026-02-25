@@ -119,7 +119,8 @@ def score_conversation(result: ConversationResult) -> tuple[float, str]:
     """
     captured_phone = bool(result.contact_captured)
     captured_email = bool(result.email_captured)
-    graceful_denied = result.final_stage == "denied" and result.goodbye_sent
+    # Agent usa "failed" para encerrar educadamente — "denied" nunca é retornado
+    graceful_denied = result.final_stage in ("failed", "denied") and result.goodbye_sent
     stuck = result.timed_out or result.final_stage not in ["success", "failed", "denied"]
     insistent = result.objection_turn_count > 2
 

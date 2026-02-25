@@ -207,17 +207,16 @@ jobs:
             eval_report.md
           retention-days: 30
 
-      - name: Analyze low-score scenarios with AI
-        if: always() && steps.eval.outputs.avg_score != '' && steps.eval.outputs.blocking_risk_count != '0' || steps.eval.outputs.pass_rate < env.WARN_PASS_RATE
+      - name: Analyze eval results with GLM-5
+        if: always()
         env:
-          AI_PROVIDER: ${{ env.AI_PROVIDER }}
           AI_MODEL: ${{ env.AI_MODEL_SMART }}
           GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
         run: |
-          if [ -f eval_report.md ]; then
-            python scripts/analyze_failures.py \
-              --agent gatekeeper \
-              --test-log eval_report.md \
+          if [ -f eval_results.json ]; then
+            python scripts/analyze_eval_report.py \
+              --eval-json eval_results.json \
+              --signature app/agents/sdr/gatekeeper/signature.py \
               --output eval_analysis.md || true
           fi
 
