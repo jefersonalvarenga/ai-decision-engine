@@ -261,11 +261,12 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git config user.name "github-actions[bot]"
           git add app/agents/sdr/gatekeeper/signature.py
-          git commit -m "🤖 auto-tune: GLM-5 otimiza signature (score anterior: ${SCORE})
+          git commit -m "🤖 auto-tune: GLM-5 otimiza signature (score anterior: ${SCORE}) [skip ci]
 
 ${RATIONALE}"
           git push
-          echo "✅ Patch aplicado e commitado! Próxima CI rodará com nova signature."
+          echo "✅ Patch aplicado e commitado."
+          echo "   [skip ci] → próximo eval só roda no próximo push manual."
           echo "   Score anterior: ${SCORE}"
 
       - name: Upload evaluation artifacts
