@@ -34,10 +34,17 @@ COMMENT ON TABLE gk_discovered_cases IS
 
 -- Grants — cobre todos os roles que Supabase/n8n pode usar
 -- (postgres = owner via SQL Editor, service_role = pooler, anon/authenticated/authenticator = PostgREST)
+-- (n8n_gatekeeper = role customizado usado pela credential Postgres do n8n)
 ALTER TABLE gk_discovered_cases OWNER TO postgres;
 GRANT ALL ON TABLE gk_discovered_cases TO postgres;
 GRANT ALL ON TABLE gk_discovered_cases TO service_role;
 GRANT ALL ON TABLE gk_discovered_cases TO anon;
 GRANT ALL ON TABLE gk_discovered_cases TO authenticated;
 GRANT ALL ON TABLE gk_discovered_cases TO authenticator;
+GRANT ALL ON TABLE gk_discovered_cases TO n8n_gatekeeper;
+
+-- Garante que tabelas futuras criadas pelo postgres já nasçam com grant para n8n_gatekeeper
+ALTER DEFAULT PRIVILEGES IN SCHEMA public
+  GRANT ALL ON TABLES TO n8n_gatekeeper;
+
 NOTIFY pgrst, 'reload schema';
