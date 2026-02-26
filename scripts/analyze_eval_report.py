@@ -149,15 +149,24 @@ com objetividade e proponha correções concretas e diretas.
 Seja técnico. Foque em causa raiz, não em sintomas.
 """
 
+PATCH_SYSTEM_PROMPT = """\
+Você é um engenheiro sênior especialista em DSPy e prompt engineering para agentes SDR.
+Sua tarefa é reescrever as instruções (docstring) da GatekeeperSignature com base nos erros observados.
+Responda APENAS com JSON válido, sem markdown, sem explicações fora do JSON.
+"""
 
-def analyze(eval_json: str, signature_path: str, output_path: str, model: str) -> None:
+
+def analyze(eval_json: str, signature_path: str, output_path: str, model: str,
+            patch_output: str | None = None) -> None:
     with open(eval_json, encoding="utf-8") as f:
         data = json.load(f)
 
+    signature_full = ""
     signature_snippet = ""
     if os.path.exists(signature_path):
         with open(signature_path, encoding="utf-8") as f:
-            signature_snippet = f.read()
+            signature_full = f.read()
+        signature_snippet = signature_full
 
     summary = data["summary"]
     avg_score = summary["avg_score"]
@@ -223,7 +232,74 @@ Máximo 700 palavras. Seja direto e técnico.
         f.write(header + result)
 
     print(f"✅ Análise salva em: {output_path}")
-    print(f"\n--- Preview ---\n{result[:600]}...\n")
+    print(f"\n--- Preview ---\n{result[:800]}...\n")
+
+    # -----------------------------------------------------------------------
+    # PATCH GENERATION: segunda chamada para gerar patch da signature
+    # Só executa quando score < 0.80 E há cenários < 0.70 E foi solicitado
+    # -----------------------------------------------------------------------
+    if patch_output and avg_score < 0.80 and low_scenarios and signature_full:
+        _generate_patch(data, signature_full, model, patch_output, low_scenarios)
+
+
+def _generate_patch(data: dict, signature_full: str, model: str,
+                    patch_output: str, low_scenarios: list) -> None:
+    """Pede ao GLM-5 uma versão melhorada da docstring da GatekeeperSignature."""
+
+    # Extrai só a docstring atual para enviar ao modelo
+    import re
+    doc_match = re.search(
+        r'(class GatekeeperSignature\(dspy\.Signature\):)\s*("""[\s\S]*?""")',
+        signature_full
+    )
+    current_docstring = doc_match.group(2) if doc_match else signature_full[:4000]
+
+    low_summary = "\n".join(
+        f"- `{s}`: score {data['summary']['scenario_avg_score'].get(s, '?')}"
+        for s in low_scenarios
+    )
+
+    patch_prompt = f"""Os seguintes cenários de avaliação estão com score baixo (< 0.70):
+{low_summary}
+
+Esta é a docstring atual da GatekeeperSignature:
+{current_docstring}
+
+Reescreva a docstring para corrigir os problemas observados nos cenários acima.
+Mantenha toda a estrutura existente, apenas ajuste as instruções problemáticas.
+
+Responda APENAS com este JSON (sem markdown, sem texto fora do JSON):
+{{
+  "new_docstring": "... texto completo da nova docstring (entre aspas triplas) ...",
+  "rationale": "uma frase explicando as principais mudanças"
+}}
+
+IMPORTANTE: new_docstring deve começar com triple-quote (\"\"\") e terminar com triple-quote (\"\"\").
+Não inclua 'class GatekeeperSignature(dspy.Signature):' no new_docstring, apenas o conteúdo interno.
+"""
+
+    print(f"🔧 Gerando patch da signature para corrigir: {', '.join(low_scenarios)}...")
+    try:
+        raw = call_glm(model, PATCH_SYSTEM_PROMPT, patch_prompt)
+        # Remove possíveis blocos de código markdown do JSON
+        raw = raw.strip()
+        if raw.startswith("```"):
+            raw = re.sub(r"^```[a-z]*\n?", "", raw)
+            raw = re.sub(r"\n?```$", "", raw)
+
+        patch_data = json.loads(raw)
+        patch_data["low_scenarios"] = low_scenarios
+        patch_data["avg_score"] = data["summary"]["avg_score"]
+        patch_data["generated_at"] = datetime.now().isoformat()
+
+        with open(patch_output, "w", encoding="utf-8") as f:
+            json.dump(patch_data, f, ensure_ascii=False, indent=2)
+
+        print(f"✅ Patch salvo em: {patch_output}")
+        print(f"   Rationale: {patch_data.get('rationale', '—')}")
+    except (json.JSONDecodeError, KeyError) as e:
+        print(f"⚠️ Não foi possível gerar patch estruturado: {e}")
+        print(f"   Raw response (300 chars): {raw[:300]}")
 
 
 # ============================================================================
@@ -246,6 +322,10 @@ def main() -> None:
         "--output", default="eval_analysis.md",
         help="Arquivo de saída markdown (padrão: eval_analysis.md)"
     )
+    parser.add_argument(
+        "--patch-output", default=None,
+        help="Se informado, gera um patch JSON para signature.py quando score < 0.80"
+    )
     args = parser.parse_args()
 
     model = os.environ.get("AI_MODEL", "glm-5")
@@ -254,7 +334,8 @@ def main() -> None:
         print(f"❌ Arquivo não encontrado: {args.eval_json}", file=sys.stderr)
         sys.exit(1)
 
-    analyze(args.eval_json, args.signature, args.output, model)
+    analyze(args.eval_json, args.signature, args.output, model,
+            patch_output=args.patch_output)
 
 
 if __name__ == "__main__":

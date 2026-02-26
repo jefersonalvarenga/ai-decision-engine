@@ -164,12 +164,16 @@ jobs:
     name: "🎭 Conversation Eval (Sofia × Receptionist)"
     runs-on: ubuntu-latest
     permissions:
+      contents: write       # necessário para auto-apply commits
       issues: write
       pull-requests: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # fetch-depth 0 para git log funcionar no auto-apply
+          fetch-depth: 0
 
       - name: Setup Python
         uses: actions/setup-python@v5
@@ -198,16 +202,6 @@ jobs:
             --output-md eval_report.md
           echo "eval_exit=$?" >> $GITHUB_OUTPUT
 
-      - name: Upload evaluation artifacts
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: conversation-eval-report
-          path: |
-            eval_results.json
-            eval_report.md
-          retention-days: 30
-
       - name: Analyze eval results with GLM-5
         if: always()
         env:
@@ -218,8 +212,73 @@ jobs:
             python scripts/analyze_eval_report.py \
               --eval-json eval_results.json \
               --signature app/agents/sdr/gatekeeper/signature.py \
-              --output eval_analysis.md || true
+              --output eval_analysis.md \
+              --patch-output signature_patch.json || true
+
+            # Escreve análise no Job Summary (visível direto na UI do GitHub Actions)
+            if [ -f eval_analysis.md ]; then
+              echo "## 🤖 Análise GLM-5" >> $GITHUB_STEP_SUMMARY
+              cat eval_analysis.md >> $GITHUB_STEP_SUMMARY
+            fi
           fi
+
+      - name: Auto-apply GLM-5 signature patch
+        # Só em push (não PRs) e nunca em commits de auto-tune (evita loop infinito)
+        if: |
+          always() &&
+          github.event_name == 'push' &&
+          !contains(github.event.head_commit.message, 'auto-tune')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ ! -f signature_patch.json ]; then
+            echo "ℹ️  Nenhum patch gerado — signature ok ou score acima do threshold."
+            exit 0
+          fi
+
+          python scripts/apply_signature_patch.py \
+            --patch signature_patch.json \
+            --target app/agents/sdr/gatekeeper/signature.py
+          APPLY_EXIT=$?
+
+          if [ $APPLY_EXIT -eq 2 ]; then
+            echo "ℹ️  Patch sem mudanças efetivas na signature."
+            exit 0
+          elif [ $APPLY_EXIT -ne 0 ]; then
+            echo "❌ Erro ao aplicar patch (exit $APPLY_EXIT)."
+            exit 0  # não falha o job, só loga
+          fi
+
+          # Confirma se houve mudança real no arquivo
+          if git diff --quiet app/agents/sdr/gatekeeper/signature.py; then
+            echo "ℹ️  Sem mudanças detectadas após aplicar patch."
+            exit 0
+          fi
+
+          # Commit e push
+          SCORE=$(python -c "import json; d=json.load(open('eval_results.json')); print(d['summary']['avg_score'])" 2>/dev/null || echo "?")
+          RATIONALE=$(python -c "import json; d=json.load(open('signature_patch.json')); print(d.get('rationale',''))" 2>/dev/null || echo "")
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name "github-actions[bot]"
+          git add app/agents/sdr/gatekeeper/signature.py
+          git commit -m "🤖 auto-tune: GLM-5 otimiza signature (score anterior: ${SCORE})
+
+${RATIONALE}"
+          git push
+          echo "✅ Patch aplicado e commitado! Próxima CI rodará com nova signature."
+          echo "   Score anterior: ${SCORE}"
+
+      - name: Upload evaluation artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: conversation-eval-report
+          path: |
+            eval_results.json
+            eval_report.md
+            eval_analysis.md
+            signature_patch.json
+          retention-days: 30
 
       - name: Comment PR with conversation eval results
         if: github.event_name == 'pull_request'
