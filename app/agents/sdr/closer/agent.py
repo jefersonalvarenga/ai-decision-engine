@@ -7,6 +7,10 @@ import re
 from typing import Optional, List
 from datetime import datetime
 from .signature import CloserSignature
+from .utils import safe_str
+
+
+MAX_ATTEMPTS = 5  # Force lost after N attempts without progress (greeting/pitching)
 
 
 class CloserAgent(dspy.Module):
@@ -15,9 +19,10 @@ class CloserAgent(dspy.Module):
     Uses Chain of Thought for better reasoning about objections and timing.
     """
 
-    def __init__(self):
+    def __init__(self, max_attempts: int = MAX_ATTEMPTS):
         super().__init__()
         self.process = dspy.ChainOfThought(CloserSignature)
+        self.max_attempts = max_attempts
 
     def _parse_datetime(self, dt_str: Optional[str]) -> Optional[str]:
         """
@@ -56,12 +61,6 @@ class CloserAgent(dspy.Module):
                 pass
 
         return None
-
-    def _split_messages(self, message: str) -> List[str]:
-        """Split multiple messages separated by |||"""
-        if "|||" in message:
-            return [m.strip() for m in message.split("|||") if m.strip()]
-        return [message.strip()]
 
     def forward(
         self,
@@ -104,14 +103,6 @@ class CloserAgent(dspy.Module):
             attempt_count=str(attempt_count),
         )
 
-        # Safe attribute access — GLM-5 sometimes returns malformed types
-        def safe_str(val, default="") -> str:
-            if val is None:
-                return default
-            if isinstance(val, str):
-                return val
-            return str(val)
-
         # Parse datetime if meeting was scheduled
         meeting_datetime = self._parse_datetime(safe_str(result.meeting_datetime, "null"))
 
@@ -131,18 +122,29 @@ class CloserAgent(dspy.Module):
         if meeting_datetime and stage not in ["scheduled", "confirming"]:
             meeting_datetime = None
 
-        # 1b. If scheduled but latest_message is a counter-proposal question about time,
-        #     downgrade to confirming. Ignore logistic questions (link, endereço, etc.)
+        # 1b. If LLM classified as scheduled but latest_message contains
+        #     reschedule/cancel keywords, downgrade to confirming so the agent
+        #     can re-negotiate the time or try to save the meeting.
+        #     Exception: if the message ALSO contains confirmation words
+        #     (e.g. "ótimo, vamos remarcar" is unlikely, but "Pode ser, 15h tá ótimo"
+        #     matched "pode ser" before — so confirm_words take priority to avoid
+        #     false downgrades).
         if stage == "scheduled" and latest_message:
             msg_lower = latest_message.lower()
-            # Keywords that indicate reschedule/cancel (NOT a confirmation)
-            reschedule_keywords = ["não dá", "trocar", "mudar", "muda",
-                                   "outro horário", "outro dia", "remarcar", "adiar",
-                                   "reagendar", "cancelar", "cancela", "imprevisto"]
-            # Confirmation words that override reschedule detection
+            # Exact phrases — unambiguous, no context needed
+            exact_keywords = ["não dá", "outro horário", "outro dia", "remarcar",
+                              "adiar", "reagendar", "imprevisto"]
+            # Generic verbs — only match near scheduling context words
+            # e.g. "mudar a reunião" matches, "mudar o mundo" does not
+            context_patterns = [
+                r"(trocar|mudar|muda).{0,15}(horário|hora|dia|data|reunião|agenda|encontro)",
+                r"(cancelar|cancela).{0,15}(reunião|agenda|encontro|demo|chamada)",
+            ]
             confirm_words = ["ótimo", "combinado", "perfeito", "fechado", "até lá",
                              "até amanhã", "tá ótimo", "tá bom"]
-            has_reschedule = any(kw in msg_lower for kw in reschedule_keywords)
+            has_exact = any(kw in msg_lower for kw in exact_keywords)
+            has_context = any(re.search(p, msg_lower) for p in context_patterns)
+            has_reschedule = has_exact or has_context
             has_confirm = any(cw in msg_lower for cw in confirm_words)
             if has_reschedule and not has_confirm:
                 stage = "confirming"
@@ -156,8 +158,8 @@ class CloserAgent(dspy.Module):
         if stage == "proposing_time" and not available_slots:
             stage = "pitching"
 
-        # 4. Force lost if 5+ attempts without progress
-        if attempt_count >= 5 and stage in ["greeting", "pitching"]:
+        # 4. Force lost if max attempts reached without progress
+        if attempt_count >= self.max_attempts and stage in ["greeting", "pitching"]:
             stage = "lost"
             should_continue = False
 
