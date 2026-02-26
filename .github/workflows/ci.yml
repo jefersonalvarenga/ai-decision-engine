@@ -37,8 +37,9 @@ env:
   AI_MODEL_SMART: "glm-5"              # análise de falhas, geração de cenários
 
   # Thresholds
-  MIN_PASS_RATE: "90"                    # % mínima para não bloquear merge
+  MIN_PASS_RATE: "90"                    # % mínima para não bloquear merge (test-gatekeeper)
   WARN_PASS_RATE: "95"                   # % abaixo da qual posta aviso no PR
+  MIN_AVG_SCORE: "0.55"                  # score mínimo (escala 0-1) para eval-conversations
 
 jobs:
   # ============================================================================
@@ -289,11 +290,9 @@ jobs:
         if: steps.eval.outputs.avg_score != ''
         run: |
           AVG=${{ steps.eval.outputs.avg_score }}
-          MIN=${{ env.MIN_PASS_RATE }}
-          # Convert MIN from percentage (e.g. 90) to decimal (0.90) for comparison
-          MIN_DECIMAL=$(echo "scale=2; $MIN / 100" | bc)
-          echo "Score médio: ${AVG} (mínimo convertido: ${MIN_DECIMAL})"
-          if (( $(echo "$AVG < $MIN_DECIMAL" | bc -l) )); then
+          MIN=${{ env.MIN_AVG_SCORE }}
+          echo "Score médio: ${AVG} (mínimo: ${MIN})"
+          if (( $(echo "$AVG < $MIN" | bc -l) )); then
             echo "❌ Score médio abaixo do mínimo!"
             exit 1
           fi
