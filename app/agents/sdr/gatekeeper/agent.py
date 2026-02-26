@@ -110,18 +110,19 @@ class GatekeeperAgent(dspy.Module):
 
     def _count_objection_turns(self, conversation_history: list) -> int:
         """
-        Count how many agent messages were sent while in handling_objection.
-        Used to enforce MAX_OBJECTION_TURNS limit.
-
-        Heuristic: count consecutive agent turns after the first human message
-        that didn't yield a contact. This approximates objection handling turns.
-        We count agent messages from position 2 onward (after opening + first human reply).
+        Conta turnos reais de handling_objection no histórico.
+        Usa o campo 'stage' por turno quando disponível (fonte exata).
+        Fallback: heurística de contagem se stage não estiver no histórico.
         """
         agent_turns = [t for t in conversation_history if t.get("role") == "agent"]
-        # First agent turn is greeting (opening), second is requesting.
-        # Objection handling starts from 3rd agent turn onward.
-        objection_turns = max(0, len(agent_turns) - 2)
-        return objection_turns
+
+        # Contagem exata: usa stage salvo por turno (quando n8n passa stage no histórico)
+        turns_with_stage = [t for t in agent_turns if t.get("stage")]
+        if turns_with_stage:
+            return sum(1 for t in turns_with_stage if t.get("stage") == "handling_objection")
+
+        # Fallback heurístico: assume que os 2 primeiros turnos são opening/requesting
+        return max(0, len(agent_turns) - 2)
 
     def forward(
         self,
@@ -167,22 +168,6 @@ class GatekeeperAgent(dspy.Module):
                 "should_send_message": True,
             }
 
-        # --- SMART FALLBACK 2: Max objection turns — graceful exit ---
-        objection_turns = self._count_objection_turns(conversation_history)
-        if objection_turns >= MAX_OBJECTION_TURNS:
-            return {
-                "reasoning": (
-                    f"Reached max objection turns ({objection_turns}/{MAX_OBJECTION_TURNS}). "
-                    "Sending graceful goodbye and marking as failed."
-                ),
-                "response_message": "Compreendo, obrigado pela atenção! Sucesso à clínica.",
-                "conversation_stage": "failed",
-                "extracted_manager_contact": None,
-                "extracted_manager_email": None,
-                "extracted_manager_name": None,
-                "should_send_message": True,
-            }
-
         result = self.process(
             clinic_name=clinic_name,
             conversation_history=str(conversation_history) if conversation_history else "[]",
@@ -204,6 +189,16 @@ class GatekeeperAgent(dspy.Module):
         stage = safe_str(result.conversation_stage, "handling_objection").lower().strip()
         if stage not in valid_stages:
             stage = "handling_objection"
+
+        # --- PÓS-CHECK: LLM confirmou que é objeção → conta objeções reais e decide ---
+        if stage == "handling_objection":
+            prior_objections = self._count_objection_turns(conversation_history)
+            total_objections = prior_objections + 1  # +1 pela atual
+            if total_objections >= MAX_OBJECTION_TURNS:
+                stage = "failed"
+                response_message = safe_str(result.response_message, "").strip()
+                if not response_message or response_message.lower() == "null":
+                    response_message = "Compreendo, obrigado pela atenção! Sucesso à clínica."
 
         # Get response message
         response_message = safe_str(result.response_message, "").strip()
