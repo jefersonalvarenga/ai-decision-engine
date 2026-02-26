@@ -32,6 +32,12 @@ COMMENT ON TABLE gk_discovered_cases IS
   'Avaliações automáticas de conversas reais pelo GLM. '
   'Fonte de novos casos de teste para o pipeline de auto-tuning.';
 
--- Grants (mesmo padrão das outras tabelas SDR)
-GRANT ALL ON gk_discovered_cases TO service_role;
-GRANT SELECT, INSERT ON gk_discovered_cases TO anon;
+-- Grants — cobre todos os roles que Supabase/n8n pode usar
+-- (postgres = owner via SQL Editor, service_role = pooler, anon/authenticated/authenticator = PostgREST)
+ALTER TABLE gk_discovered_cases OWNER TO postgres;
+GRANT ALL ON TABLE gk_discovered_cases TO postgres;
+GRANT ALL ON TABLE gk_discovered_cases TO service_role;
+GRANT ALL ON TABLE gk_discovered_cases TO anon;
+GRANT ALL ON TABLE gk_discovered_cases TO authenticated;
+GRANT ALL ON TABLE gk_discovered_cases TO authenticator;
+NOTIFY pgrst, 'reload schema';
