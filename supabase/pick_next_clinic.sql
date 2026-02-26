@@ -269,8 +269,9 @@ BEGIN
     SELECT
         c.c_place_id,
         c.c_clinic_name,
-        -- Modo homolog: substitui apenas o telefone — todos os outros dados são reais
-        CASE WHEN v_environment = 'homolog' THEN v_homolog_phone ELSE c.c_clinic_phone END,
+        -- Sempre retorna o phone real da clínica.
+        -- Redirecionamento para número de teste é feito via TEST_PHONE no n8n (Seleciona Template).
+        c.c_clinic_phone,
         c.c_lead_score,
         c.c_ads_group,
         c.c_google_ads_count,
