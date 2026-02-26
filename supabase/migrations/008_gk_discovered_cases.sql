@@ -31,3 +31,7 @@ CREATE INDEX IF NOT EXISTS idx_gk_discovered_cases_new_pattern
 COMMENT ON TABLE gk_discovered_cases IS
   'Avaliações automáticas de conversas reais pelo GLM. '
   'Fonte de novos casos de teste para o pipeline de auto-tuning.';
+
+-- Grants (mesmo padrão das outras tabelas SDR)
+GRANT ALL ON gk_discovered_cases TO service_role;
+GRANT SELECT, INSERT ON gk_discovered_cases TO anon;
