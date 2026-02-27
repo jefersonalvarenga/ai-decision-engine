@@ -74,6 +74,89 @@ from app.core.config import init_dspy
 
 
 # ============================================================================
+# JUDGE — avalia automaticamente se a resposta segue a estratégia
+# ============================================================================
+
+# Estratégia resumida para o juiz (não o prompt completo — só o fluxo principal)
+_GATEKEEPER_STRATEGY = """
+Você avalia se a Sofia (agente SDR) respondeu corretamente a uma recepcionista de clínica.
+
+ESTRATÉGIA CORRETA DA SOFIA:
+1. PRIMEIRA MSG (opening): Confirmar se é a clínica → "Bom dia, é da clínica X?"
+2. CLÍNICA CONFIRMOU (requesting): Pedir gestor → "Gostaria de falar com o gestor ou gestora"
+3. PERGUNTAM ASSUNTO pela 1ª vez (handling_objection): Resposta CURTA → "Seria sobre assunto comercial"
+3b. INSISTEM pela 2ª vez (handling_objection): Dar pitch resumido da EasyScale (IA no WhatsApp)
+3c. BLOQUEIAM 3ª vez (handling_objection): Pivotar para email → "Qual o email do gestor então?"
+4. DÃO CONTATO (success): Agradecer e encerrar → "Obrigado!"
+FAILED: após 3 handling_objection sem progresso, ou rejeição definitiva ("já disse que não", etc.)
+
+ERROS COMUNS A DETECTAR:
+- Dar o pitch da EasyScale na 1ª pergunta sobre assunto (deveria ser só "assunto comercial")
+- Pular etapas (ex: já dar email na 1ª objeção)
+- Não encerrar quando deveria (success/failed com should_continue=true incorreto)
+- Resposta genérica demais que não avança a conversa
+- Mensagem muito longa (>100 chars) para um canal WhatsApp
+"""
+
+import dspy as _dspy
+
+
+class _JudgeSignature(_dspy.Signature):
+    """Avalia se a resposta do agente SDR está correta para a situação."""
+    strategy:        str = _dspy.InputField(desc="Estratégia esperada do agente")
+    conversation:    str = _dspy.InputField(desc="Histórico completo da conversa (turnos anteriores)")
+    latest_message:  str = _dspy.InputField(desc="Última mensagem recebida da recepção")
+    agent_response:  str = _dspy.InputField(desc="Resposta que o agente gerou")
+    expected_stage:  str = _dspy.InputField(desc="Stage esperado para essa situação")
+    actual_stage:    str = _dspy.InputField(desc="Stage que o agente classificou")
+
+    is_valid: str = _dspy.OutputField(
+        desc="'true' se a resposta está correta e segue a estratégia, 'false' caso contrário"
+    )
+    reason: str = _dspy.OutputField(
+        desc="Explicação de 1-2 frases: por que está certo ou qual erro foi cometido"
+    )
+
+
+_judge = None  # lazy init — só cria depois do init_dspy()
+
+
+def judge_gatekeeper_response(scenario: dict, result: dict) -> dict:
+    """
+    Usa o LLM configurado para avaliar se a resposta do agente é correta.
+    Retorna {"valid": bool, "reason": str}
+    """
+    global _judge
+    if _judge is None:
+        _judge = _dspy.Predict(_JudgeSignature)
+
+    history = scenario.get("conversation_history", [])
+    conv_text = "\n".join(
+        f"{'Sofia' if t['role'] == 'agent' else 'Recepção'}: {t['content']}"
+        for t in history
+    ) or "(primeira mensagem — sem histórico)"
+
+    latest = scenario.get("latest_message") or "null (primeira mensagem)"
+
+    try:
+        verdict = _judge(
+            strategy=_GATEKEEPER_STRATEGY.strip(),
+            conversation=conv_text,
+            latest_message=str(latest),
+            agent_response=result.get("response_message", ""),
+            expected_stage=scenario.get("expected_stage", "?"),
+            actual_stage=result.get("conversation_stage", "?"),
+        )
+        is_valid = str(verdict.is_valid).strip().lower() == "true"
+        reason   = str(verdict.reason).strip()
+    except Exception as e:
+        is_valid = False
+        reason   = f"Erro ao chamar juiz: {e}"
+
+    return {"valid": is_valid, "reason": reason}
+
+
+# ============================================================================
 # TEST SCENARIOS - GATEKEEPER
 # ============================================================================
 
@@ -524,18 +607,13 @@ def main():
                             f"obtido={result.get('should_send_message')}"
                         )
 
-                # Check 3: response deve conter certas palavras-chave
-                resp_lower = result.get("response_message", "").lower()
-                for kw in scenario.get("expected_response_contains", []):
-                    if kw.lower() not in resp_lower:
-                        scenario_ok = False
-                        fail_reasons.append(f"resposta deveria conter: \"{kw}\"")
-
-                # Check 4: response NÃO pode conter palavras proibidas
-                for kw in scenario.get("forbidden_keywords", []):
-                    if kw.lower() in resp_lower:
-                        scenario_ok = False
-                        fail_reasons.append(f"resposta não deveria conter: \"{kw}\"")
+                # Check 3: juiz LLM — valida qualidade da resposta automaticamente
+                verdict = judge_gatekeeper_response(scenario, result)
+                judge_icon = "✅" if verdict["valid"] else "❌"
+                print(f"  {judge_icon} Juiz LLM   : {verdict['reason']}")
+                if not verdict["valid"]:
+                    scenario_ok = False
+                    fail_reasons.append(f"juiz: {verdict['reason']}")
 
                 if scenario_ok:
                     g_passed += 1
