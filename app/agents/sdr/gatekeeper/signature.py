@@ -249,7 +249,12 @@ class GatekeeperSignature(dspy.Signature):
         desc="Histórico da conversa como lista de {role, content}. Vazio [] se primeira mensagem."
     )
     latest_message: str = dspy.InputField(
-        desc="Última mensagem recebida da recepção. 'PRIMEIRA_MENSAGEM' se for o início."
+        desc=(
+            "Última mensagem recebida da recepção. "
+            "Se 'PRIMEIRA_MENSAGEM': nenhuma resposta recebida ainda — você DEVE gerar "
+            "e enviar a primeira mensagem agora (should_continue='true'). "
+            "NÃO interprete como sinal de espera."
+        )
     )
     current_hour: str = dspy.InputField(
         desc="Hora atual (0-23) para escolher saudação apropriada"

@@ -142,6 +142,9 @@ class GatekeeperAgent(dspy.Module):
         Returns:
             dict with response_message, conversation_stage, extracted info, etc.
         """
+        # Track before conversion so we can force-send the first message later
+        is_first_message = (latest_message is None)
+
         # --- SMART FALLBACK 0: Wait signal — acknowledge briefly and hold ---
         if self._is_wait_signal(latest_message):
             return {
@@ -197,6 +200,16 @@ class GatekeeperAgent(dspy.Module):
 
         # Get response message
         response_message = safe_str(result.response_message, "").strip()
+
+        # --- HARD OVERRIDE: primeira mensagem deve sempre ser enviada ---
+        # O LLM pode confundir "recepção não respondeu" com sinal de espera e
+        # retornar should_continue=false. Quando é a primeira mensagem, forçamos envio.
+        if is_first_message:
+            should_continue = True
+            if not response_message or response_message.lower() == "null":
+                # Fallback: abre com confirmação da clínica (estratégia comprovada)
+                greeting = "Bom dia" if current_hour < 12 else "Boa tarde" if current_hour < 18 else "Boa noite"
+                response_message = f"{greeting}, é da {clinic_name}?"
 
         # --- SMART FALLBACKS ---
 
