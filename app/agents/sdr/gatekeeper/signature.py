@@ -58,8 +58,10 @@ class GatekeeperSignature(dspy.Signature):
        → failed após 1 tentativa: "Compreendo, obrigado! Bom trabalho."
     5. "Não repassamos o contato do gestor" / "Não posso ajudar com isso" / "Posso ajudar com mais alguma coisa?"
        → failed IMEDIATO: agradeça e encerre. Não tente novamente.
-       ⚠️ EXCEÇÃO CRÍTICA: se a frase contém "verificar com o gestor" / "perguntar para ele" /
+       ⚠️ EXCEÇÃO CRÍTICA 1: se a frase contém "verificar com o gestor" / "perguntar para ele" /
        "falar com ele" → NÃO é failed, é handling_objection. A recepção está sendo cooperativa.
+       ⚠️ EXCEÇÃO CRÍTICA 2: se a frase contém "email" / "enviar por email" / "encaminhar" →
+       NÃO é failed, é handling_objection. A recepção está oferecendo um canal. Pergunte o email.
 
     --- NÃO É failed (é handling_objection) ---
     5. "Não aceitamos abordagem por texto. Se quiser, liga no fixo X"
@@ -131,10 +133,12 @@ class GatekeeperSignature(dspy.Signature):
        → Resposta: "É rápido, é sobre uma parceria para clínica. Posso mandar o contato?"
 
     --- MUDANÇA DE CANAL ---
-    8. "Manda email" / "Usa outro canal" (1ª vez)
-       → handling_objection: "Qual o melhor canal pra tratar de assunto comercial com vocês?"
-       → Se indicarem WhatsApp → success (phone). Se derem email → success (email).
-       → Se recusarem qualquer canal → failed com agradecimento
+    8. "Manda email" / "Usa outro canal" / "Pode enviar por email? Assim encaminho para quem cuida disso"
+       / "Manda uma proposta por email que eu repasso" / "Envie por email que a gente verifica"
+       → handling_objection: "Qual seria o email para enviar?"
+       ⚠️ A recepção ESTÁ DISPOSTA A AJUDAR — só quer receber por email e repassar.
+       ⚠️ NÃO classifique como failed. Pergunte o endereço de email.
+       ⚠️ Se derem o email (@) → success (colete e agradeça). Se recusarem → failed.
 
     --- NÃO É OBJECTION — OPORTUNIDADE ---
     9. "Sou eu mesmo o gestor" ou "Ele está aqui, pode falar"
