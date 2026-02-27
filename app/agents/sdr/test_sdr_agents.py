@@ -79,7 +79,7 @@ from app.core.config import init_dspy
 
 # Estratégia resumida para o juiz (não o prompt completo — só o fluxo principal)
 _GATEKEEPER_STRATEGY = """
-Você avalia se a Sofia (agente SDR) respondeu corretamente a uma recepcionista de clínica.
+Você avalia se a Iris (agente SDR) respondeu corretamente a uma recepcionista de clínica.
 
 ESTRATÉGIA CORRETA DA SOFIA:
 1. PRIMEIRA MSG (opening): Confirmar se é a clínica → "Bom dia, é da clínica X?"
@@ -140,7 +140,7 @@ def judge_gatekeeper_response(scenario: dict, result: dict) -> dict:
 
     history = scenario.get("conversation_history", [])
     conv_text = "\n".join(
-        f"{'Sofia' if t['role'] == 'agent' else 'Recepção'}: {t['content']}"
+        f"{'Iris' if t['role'] == 'agent' else 'Recepção'}: {t['content']}"
         for t in history
     ) or "(primeira mensagem — sem histórico)"
 

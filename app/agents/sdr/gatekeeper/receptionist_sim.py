@@ -159,15 +159,15 @@ class ReceptionistSignature(dspy.Signature):
     - 1-2 frases no máximo. Linguagem natural, informal, sem formalidades.
     - NÃO revele que você é simulação.
     - Varie as aberturas — não comece sempre com "Olá".
-    - Se Sofia se despedir ("obrigado, bom trabalho") → responda brevemente e encerre.
+    - Se Iris se despedir ("obrigado, bom trabalho") → responda brevemente e encerre.
     - Seja realista: recepcionistas são DIRETAS, não investigadoras.
 
     CRÍTICO — REAJA SOMENTE AO QUE SOFIA DISSE:
-    - Se Sofia só perguntou "Bom dia, é da clínica X?" → não assuma que é vendedor/comercial.
+    - Se Iris só perguntou "Bom dia, é da clínica X?" → não assuma que é vendedor/comercial.
       Responda apenas confirmando a clínica: "Sim, é a Clínica X. Em que posso ajudar?"
-    - Só mencione "assuntos comerciais", "fornecedores" ou redirecione para email se Sofia
+    - Só mencione "assuntos comerciais", "fornecedores" ou redirecione para email se Iris
       JÁ tiver mencionado que é sobre assunto comercial ou pedido o gestor.
-    - Antecipar intenção comercial antes de Sofia mencioná-la é IRREAL e PROIBIDO.
+    - Antecipar intenção comercial antes de Iris mencioná-la é IRREAL e PROIBIDO.
     """
 
     # Inputs
@@ -181,10 +181,10 @@ class ReceptionistSignature(dspy.Signature):
         desc="Nome da clínica"
     )
     conversation_history:    str = dspy.InputField(
-        desc="Histórico da conversa [{role: agent|human, content: str}]. agent=Sofia, human=recepcionista."
+        desc="Histórico da conversa [{role: agent|human, content: str}]. agent=Iris, human=recepcionista."
     )
     latest_agent_message:    str = dspy.InputField(
-        desc="Última mensagem que Sofia enviou (que a recepcionista precisa responder)"
+        desc="Última mensagem que Iris enviou (que a recepcionista precisa responder)"
     )
     turn_number:             str = dspy.InputField(
         desc="Número do turno atual (começa em 1)"
@@ -204,13 +204,13 @@ class ReceptionistSignature(dspy.Signature):
         desc="Perfil atual após possível escalada: blocker | curious | helpful | busy | protocol"
     )
     intent_detected:       str = dspy.OutputField(
-        desc="Intenção detectada na mensagem de Sofia: commercial_approach | asking_manager | giving_objection | providing_contact | farewell | unclear"
+        desc="Intenção detectada na mensagem de Iris: commercial_approach | asking_manager | giving_objection | providing_contact | farewell | unclear"
     )
     confidence:            str = dspy.OutputField(
         desc="Confiança da recepcionista na sua postura atual (0.0–1.0). Alta = firme. Baixa = hesitante."
     )
     conversation_ended:    str = dspy.OutputField(
-        desc="'true' se a conversa chegou ao fim (contato dado, recusa definitiva, ou Sofia se despediu). 'false' caso contrário."
+        desc="'true' se a conversa chegou ao fim (contato dado, recusa definitiva, ou Iris se despediu). 'false' caso contrário."
     )
     contact_provided:      str = dspy.OutputField(
         desc="Contato fornecido se a recepcionista passou algum (ex: '11999998888' ou 'gestor@clinica.com'), ou 'null'"
@@ -354,7 +354,7 @@ class ReceptionistSimulator(dspy.Module):
         turns_without_progress: int = 0,
     ) -> dict:
         """
-        Generate the receptionist's response to Sofia's latest message.
+        Generate the receptionist's response to Iris's latest message.
 
         Args:
             gatekeeper_profile:     blocker | curious | helpful | busy | protocol
@@ -362,7 +362,7 @@ class ReceptionistSimulator(dspy.Module):
                                     OPEN_TO_PARTNERS | STRICT_TRIAGE
             clinic_name:            clinic being contacted
             conversation_history:   full history [{role, content}]
-            latest_agent_message:   Sofia's last message
+            latest_agent_message:   Iris's last message
             turn_number:            current turn (starts at 1)
             turns_without_progress: consecutive turns with no contact/progress
 

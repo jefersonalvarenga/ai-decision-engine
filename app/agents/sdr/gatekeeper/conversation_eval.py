@@ -1,7 +1,7 @@
 """
 Conversation Evaluator — Multi-turn conversation runner + scoring.
 
-Orchestrates full conversations between GatekeeperAgent (Sofia) and
+Orchestrates full conversations between GatekeeperAgent (Iris) and
 ReceptionistSimulator (GLM-4-Flash), then scores outcomes.
 
 Scoring rubric:
@@ -67,7 +67,7 @@ def _call_with_retry(fn: Callable, *args, max_retries: int = 4, **kwargs) -> Any
 
 @dataclass
 class ConversationTurn:
-    role:             str           # "agent" (Sofia) | "human" (receptionist)
+    role:             str           # "agent" (Iris) | "human" (receptionist)
     content:          str
     stage:            Optional[str] = None    # GatekeeperAgent stage (agent turns only)
     intent_detected:  Optional[str] = None    # receptionist intent (human turns only)
@@ -175,7 +175,7 @@ def score_conversation(result: ConversationResult) -> tuple:
 
 class ConversationEvaluator:
     """
-    Runs full multi-turn conversations between Sofia (GatekeeperAgent)
+    Runs full multi-turn conversations between Iris (GatekeeperAgent)
     and the ReceptionistSimulator (GLM-4-Flash).
     """
 
@@ -243,7 +243,7 @@ class ConversationEvaluator:
 
         for turn_idx in range(self.MAX_TURNS):
 
-            # ── Sofia's turn ──────────────────────────────────────────────
+            # ── Iris's turn ──────────────────────────────────────────────
             sofia_result = _call_with_retry(
                 self.gatekeeper.forward,
                 clinic_name=clinic_name,
@@ -275,16 +275,16 @@ class ConversationEvaluator:
                 history.append({"role": "agent", "content": response})
                 agent_turn_count += 1
                 if verbose:
-                    print(f"  Sofia [{stage}]: {response}")
+                    print(f"  Iris [{stage}]: {response}")
 
-            # Terminal — stop after Sofia's last message
-            # Also stop if receptionist already ended (Sofia just sent her closing)
+            # Terminal — stop after Iris's last message
+            # Also stop if receptionist already ended (Iris just sent her closing)
             if stage in ["success", "failed"] or receptionist_ended:
                 break
 
             if not should_send:
                 if verbose:
-                    print(f"  Sofia aguardando (stage={stage})")
+                    print(f"  Iris aguardando (stage={stage})")
 
             # ── Receptionist's turn (GLM-4-Flash) ─────────────────────────
             rec_result = _call_with_retry(
@@ -333,7 +333,7 @@ class ConversationEvaluator:
             if rec_ended:
                 receptionist_ended = True
                 if verbose:
-                    print("  [Recepcionista encerrou — aguardando fechamento de Sofia]")
+                    print("  [Recepcionista encerrou — aguardando fechamento de Iris]")
 
         else:
             timed_out = True

@@ -53,7 +53,7 @@
     "expected_stage": "handling_objection",
     "resolved": true,
     "last_run": "2026-02-27",
-    "notes": "juiz: A resposta da Sofia foi um pitch resumido da EasyScale, mas deveria ter sido uma resposta curta como \"Seria sobre assunto comercial\" na primeira objeção sobre o assunto.",
+    "notes": "juiz: A resposta da Iris foi um pitch resumido da EasyScale, mas deveria ter sido uma resposta curta como \"Seria sobre assunto comercial\" na primeira objeção sobre o assunto.",
     "expected_response_contains": [
       "assunto comercial"
     ],
@@ -88,7 +88,7 @@
     "expected_stage": "requesting",
     "resolved": true,
     "last_run": "2026-02-27",
-    "notes": "juiz: A resposta da Sofia não seguiu a estratégia correta; ela deveria ter dado uma resposta curta sobre o assunto comercial, não solicitado o WhatsApp para enviar material."
+    "notes": "juiz: A resposta da Iris não seguiu a estratégia correta; ela deveria ter dado uma resposta curta sobre o assunto comercial, não solicitado o WhatsApp para enviar material."
   },
   {
     "name": "Bloqueio direto contato",

@@ -113,7 +113,7 @@ class WebhookReceptionistClient:
 
     Expected request body (POST JSON):
         {
-            "message":              "Sofia's latest message",
+            "message":              "Iris's latest message",
             "conversation_history": [...],
             "gatekeeper_profile":   "blocker",       # optional — force initial profile
             "clinic_policy":        "FILTER_FIRST",  # optional — force initial policy
@@ -303,7 +303,7 @@ def run_webhook_conversation(
 
     for turn_idx in range(MAX_TURNS):
 
-        # ─── Sofia's turn ─────────────────────────────────────────────────
+        # ─── Iris's turn ─────────────────────────────────────────────────
         sofia_result = gatekeeper.forward(
             clinic_name=clinic_name,
             conversation_history=history.copy(),
@@ -332,15 +332,15 @@ def run_webhook_conversation(
             history.append({"role": "agent", "content": response})
             agent_turn_count += 1
             if verbose:
-                print(f"  Sofia [{stage}]: {response}")
+                print(f"  Iris [{stage}]: {response}")
 
-        # Terminal — stop after Sofia sends last message
+        # Terminal — stop after Iris sends last message
         if stage in ["success", "failed"]:
             break
 
         if not should_send:
             if verbose:
-                print(f"  Sofia aguardando (should_send=False, stage={stage})")
+                print(f"  Iris aguardando (should_send=False, stage={stage})")
 
         # ─── Webhook Receptionist's turn ──────────────────────────────────
         if delay_between_turns > 0:
