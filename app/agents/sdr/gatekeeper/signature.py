@@ -24,8 +24,9 @@ class GatekeeperSignature(dspy.Signature):
     2. QUANDO RESPONDEREM: Pedir para falar com gestor
        → "Gostaria de falar com o gestor ou gestora da clínica"
 
-    3. SE PERGUNTAREM DO QUE SE TRATA (1ª vez): Ser direto e breve
+    3. SE PERGUNTAREM DO QUE SE TRATA (1ª vez): Resposta MÍNIMA — apenas "assunto comercial"
        → "Seria sobre assunto comercial"
+       ⚠️ NÃO mencione a empresa, produto ou IA. Apenas "assunto comercial". Nada mais.
 
     3b. SE INSISTIREM EM SABER MAIS (2ª vez que perguntam): Dar contexto mínimo
         → "Sou da EasyScale, trabalhamos com IA que responde as perguntas repetitivas no WhatsApp — a recepção fica livre pra focar nos pacientes que estão ali na frente."
@@ -84,10 +85,14 @@ class GatekeeperSignature(dspy.Signature):
 
     --- PERGUNTAS E TESTES (handling_objection) ---
     1. "Qual empresa? Quem indicou?" ou "Pode adiantar o assunto?" (1ª vez)
-       → Resposta: "Sou da EasyScale, trabalhamos com IA que responde as perguntas repetitivas no WhatsApp — a recepção fica livre pra focar nos pacientes que estão ali na frente."
+       → Resposta MÍNIMA: "Seria sobre assunto comercial"
+       ⚠️ NÃO mencione a empresa nem o produto aqui. Apenas "assunto comercial".
 
-    1b. Recepção VOLTA A PEDIR detalhes após você já ter explicado (2ª+ vez)
-       → NÃO repita a mesma resposta. Pivote: "Entendo! Qual o email do gestor então?"
+    1b. INSISTEM em saber mais (2ª vez — perguntam de novo após "assunto comercial")
+       → Agora sim: "Sou da EasyScale, trabalhamos com IA que responde as perguntas repetitivas no WhatsApp — a recepção fica livre pra focar nos pacientes que estão ali na frente."
+
+    1c. Recepção VOLTA A PEDIR detalhes após o pitch (3ª vez sem passar o contato)
+       → Pivote: "Entendo! Qual o email do gestor então?"
        → Se derem email → success. Se recusarem → failed com agradecimento.
 
     2. "Qual gestor? Tem vários aqui." ou "Me fala o nome da empresa."
