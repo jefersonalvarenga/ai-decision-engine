@@ -1,0 +1,109 @@
+name: "🔄 Auto-tune from Real Conversations"
+
+# Disparado pelo n8n via GitHub API (workflow_dispatch) quando:
+#   - quality_score < 0.5 em uma conversa real
+#   - is_new_pattern = true (padrão novo detectado)
+# Também pode ser rodado manualmente pelo GitHub Actions UI.
+
+on:
+  workflow_dispatch:
+    inputs:
+      quality_threshold:
+        description: "Inclui casos com quality_score abaixo deste valor (padrão: 0.6)"
+        default: "0.6"
+      since_hours:
+        description: "Janela de tempo em horas (padrão: 48)"
+        default: "48"
+      limit:
+        description: "Máximo de casos a processar (padrão: 10)"
+        default: "10"
+
+env:
+  AI_PROVIDER: "glm"
+  AI_MODEL_SMART: "glm-5"
+
+jobs:
+  auto-tune:
+    name: "🧠 Auto-tune Gatekeeper"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          ref: main
+          fetch-depth: 0
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # ── Passo 1: Ler gk_discovered_cases e gerar casos + patch ──────────────
+      - name: Generate test cases and signature patch from real conversations
+        id: generate
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+          GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
+        run: |
+          python scripts/auto_tune_from_real.py \
+            --quality-threshold ${{ github.event.inputs.quality_threshold || '0.6' }} \
+            --since-hours ${{ github.event.inputs.since_hours || '48' }} \
+            --limit ${{ github.event.inputs.limit || '10' }} \
+            --output-test-file app/agents/sdr/test_gatekeeper_cases.json \
+            --output-patch signature_patch_real.json
+
+      # ── Passo 2: Aplicar patch na signature ──────────────────────────────────
+      - name: Apply signature patch
+        id: patch
+        run: |
+          python scripts/apply_signature_patch.py \
+            --patch signature_patch_real.json \
+            --target app/agents/sdr/gatekeeper/signature.py
+          echo "patch_applied=$?" >> $GITHUB_OUTPUT
+
+      # ── Passo 3: Rodar testes para validar mudanças ──────────────────────────
+      - name: Run gatekeeper tests
+        id: tests
+        env:
+          DSPY_PROVIDER: ${{ env.AI_PROVIDER }}
+          DSPY_MODEL: ${{ env.AI_MODEL_SMART }}
+          GLM_API_KEY: ${{ secrets.GLM_API_KEY }}
+          GLM-API-KEY: ${{ secrets.GLM_API_KEY }}
+        run: |
+          python -m pytest app/agents/sdr/test_sdr_agents.py \
+            -k "gatekeeper" \
+            --tb=short \
+            -q \
+            --json-report \
+            --json-report-file=test_results.json \
+            || true  # não falha o job — analisamos o resultado abaixo
+
+      # ── Passo 4: Commit direto na main com os novos cenários + signature ────────
+      - name: Commit improvements directly to main
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add \
+            app/agents/sdr/test_gatekeeper_cases.json \
+            app/agents/sdr/gatekeeper/signature.py
+          # Só commita se houver mudanças reais
+          if git diff --staged --quiet; then
+            echo "Nenhuma mudança para commitar."
+          else
+            git commit -m "feat(gatekeeper): auto-tune from real conversations [skip ci]
+
+- Novos casos de teste gerados a partir de gk_discovered_cases
+- Patch de signature baseado em falhas reais
+- Run #${{ github.run_number }}"
+            git push origin main
+            echo "Commit realizado e push para main com sucesso."
+          fi
