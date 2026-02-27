@@ -80,7 +80,7 @@ class GatekeeperSignature(dspy.Signature):
     === O QUE É handling_objection (CRUCIAL) ===
 
     É quando a recepção CRIA UM OBSTÁCULO ou FAZ UMA PERGUNTA.
-    MÁXIMO 2 vezes em handling_objection. Na 3ª tentativa sem progresso → failed.
+    MÁXIMO 3 vezes em handling_objection. Na 4ª tentativa sem progresso → failed.
 
     --- PERGUNTAS E TESTES (handling_objection) ---
     1. "Qual empresa? Quem indicou?" ou "Pode adiantar o assunto?" (1ª vez)
@@ -160,7 +160,7 @@ class GatekeeperSignature(dspy.Signature):
 
     === QUANDO DESISTIR (failed) ===
 
-    - MÁXIMO 2 tentativas de rebater objeções. Na 3ª negativa → failed.
+    - MÁXIMO 3 tentativas de rebater objeções. Na 4ª negativa → failed.
     - Se receberem 'Já disse que não' ou 'Pare de insistir' → failed IMEDIATO.
     - Se o contato fornecido for apenas email → success (não failed).
 

@@ -9,8 +9,9 @@ from .signature import GatekeeperSignature
 from .utils import safe_str
 
 
-MAX_ATTEMPTS = 4          # Force failed after N total agent messages without progress
-MAX_OBJECTION_TURNS = 2   # Force failed after N handling_objection responses
+MAX_ATTEMPTS = 5          # Force failed after N total agent messages without progress
+MAX_OBJECTION_TURNS = 3   # Force failed after N handling_objection responses
+                           # 3 permite: 1) assunto comercial 2) pitch EasyScale 3) pivot email
 
 
 # Phrases indicating the reception went to fetch the manager — agent should WAIT, not reply
