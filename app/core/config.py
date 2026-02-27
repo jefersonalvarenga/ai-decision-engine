@@ -28,6 +28,7 @@ class EasyScaleSettings(BaseSettings):
     openai_api_key: Optional[str] = Field(default=None, env="OPENAI_API_KEY")
     anthropic_api_key: Optional[str] = Field(default=None, env="ANTHROPIC_API_KEY")
     groq_api_key: Optional[str] = Field(default=None, env="GROQ_API_KEY")
+    xai_api_key: Optional[str] = Field(default=None, env="XAI_API_KEY")
     glm_api_key: Optional[str] = Field(default=None, env="GLM_API_KEY")
     glm_model: str = Field(default="glm-4.7-flash", env="GLM_MODEL")
     glm_max_tokens: int = Field(default=300, env="GLM_MAX_TOKENS")
@@ -56,6 +57,7 @@ class EasyScaleSettings(BaseSettings):
         if self.dspy_provider == "openai": return self.openai_api_key
         if self.dspy_provider == "anthropic": return self.anthropic_api_key
         if self.dspy_provider == "groq": return self.groq_api_key
+        if self.dspy_provider == "xai": return self.xai_api_key
         if self.dspy_provider == "glm": return self.glm_api_key
         return None
 
@@ -77,7 +79,15 @@ def init_dspy() -> None:
 
     try:
         # Novo padrão DSPy 2.5+
-        if settings.dspy_provider == "glm":
+        if settings.dspy_provider == "xai":
+            lm = dspy.LM(
+                model=f"openai/{settings.dspy_model}",
+                api_key=api_key,
+                api_base="https://api.x.ai/v1",
+                temperature=settings.dspy_temperature,
+                max_tokens=settings.dspy_max_tokens
+            )
+        elif settings.dspy_provider == "glm":
             lm = dspy.LM(
                 model=f"openai/{settings.dspy_model}",
                 api_key=api_key,
