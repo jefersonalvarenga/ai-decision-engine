@@ -524,6 +524,19 @@ def main():
                             f"obtido={result.get('should_send_message')}"
                         )
 
+                # Check 3: response deve conter certas palavras-chave
+                resp_lower = result.get("response_message", "").lower()
+                for kw in scenario.get("expected_response_contains", []):
+                    if kw.lower() not in resp_lower:
+                        scenario_ok = False
+                        fail_reasons.append(f"resposta deveria conter: \"{kw}\"")
+
+                # Check 4: response NÃO pode conter palavras proibidas
+                for kw in scenario.get("forbidden_keywords", []):
+                    if kw.lower() in resp_lower:
+                        scenario_ok = False
+                        fail_reasons.append(f"resposta não deveria conter: \"{kw}\"")
+
                 if scenario_ok:
                     g_passed += 1
                     print(f"  ✅ PASSOU — marcando resolved=true")

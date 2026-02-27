@@ -5,8 +5,8 @@
     "conversation_history": [],
     "latest_message": null,
     "expected_stage": "opening",
-    "resolved": false,
-    "last_run": null,
+    "resolved": true,
+    "last_run": "2026-02-27",
     "notes": ""
   },
   {
@@ -24,8 +24,8 @@
     ],
     "latest_message": "Sim, aqui é a Juliana. Em que posso ajudar?",
     "expected_stage": "requesting",
-    "resolved": false,
-    "last_run": null,
+    "resolved": true,
+    "last_run": "2026-02-27",
     "notes": ""
   },
   {
@@ -53,7 +53,15 @@
     "expected_stage": "handling_objection",
     "resolved": false,
     "last_run": null,
-    "notes": ""
+    "notes": "Falso positivo: stage correto mas resposta errada. Na 1ª pergunta deve dizer assunto comercial, nao o pitch EasyScale",
+    "expected_response_contains": [
+      "assunto comercial"
+    ],
+    "forbidden_keywords": [
+      "EasyScale",
+      "IA que responde",
+      "recepção fica livre"
+    ]
   },
   {
     "name": "Recepção quer resolver sozinha",
