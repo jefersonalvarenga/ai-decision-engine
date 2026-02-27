@@ -143,41 +143,51 @@ def run_gatekeeper_test(scenario: Dict, verbose: bool = True):
     """Executa um cenário de teste do Gatekeeper"""
     from app.agents.sdr.gatekeeper import gatekeeper_graph
 
+    idx      = scenario.get("_idx", "?")
+    expected = scenario.get("expected_stage", "?")
+    resolved = "✓ resolved" if scenario.get("resolved") else "⏳ pending"
+
     print(f"\n{'='*60}")
-    print(f"GATEKEEPER: {scenario['name']}")
+    print(f"[#{idx}] {scenario['name']}")
+    print(f"  Clínica   : {scenario['clinic_name']}")
+    print(f"  Esperado  : {expected}   |   {resolved}")
     print(f"{'='*60}")
 
-    if verbose and scenario.get("conversation_history"):
-        print("\nHistórico:")
-        for turn in scenario["conversation_history"]:
+    history = scenario.get("conversation_history", [])
+    if verbose and history:
+        print("\n  Histórico:")
+        for turn in history:
             prefix = "🤖" if turn["role"] == "agent" else "👤"
-            print(f"  {prefix} {turn['content']}")
+            print(f"    {prefix} {turn['content']}")
+    elif not history:
+        print("\n  Histórico: (vazio — primeira mensagem)")
 
-    if scenario.get("latest_message"):
-        print(f"\nÚltima msg recebida: \"{scenario['latest_message']}\"")
+    latest = scenario.get("latest_message")
+    print(f"  Última msg: {repr(latest) if latest else 'null (primeira mensagem)'}")
 
     # Conta tentativas (permite override para testar fallback de max attempts)
     attempt_count = scenario.get("attempt_count_override", len([
-        t for t in scenario.get("conversation_history", [])
-        if t["role"] == "agent"
+        t for t in history if t["role"] == "agent"
     ]))
 
     # Invoca o grafo
     result = gatekeeper_graph.invoke({
         "clinic_name": scenario["clinic_name"],
-        "conversation_history": scenario.get("conversation_history", []),
-        "latest_message": scenario.get("latest_message"),
+        "conversation_history": history,
+        "latest_message": latest,
         "current_hour": datetime.now().hour,
         "attempt_count": attempt_count,
     })
 
-    print(f"\n📤 Resposta do agente:")
-    print(f"   Mensagem: \"{result['response_message']}\"")
-    print(f"   Stage: {result['conversation_stage']}")
-    print(f"   Contato extraído: {result.get('extracted_manager_contact')}")
-    print(f"   Nome extraído: {result.get('extracted_manager_name')}")
-    print(f"   Enviar msg: {result['should_send_message']}")
-    print(f"\n💭 Reasoning: {result['reasoning']}")
+    stage_ok = result['conversation_stage'] == expected
+    stage_icon = "✅" if stage_ok else "❌"
+
+    print(f"\n  📤 Resposta  : \"{result['response_message']}\"")
+    print(f"  {stage_icon} Stage       : {result['conversation_stage']}  (esperado: {expected})")
+    print(f"  📞 Contato   : {result.get('extracted_manager_contact') or '—'}")
+    print(f"  🙍 Nome      : {result.get('extracted_manager_name') or '—'}")
+    print(f"  📨 Envia?    : {result['should_send_message']}")
+    print(f"\n  💭 Reasoning : {result['reasoning']}")
 
     return result
 
@@ -474,9 +484,13 @@ def main():
         print("# TESTES GATEKEEPER")
         print("#"*60)
 
-        # Filtra por resolved e aplica --n
+        # Filtra por resolved e aplica --n — preserva índice original do JSON
         only_pending = not args.all_cases
-        queue = [s for s in GATEKEEPER_SCENARIOS if not (only_pending and s.get("resolved", False))]
+        queue = [
+            {**s, "_idx": i}
+            for i, s in enumerate(GATEKEEPER_SCENARIOS)
+            if not (only_pending and s.get("resolved", False))
+        ]
         total_gk = len(GATEKEEPER_SCENARIOS)
         resolved_gk = sum(1 for s in GATEKEEPER_SCENARIOS if s.get("resolved", False))
         pending_gk = total_gk - resolved_gk
