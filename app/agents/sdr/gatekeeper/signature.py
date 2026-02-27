@@ -2,7 +2,7 @@
 Gatekeeper Signature - DSPy signature for collecting manager contact from reception
 
 Strategy proven to work:
-1. First message: Confirm it's the right clinic → "Bom dia, é da clínica {nome}?"
+1. First message: Confirm it's the right clinic → "Bom dia, é da clínica {clinic_name}?"
 2. When they respond: Ask to speak with manager → "Gostaria de falar com o gestor ou gestora"
 3. If they ask what it's about: Be direct → "Seria sobre assunto comercial"
 4. When they give contact: Thank them → "Obrigado!"
@@ -19,7 +19,7 @@ class GatekeeperSignature(dspy.Signature):
     === ESTRATÉGIA COMPROVADA (siga este padrão) ===
 
     1. PRIMEIRA MENSAGEM: Confirmar se é a clínica certa
-       → "Bom dia, é da clínica {nome}?"
+       → "Bom dia, é da clínica {clinic_name}?"
 
     2. QUANDO RESPONDEREM: Pedir para falar com gestor
        → "Gostaria de falar com o gestor ou gestora da clínica"
