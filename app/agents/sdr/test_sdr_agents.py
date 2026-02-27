@@ -382,12 +382,43 @@ def run_interactive_closer():
 # MAIN
 # ============================================================================
 
+def mark_resolved(json_path: Path, scenario_name: str, passed: bool, notes: str = ""):
+    """Atualiza resolved + last_run no JSON após cada teste."""
+    try:
+        with open(json_path, "r", encoding="utf-8") as f:
+            cases = json.load(f)
+        for c in cases:
+            if c.get("name") == scenario_name:
+                if passed:
+                    c["resolved"] = True
+                c["last_run"] = datetime.now().strftime("%Y-%m-%d")
+                if notes:
+                    c["notes"] = notes
+                break
+        with open(json_path, "w", encoding="utf-8") as f:
+            json.dump(cases, f, ensure_ascii=False, indent=2)
+    except Exception as e:
+        print(f"  ⚠️  Não foi possível salvar resolved: {e}")
+
+
 def main():
     parser = argparse.ArgumentParser(description="Testes dos agentes SDR")
     parser.add_argument("--gatekeeper", action="store_true", help="Rodar cenários do Gatekeeper")
     parser.add_argument("--closer", action="store_true", help="Rodar cenários do Closer")
     parser.add_argument("--interactive", action="store_true", help="Modo interativo")
     parser.add_argument("--all", action="store_true", help="Rodar todos os cenários")
+    parser.add_argument(
+        "--n", type=int, default=None, metavar="N",
+        help="Limitar a N casos pendentes (ex: --n 1 para rodar só o próximo)"
+    )
+    parser.add_argument(
+        "--pending", action="store_true", default=True,
+        help="Rodar apenas casos com resolved=false (padrão)"
+    )
+    parser.add_argument(
+        "--all-cases", action="store_true",
+        help="Rodar TODOS os casos incluindo resolved=true"
+    )
 
     args = parser.parse_args()
 
@@ -395,10 +426,11 @@ def main():
     if not any([args.gatekeeper, args.closer, args.interactive, args.all]):
         parser.print_help()
         print("\nExemplos:")
-        print("  python -m app.agents.sdr.test_sdr_agents --gatekeeper")
-        print("  python -m app.agents.sdr.test_sdr_agents --closer")
+        print("  python -m app.agents.sdr.test_sdr_agents --gatekeeper          # próximos pendentes")
+        print("  python -m app.agents.sdr.test_sdr_agents --gatekeeper --n 1    # só 1 caso pendente")
+        print("  python -m app.agents.sdr.test_sdr_agents --gatekeeper --n 5    # próximos 5 pendentes")
+        print("  python -m app.agents.sdr.test_sdr_agents --gatekeeper --all-cases  # todos (incl. resolved)")
         print("  python -m app.agents.sdr.test_sdr_agents --interactive")
-        print("  python -m app.agents.sdr.test_sdr_agents --all")
         return
 
     # Inicializa DSPy
@@ -442,8 +474,21 @@ def main():
         print("# TESTES GATEKEEPER")
         print("#"*60)
 
+        # Filtra por resolved e aplica --n
+        only_pending = not args.all_cases
+        queue = [s for s in GATEKEEPER_SCENARIOS if not (only_pending and s.get("resolved", False))]
+        total_gk = len(GATEKEEPER_SCENARIOS)
+        resolved_gk = sum(1 for s in GATEKEEPER_SCENARIOS if s.get("resolved", False))
+        pending_gk = total_gk - resolved_gk
+        print(f"\n📊 Status: {resolved_gk}/{total_gk} resolved | {pending_gk} pendentes")
+        if args.n:
+            queue = queue[:args.n]
+            print(f"🎯 Rodando {len(queue)} caso(s) (--n {args.n})")
+        else:
+            print(f"🎯 Rodando {len(queue)} caso(s) {'pendentes' if only_pending else 'no total'}")
+
         g_passed = g_failed = 0
-        for scenario in GATEKEEPER_SCENARIOS:
+        for scenario in queue:
             try:
                 result = run_gatekeeper_test(scenario)
                 scenario_ok = True
@@ -467,14 +512,18 @@ def main():
 
                 if scenario_ok:
                     g_passed += 1
+                    print(f"  ✅ PASSOU — marcando resolved=true")
+                    mark_resolved(GATEKEEPER_JSON, scenario["name"], passed=True)
                 else:
                     g_failed += 1
                     reason_str = " | ".join(fail_reasons)
                     failures.append(f"GATEKEEPER | {scenario['name']} | {reason_str}")
+                    mark_resolved(GATEKEEPER_JSON, scenario["name"], passed=False, notes=reason_str)
             except Exception as e:
                 g_failed += 1
                 failures.append(f"GATEKEEPER | {scenario['name']} | ERRO: {e}")
                 print(f"\n❌ ERRO no cenário '{scenario['name']}': {e}")
+                mark_resolved(GATEKEEPER_JSON, scenario["name"], passed=False, notes=str(e))
 
         total_passed += g_passed
         total_failed += g_failed

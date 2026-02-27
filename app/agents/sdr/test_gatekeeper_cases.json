@@ -4,7 +4,10 @@
     "clinic_name": "Clínica Bella Luna",
     "conversation_history": [],
     "latest_message": null,
-    "expected_stage": "opening"
+    "expected_stage": "opening",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Confirma identidade",
@@ -20,7 +23,10 @@
       }
     ],
     "latest_message": "Sim, aqui é a Juliana. Em que posso ajudar?",
-    "expected_stage": "requesting"
+    "expected_stage": "requesting",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Recepção pergunta assunto",
@@ -44,7 +50,10 @@
       }
     ],
     "latest_message": "Pode adiantar o assunto?",
-    "expected_stage": "handling_objection"
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Recepção quer resolver sozinha",
@@ -60,7 +69,10 @@
       }
     ],
     "latest_message": "Pode falar comigo mesmo.",
-    "expected_stage": "handling_objection"
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Bloqueio direto contato",
@@ -76,7 +88,10 @@
       }
     ],
     "latest_message": "Não passamos contato. Envie email.",
-    "expected_stage": "handling_objection"
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Pedido de email corporativo",
@@ -92,7 +107,10 @@
       }
     ],
     "latest_message": "Mande pelo nosso email contato@saudeviva.com.br",
-    "expected_stage": "handling_objection"
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Recepção confusa sobre gestor",
@@ -108,7 +126,10 @@
       }
     ],
     "latest_message": "Qual gestor exatamente?",
-    "expected_stage": "handling_objection"
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Resposta curta neutra",
@@ -124,7 +145,10 @@
       }
     ],
     "latest_message": "Sim",
-    "expected_stage": "requesting"
+    "expected_stage": "requesting",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Recepção defensiva sem interesse",
@@ -140,7 +164,10 @@
       }
     ],
     "latest_message": "Não temos interesse em marketing.",
-    "expected_stage": "handling_objection"
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Recepção testa legitimidade",
@@ -156,7 +183,10 @@
       }
     ],
     "latest_message": "Qual empresa? Quem indicou?",
-    "expected_stage": "handling_objection"
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Transferência oferecida",
@@ -172,7 +202,10 @@
       }
     ],
     "latest_message": "Um momento, vou transferir.",
-    "expected_stage": "requesting"
+    "expected_stage": "requesting",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Pedir retorno depois",
@@ -188,7 +221,10 @@
       }
     ],
     "latest_message": "Ele não está agora, retorne amanhã.",
-    "expected_stage": "handling_objection"
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Contato parcial fornecido",
@@ -204,7 +240,10 @@
       }
     ],
     "latest_message": "Pode chamar no WhatsApp geral 11911112222",
-    "expected_stage": "handling_objection"
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Nome decisor sem telefone",
@@ -220,7 +259,10 @@
       }
     ],
     "latest_message": "É a Dra. Ana.",
-    "expected_stage": "requesting"
+    "expected_stage": "requesting",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Recepção acha que é paciente",
@@ -236,7 +278,10 @@
       }
     ],
     "latest_message": "Deseja agendar consulta?",
-    "expected_stage": "handling_objection"
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Suspeita de spam",
@@ -252,7 +297,10 @@
       }
     ],
     "latest_message": "Isso é spam?",
-    "expected_stage": "handling_objection"
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Sucesso contato direto",
@@ -268,7 +316,10 @@
       }
     ],
     "latest_message": "O número do Dr. Carlos é 11999887766.",
-    "expected_stage": "success"
+    "expected_stage": "success",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Pedido de Apresentacao",
@@ -284,7 +335,10 @@
       }
     ],
     "latest_message": "Pode mandar uma apresentacao?",
-    "expected_stage": "handling_objection"
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Numero Fornecido Formatado",
@@ -300,7 +354,10 @@
       }
     ],
     "latest_message": "O numero dele e (11) 9 9999-8888",
-    "expected_stage": "success"
+    "expected_stage": "success",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Retorno Futuro",
@@ -316,7 +373,10 @@
       }
     ],
     "latest_message": "Ele nao esta, retorne amanha.",
-    "expected_stage": "handling_objection"
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Recepcionista Rude",
@@ -332,7 +392,10 @@
       }
     ],
     "latest_message": "Que gestor?! Sem interesse!",
-    "expected_stage": "handling_objection"
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Transferencia com Numero",
@@ -348,7 +411,10 @@
       }
     ],
     "latest_message": "Vou transferir, mas tente no 11988887777",
-    "expected_stage": "success"
+    "expected_stage": "success",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Confusao sobre Gestor",
@@ -364,7 +430,10 @@
       }
     ],
     "latest_message": "Qual gestor? Tem varios aqui.",
-    "expected_stage": "handling_objection"
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Recepcionista e o Gestor",
@@ -380,7 +449,10 @@
       }
     ],
     "latest_message": "Sou eu mesmo o gestor, pode falar.",
-    "expected_stage": "requesting"
+    "expected_stage": "requesting",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Pergunta sobre Empresa",
@@ -396,14 +468,20 @@
       }
     ],
     "latest_message": "Me fala o nome da empresa.",
-    "expected_stage": "handling_objection"
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Primeiro Contato",
     "clinic_name": "Clinica Sao Joao",
     "conversation_history": [],
     "latest_message": null,
-    "expected_stage": "opening"
+    "expected_stage": "opening",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Recusa Definitiva",
@@ -427,7 +505,10 @@
       }
     ],
     "latest_message": "Ja disse que nao, pare de mandar mensagens.",
-    "expected_stage": "failed"
+    "expected_stage": "failed",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Conversa longa com múltiplas objeções",
@@ -459,7 +540,10 @@
       }
     ],
     "latest_message": "Olha, ele não gosta de recados de vendas. Tente mês que vem.",
-    "expected_stage": "failed"
+    "expected_stage": "failed",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Sucesso com link WhatsApp",
@@ -475,7 +559,10 @@
       }
     ],
     "latest_message": "É a Fernanda. Ela atende em outro número. Clica aqui: wa.me/5511999998888",
-    "expected_stage": "success"
+    "expected_stage": "success",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Promessa ambígua de repasse",
@@ -491,7 +578,10 @@
       }
     ],
     "latest_message": "Ele saiu. Me passa o assunto que eu vejo se encaminho pra ele.",
-    "expected_stage": "handling_objection"
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Pedido para ligar canal voz",
@@ -507,7 +597,10 @@
       }
     ],
     "latest_message": "Aqui não aceitamos abordagem por texto. Se quiser, liga no fixo 1133334444.",
-    "expected_stage": "handling_objection"
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Gestor pede proposta antes",
@@ -531,7 +624,10 @@
       }
     ],
     "latest_message": "Não tenho tempo para papo. Manda a proposta no email que eu leio.",
-    "expected_stage": "handling_objection"
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Resposta em inglês",
@@ -547,7 +643,10 @@
       }
     ],
     "latest_message": "Hello! We assist international patients only. How can I help you?",
-    "expected_stage": "handling_objection"
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Recepção questiona se é robô",
@@ -563,7 +662,10 @@
       }
     ],
     "latest_message": "Nossa, você respondeu rápido demais. É robô ou pessoa real falando aí?",
-    "expected_stage": "handling_objection"
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Número de telefone incompleto",
@@ -579,14 +681,20 @@
       }
     ],
     "latest_message": "Ela não está no consultório agora, tenta falar com ela no 9999.",
-    "expected_stage": "handling_objection"
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Primeiro contato veterinária",
     "clinic_name": "PetVida Clínica Veterinária",
     "conversation_history": [],
     "latest_message": null,
-    "expected_stage": "opening"
+    "expected_stage": "opening",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Duas objeções e conversão final",
@@ -618,7 +726,10 @@
       }
     ],
     "latest_message": "Ah tá, pode mandar mensagem pra ele no 11988887777.",
-    "expected_stage": "success"
+    "expected_stage": "success",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Recepção pede para aguardar — 'só um instante'",
@@ -644,7 +755,10 @@
     "latest_message": "Tá bem, só um instante por gentileza",
     "expected_stage": "requesting",
     "expected_should_continue": true,
-    "expected_response": "Certo!"
+    "expected_response": "Certo!",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Recepção pede para aguardar — 'vou chamar ele'",
@@ -662,7 +776,10 @@
     "latest_message": "Um momento, vou chamar ele",
     "expected_stage": "requesting",
     "expected_should_continue": true,
-    "expected_response": "Certo!"
+    "expected_response": "Certo!",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Recepção pede para aguardar — 'aguarda um segundo'",
@@ -680,7 +797,10 @@
     "latest_message": "Aguarda um segundo",
     "expected_stage": "requesting",
     "expected_should_continue": true,
-    "expected_response": "Certo!"
+    "expected_response": "Certo!",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   },
   {
     "name": "Recepção pede para aguardar — 'deixa eu ver'",
@@ -698,6 +818,9 @@
     "latest_message": "Deixa eu ver se ele está disponível",
     "expected_stage": "requesting",
     "expected_should_continue": true,
-    "expected_response": "Certo!"
+    "expected_response": "Certo!",
+    "resolved": false,
+    "last_run": null,
+    "notes": ""
   }
 ]
