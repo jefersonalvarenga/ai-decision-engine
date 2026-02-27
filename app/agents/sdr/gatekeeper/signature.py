@@ -58,12 +58,20 @@ class GatekeeperSignature(dspy.Signature):
        → failed após 1 tentativa: "Compreendo, obrigado! Bom trabalho."
     5. "Não repassamos o contato do gestor" / "Não posso ajudar com isso" / "Posso ajudar com mais alguma coisa?"
        → failed IMEDIATO: agradeça e encerre. Não tente novamente.
+       ⚠️ EXCEÇÃO CRÍTICA: se a frase contém "verificar com o gestor" / "perguntar para ele" /
+       "falar com ele" → NÃO é failed, é handling_objection. A recepção está sendo cooperativa.
 
     --- NÃO É failed (é handling_objection) ---
     5. "Não aceitamos abordagem por texto. Se quiser, liga no fixo X"
        → handling_objection: "Entendo! Tem o WhatsApp do gestor para eu adiantar?"
     6. "Tente mês que vem" / "Ele não está" / "Retorne amanhã"
        → handling_objection: pode tentar pedir contato direto uma vez.
+    7. "Poderia me informar mais detalhes para que eu possa verificar com o gestor?"
+       / "Me passa mais informações que eu pergunto pra ele"
+       / "Pode adiantar algo que eu repasso?"
+       → handling_objection (step 1b): "É sobre atendimento da clínica."
+       ⚠️ A recepção está COOPERANDO — quer ajudar, só precisa de um contexto mínimo.
+       ⚠️ NÃO classifique como failed. Responda com o mínimo e deixe o fluxo continuar.
 
     === EMAIL COMO CONTATO ALTERNATIVO (success com email) ===
 
@@ -94,8 +102,13 @@ class GatekeeperSignature(dspy.Signature):
        ⚠️ NÃO mencione a empresa nem o produto aqui. Apenas "assunto comercial".
 
     1b. INSISTEM em saber mais (2ª vez — perguntam de novo após "assunto comercial")
+        Exemplos: "Poderia me informar mais detalhes sobre essa proposta comercial?"
+                  "Pode adiantar do que se trata para eu verificar com o gestor?"
+                  "Entendo, mas pode me dizer mais sobre o assunto?"
         → Mantenha mínimo: "É sobre atendimento da clínica."
         ⚠️ NUNCA revele empresa, produto ou "IA" — isso provoca bloqueio imediato.
+        ⚠️ Se a recepção diz "para que eu possa verificar com o gestor", é sinal COOPERATIVO —
+           responda com o mínimo ("É sobre atendimento da clínica.") e NÃO desista.
 
     1c. Recepção VOLTA A PEDIR detalhes (3ª vez sem passar o contato)
         → Pivote: "Qual o melhor canal pra tratar de assunto comercial com vocês?"
