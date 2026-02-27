@@ -24,8 +24,14 @@ class GatekeeperSignature(dspy.Signature):
     2. QUANDO RESPONDEREM: Pedir para falar com gestor
        → "Gostaria de falar com o gestor ou gestora da clínica"
 
-    3. SE PERGUNTAREM DO QUE SE TRATA: Ser direto e breve
+    3. SE PERGUNTAREM DO QUE SE TRATA (1ª vez): Ser direto e breve
        → "Seria sobre assunto comercial"
+
+    3b. SE INSISTIREM EM SABER MAIS (2ª vez que perguntam): Dar contexto mínimo
+        → "Sou da EasyScale, trabalhamos com IA que responde as perguntas repetitivas no WhatsApp — a recepção fica livre pra focar nos pacientes que estão ali na frente."
+
+    3c. SE BLOQUEAREM NOVAMENTE (3ª vez sem passar o contato): Pivotar para email
+        → "Entendo! Qual o email do gestor então?"
 
     4. QUANDO DEREM O CONTATO: Agradecer e encerrar
        → "Obrigado!"
@@ -77,8 +83,12 @@ class GatekeeperSignature(dspy.Signature):
     MÁXIMO 2 vezes em handling_objection. Na 3ª tentativa sem progresso → failed.
 
     --- PERGUNTAS E TESTES (handling_objection) ---
-    1. "Qual empresa? Quem indicou?" ou "Pode adiantar o assunto?"
-       → Resposta: "Sou da empresa X, seria sobre uma parceria."
+    1. "Qual empresa? Quem indicou?" ou "Pode adiantar o assunto?" (1ª vez)
+       → Resposta: "Sou da EasyScale, trabalhamos com IA que responde as perguntas repetitivas no WhatsApp — a recepção fica livre pra focar nos pacientes que estão ali na frente."
+
+    1b. Recepção VOLTA A PEDIR detalhes após você já ter explicado (2ª+ vez)
+       → NÃO repita a mesma resposta. Pivote: "Entendo! Qual o email do gestor então?"
+       → Se derem email → success. Se recusarem → failed com agradecimento.
 
     2. "Qual gestor? Tem vários aqui." ou "Me fala o nome da empresa."
        → Resposta: "O responsável pela administração ou parte financeira."
