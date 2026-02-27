@@ -29,6 +29,20 @@ class EasyScaleSettings(BaseSettings):
     anthropic_api_key: Optional[str] = Field(default=None, env="ANTHROPIC_API_KEY")
     groq_api_key: Optional[str] = Field(default=None, env="GROQ_API_KEY")
     glm_api_key: Optional[str] = Field(default=None, env="GLM_API_KEY")
+    glm_model: str = Field(default="glm-4.7-flash", env="GLM_MODEL")
+    glm_max_tokens: int = Field(default=300, env="GLM_MAX_TOKENS")
+    glm_timeout: int = Field(default=60, env="GLM_TIMEOUT")  # seconds
+
+    # Receptionist LLM (simulator — isolated from main SDR model)
+    receptionist_model: str = Field(
+        default="openai/glm-4.7-flash", env="RECEPTIONIST_MODEL"
+    )
+    receptionist_api_base: Optional[str] = Field(
+        default="https://open.bigmodel.cn/api/paas/v4/", env="RECEPTIONIST_API_BASE"
+    )
+    receptionist_api_key: Optional[str] = Field(
+        default=None, env="RECEPTIONIST_API_KEY"
+    )
 
     # API Authentication
     api_key: Optional[str] = Field(default=None, env="API_KEY")

@@ -90,12 +90,20 @@ ESTRATÉGIA CORRETA DA SOFIA:
 4. DÃO CONTATO (success): Agradecer e encerrar → "Obrigado!"
 FAILED: após 3 handling_objection sem progresso, ou rejeição definitiva ("já disse que não", etc.)
 
+OPORTUNIDADES (NÃO são objection — são avanço):
+- "Pode falar comigo mesmo" / "Sou eu quem cuida disso" / "Sou eu mesmo o gestor"
+  → A PESSOA É O POTENCIAL DECISOR. Stage = requesting.
+  → Resposta correta: "Ótimo! Seria sobre assunto comercial. Qual o seu WhatsApp para eu te enviar mais detalhes?"
+  → NÃO diga "é específico para a gestão" — a pessoa JÁ pode ser a gestão.
+  → NÃO classifique como handling_objection — é uma abertura para avançar.
+
 ERROS COMUNS A DETECTAR:
 - Dar o pitch da EasyScale na 1ª pergunta sobre assunto (deveria ser só "assunto comercial")
 - Pular etapas (ex: já dar email na 1ª objeção)
 - Não encerrar quando deveria (success/failed com should_continue=true incorreto)
 - Resposta genérica demais que não avança a conversa
 - Mensagem muito longa (>100 chars) para um canal WhatsApp
+- Tratar "Pode falar comigo mesmo" como objection (é oportunidade!)
 """
 
 import dspy as _dspy
@@ -512,6 +520,10 @@ def main():
         "--all-cases", action="store_true",
         help="Rodar TODOS os casos incluindo resolved=true"
     )
+    parser.add_argument(
+        "--case", type=int, default=None, metavar="IDX",
+        help="Rodar apenas o caso com índice IDX (independente de resolved). Ex: --case 3"
+    )
 
     args = parser.parse_args()
 
@@ -523,6 +535,7 @@ def main():
         print("  python -m app.agents.sdr.test_sdr_agents --gatekeeper --n 1    # só 1 caso pendente")
         print("  python -m app.agents.sdr.test_sdr_agents --gatekeeper --n 5    # próximos 5 pendentes")
         print("  python -m app.agents.sdr.test_sdr_agents --gatekeeper --all-cases  # todos (incl. resolved)")
+        print("  python -m app.agents.sdr.test_sdr_agents --gatekeeper --case 3 # roda caso #3 direto")
         print("  python -m app.agents.sdr.test_sdr_agents --interactive")
         return
 
@@ -567,22 +580,31 @@ def main():
         print("# TESTES GATEKEEPER")
         print("#"*60)
 
-        # Filtra por resolved e aplica --n — preserva índice original do JSON
-        only_pending = not args.all_cases
-        queue = [
-            {**s, "_idx": i}
-            for i, s in enumerate(GATEKEEPER_SCENARIOS)
-            if not (only_pending and s.get("resolved", False))
-        ]
+        # Filtra por resolved e aplica --n / --case — preserva índice original do JSON
         total_gk = len(GATEKEEPER_SCENARIOS)
         resolved_gk = sum(1 for s in GATEKEEPER_SCENARIOS if s.get("resolved", False))
         pending_gk = total_gk - resolved_gk
         print(f"\n📊 Status: {resolved_gk}/{total_gk} resolved | {pending_gk} pendentes")
-        if args.n:
-            queue = queue[:args.n]
-            print(f"🎯 Rodando {len(queue)} caso(s) (--n {args.n})")
+
+        if args.case is not None:
+            # --case N: roda exatamente o caso pelo índice, independente de resolved
+            if args.case < 0 or args.case >= total_gk:
+                print(f"❌ --case {args.case} fora do intervalo (0–{total_gk - 1})")
+                return
+            queue = [{**GATEKEEPER_SCENARIOS[args.case], "_idx": args.case}]
+            print(f"🎯 Rodando caso #{args.case}: {queue[0]['name']}")
         else:
-            print(f"🎯 Rodando {len(queue)} caso(s) {'pendentes' if only_pending else 'no total'}")
+            only_pending = not args.all_cases
+            queue = [
+                {**s, "_idx": i}
+                for i, s in enumerate(GATEKEEPER_SCENARIOS)
+                if not (only_pending and s.get("resolved", False))
+            ]
+            if args.n:
+                queue = queue[:args.n]
+                print(f"🎯 Rodando {len(queue)} caso(s) (--n {args.n})")
+            else:
+                print(f"🎯 Rodando {len(queue)} caso(s) {'pendentes' if only_pending else 'no total'}")
 
         g_passed = g_failed = 0
         for scenario in queue:

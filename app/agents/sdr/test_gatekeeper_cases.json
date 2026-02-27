@@ -86,14 +86,22 @@
     ],
     "latest_message": "Pode falar comigo mesmo.",
     "expected_stage": "requesting",
-    "resolved": false,
-    "last_run": null,
-    "notes": "Pode falar comigo = potencial decisor. Stage deve ser requesting, não handling_objection. Sofia pede o WhatsApp diretamente."
+    "resolved": true,
+    "last_run": "2026-02-27",
+    "notes": "juiz: A resposta da Sofia não seguiu a estratégia correta; ela deveria ter dado uma resposta curta sobre o assunto comercial, não solicitado o WhatsApp para enviar material."
   },
   {
     "name": "Bloqueio direto contato",
     "clinic_name": "Clínica Odonto Smile",
     "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da clínica Clínica Odonto Smile?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
       {
         "role": "agent",
         "content": "Gostaria de falar com o gestor."
@@ -105,14 +113,22 @@
     ],
     "latest_message": "Não passamos contato. Envie email.",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
+    "resolved": true,
+    "last_run": "2026-02-27",
     "notes": ""
   },
   {
     "name": "Pedido de email corporativo",
     "clinic_name": "Clínica Saúde Viva",
     "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da clínica Clínica Saúde Viva?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
       {
         "role": "agent",
         "content": "Posso falar com o responsável pela clínica?"
@@ -134,6 +150,14 @@
     "conversation_history": [
       {
         "role": "agent",
+        "content": "Bom dia, é da clínica Clínica Alpha?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
         "content": "Gostaria de falar com o gestor da clínica."
       },
       {
@@ -151,6 +175,14 @@
     "name": "Resposta curta neutra",
     "clinic_name": "Clínica Beta",
     "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da clínica Clínica Beta?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
       {
         "role": "agent",
         "content": "É da clínica Beta?"
@@ -172,6 +204,14 @@
     "conversation_history": [
       {
         "role": "agent",
+        "content": "Bom dia, é da clínica Clínica Gama?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
         "content": "Gostaria de falar com o responsável pela clínica."
       },
       {
@@ -189,6 +229,14 @@
     "name": "Recepção testa legitimidade",
     "clinic_name": "Clínica Delta",
     "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da clínica Clínica Delta?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
       {
         "role": "agent",
         "content": "Gostaria de falar com o gestor."
@@ -210,6 +258,14 @@
     "conversation_history": [
       {
         "role": "agent",
+        "content": "Bom dia, é da clínica Clínica Omega?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
         "content": "Gostaria de falar com o gestor da clínica."
       },
       {
@@ -227,6 +283,14 @@
     "name": "Pedir retorno depois",
     "clinic_name": "Clínica Sigma",
     "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da clínica Clínica Sigma?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
       {
         "role": "agent",
         "content": "Posso falar com o responsável?"
@@ -248,6 +312,14 @@
     "conversation_history": [
       {
         "role": "agent",
+        "content": "Bom dia, é da clínica Clínica Vita?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
         "content": "Gostaria de falar com o gestor."
       },
       {
@@ -265,6 +337,14 @@
     "name": "Nome decisor sem telefone",
     "clinic_name": "Clínica Zen",
     "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da clínica Clínica Zen?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
       {
         "role": "agent",
         "content": "Quem é o responsável pela clínica?"
@@ -286,6 +366,14 @@
     "conversation_history": [
       {
         "role": "agent",
+        "content": "Bom dia, é da clínica Clínica Nova?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
         "content": "Gostaria de falar com o gestor."
       },
       {
@@ -303,6 +391,14 @@
     "name": "Suspeita de spam",
     "clinic_name": "Clínica Prime",
     "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da clínica Clínica Prime?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
       {
         "role": "agent",
         "content": "Posso falar com o responsável pela clínica?"
@@ -324,6 +420,14 @@
     "conversation_history": [
       {
         "role": "agent",
+        "content": "Bom dia, é da clínica Clínica Bella Luna?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
         "content": "Gostaria de falar com o gestor."
       },
       {
@@ -341,6 +445,14 @@
     "name": "Pedido de Apresentacao",
     "clinic_name": "Clinica Bem Estar",
     "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da clínica Clinica Bem Estar?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
       {
         "role": "agent",
         "content": "Oi, tudo bem? Aqui é da empresa X, gostaria de falar com o responsavel pela clinica."
@@ -362,6 +474,14 @@
     "conversation_history": [
       {
         "role": "agent",
+        "content": "Bom dia, é da clínica Dental Sorriso?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
         "content": "Preciso do contato do gestor de marketing."
       },
       {
@@ -379,6 +499,14 @@
     "name": "Retorno Futuro",
     "clinic_name": "Posto de Saude Central",
     "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da clínica Posto de Saude Central?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
       {
         "role": "agent",
         "content": "Bom dia, tem algum responsavel disponivel?"
@@ -400,6 +528,14 @@
     "conversation_history": [
       {
         "role": "agent",
+        "content": "Bom dia, é da clínica Clinica Medica Rapida?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
         "content": "Ola, gostaria de falar com a diretoria."
       },
       {
@@ -417,6 +553,14 @@
     "name": "Transferencia com Numero",
     "clinic_name": "Hospital Santa Rita",
     "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da clínica Hospital Santa Rita?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
       {
         "role": "agent",
         "content": "Qual o whatsapp do proprietario?"
@@ -438,6 +582,14 @@
     "conversation_history": [
       {
         "role": "agent",
+        "content": "Bom dia, é da clínica Clinica Multi-Especialista?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
         "content": "Preciso falar com o gerente."
       },
       {
@@ -457,6 +609,14 @@
     "conversation_history": [
       {
         "role": "agent",
+        "content": "Bom dia, é da clínica Clinica Familiar?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
         "content": "Ola, poderia me passar o contato do dono?"
       },
       {
@@ -474,6 +634,14 @@
     "name": "Pergunta sobre Empresa",
     "clinic_name": "Clinica Estetica Bella",
     "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da clínica Clinica Estetica Bella?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
       {
         "role": "agent",
         "content": "Ola, temos uma proposta para a clinica."
@@ -505,6 +673,14 @@
     "conversation_history": [
       {
         "role": "agent",
+        "content": "Bom dia, é da clínica Clinica Fechada?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
         "content": "Ola, tudo bem? Gostaria de falar com o gerente."
       },
       {
@@ -530,6 +706,14 @@
     "name": "Conversa longa com múltiplas objeções",
     "clinic_name": "Clínica OdontoBem",
     "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da clínica Clínica OdontoBem?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
       {
         "role": "agent",
         "content": "Oi, tudo bem? Falo com o Dr. Ricardo?"
@@ -567,6 +751,14 @@
     "conversation_history": [
       {
         "role": "agent",
+        "content": "Bom dia, é da clínica Estética Glow?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
         "content": "Boa tarde! Gostaria de falar com a responsável pela clínica."
       },
       {
@@ -584,6 +776,14 @@
     "name": "Promessa ambígua de repasse",
     "clinic_name": "Dermo Clínica",
     "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da clínica Dermo Clínica?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
       {
         "role": "agent",
         "content": "Oi, gostaria de falar com o Dr. Fábio."
@@ -605,6 +805,14 @@
     "conversation_history": [
       {
         "role": "agent",
+        "content": "Bom dia, é da clínica Clínica Psicologia Mental?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
         "content": "Olá, preciso falar com o sócio gestor sobre parceria."
       },
       {
@@ -622,6 +830,14 @@
     "name": "Gestor pede proposta antes",
     "clinic_name": "OrtoVida",
     "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da clínica OrtoVida?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
       {
         "role": "agent",
         "content": "Falo com o proprietário?"
@@ -651,6 +867,14 @@
     "conversation_history": [
       {
         "role": "agent",
+        "content": "Bom dia, é da clínica Rio Cosmetic Surgery?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
         "content": "Olá, gostaria de falar com o diretor da clínica."
       },
       {
@@ -670,6 +894,14 @@
     "conversation_history": [
       {
         "role": "agent",
+        "content": "Bom dia, é da clínica Clínica Dermos?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
         "content": "Olá, boa tarde! Aqui é da empresa TechHealth, gostaria de falar com o responsável pelo agendamento."
       },
       {
@@ -687,6 +919,14 @@
     "name": "Número de telefone incompleto",
     "clinic_name": "Odonto Centro Sul",
     "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da clínica Odonto Centro Sul?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
       {
         "role": "agent",
         "content": "Preciso falar com a dra. Carla para apresentar o novo sistema."
@@ -716,6 +956,14 @@
     "name": "Duas objeções e conversão final",
     "clinic_name": "Clínica Bem Estar",
     "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da clínica Clínica Bem Estar?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
       {
         "role": "agent",
         "content": "Oi, tudo bem? Aqui é da ConnectMed. Falo com quem cuida da agenda?"
@@ -753,6 +1001,14 @@
     "conversation_history": [
       {
         "role": "agent",
+        "content": "Bom dia, é da clínica Clínica Sofia?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
         "content": "Boa tarde! Gostaria de falar com o gestor da clínica."
       },
       {
@@ -782,6 +1038,14 @@
     "conversation_history": [
       {
         "role": "agent",
+        "content": "Bom dia, é da clínica OdontoMax?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
         "content": "Bom dia! Gostaria de falar com o gestor."
       },
       {
@@ -803,6 +1067,14 @@
     "conversation_history": [
       {
         "role": "agent",
+        "content": "Bom dia, é da clínica Derma Clinic?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
         "content": "Boa tarde! Posso falar com o gestor?"
       },
       {
@@ -822,6 +1094,14 @@
     "name": "Recepção pede para aguardar — 'deixa eu ver'",
     "clinic_name": "Clínica Alfa",
     "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da clínica Clínica Alfa?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
       {
         "role": "agent",
         "content": "Bom dia! Gostaria de falar com o gestor."

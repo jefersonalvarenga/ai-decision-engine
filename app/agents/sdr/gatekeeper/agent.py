@@ -9,9 +9,10 @@ from .signature import GatekeeperSignature
 from .utils import safe_str
 
 
-MAX_ATTEMPTS = 5          # Force failed after N total agent messages without progress
-MAX_OBJECTION_TURNS = 3   # Force failed after N handling_objection responses
+MAX_OBJECTION_TURNS = 3   # Max handling_objection responses before failing.
                            # 3 permite: 1) assunto comercial 2) pitch EasyScale 3) pivot email
+                           # Fail triggers on the (N+1)-th objection, so the pivot email IS sent
+                           # and the conversation stays open for the human to reply with an email.
 
 
 # Phrases indicating the reception went to fetch the manager — agent should WAIT, not reply
@@ -55,14 +56,15 @@ class GatekeeperAgent(dspy.Module):
     Uses Chain of Thought for better reasoning about conversation flow.
 
     Exit rules:
-    - success: phone (8+ digits) or email (@) received → send thanks, stop
-    - failed:  max 2 handling_objection turns OR immediate rejection → send goodbye, stop
+    - success:  phone (8+ digits) or email (@) received → send thanks, stop
+    - failed:   MAX_OBJECTION_TURNS handling_objection turns OR immediate rejection → send goodbye, stop
+    Note: total message count (attempt_count) is passed to the LLM as context only — it
+    does NOT trigger forced termination. Only objection turns count towards the limit.
     """
 
-    def __init__(self, max_attempts: int = MAX_ATTEMPTS):
+    def __init__(self):
         super().__init__()
         self.process = dspy.ChainOfThought(GatekeeperSignature)
-        self.max_attempts = max_attempts
 
     def _clean_phone(self, phone: Optional[str]) -> Optional[str]:
         """Extract only digits from phone number"""
@@ -131,7 +133,8 @@ class GatekeeperAgent(dspy.Module):
         conversation_history: list,
         latest_message: Optional[str],
         current_hour: int,
-        attempt_count: int,
+        current_weekday: int = 0,
+        attempt_count: int = 0,
     ) -> dict:
         """
         Process the conversation and generate next response.
@@ -161,7 +164,7 @@ class GatekeeperAgent(dspy.Module):
                     f"Immediate rejection detected: '{latest_message}'. "
                     "Sending graceful goodbye."
                 ),
-                "response_message": "Entendido, desculpe o incômodo. Bom trabalho a todos!",
+                "response_message": "Entendido! Se um dia quiser — a gente desafoga 60% do repetitivo. Me chama.",
                 "conversation_stage": "failed",
                 "extracted_manager_contact": None,
                 "extracted_manager_email": None,
@@ -174,6 +177,7 @@ class GatekeeperAgent(dspy.Module):
             conversation_history=str(conversation_history) if conversation_history else "[]",
             latest_message=latest_message or "PRIMEIRA_MENSAGEM",
             current_hour=str(current_hour),
+            current_weekday=str(current_weekday),
             attempt_count=str(attempt_count),
         )
 
@@ -191,46 +195,43 @@ class GatekeeperAgent(dspy.Module):
         if stage not in valid_stages:
             stage = "handling_objection"
 
-        # --- PÓS-CHECK: LLM confirmou que é objeção → conta objeções reais e decide ---
-        if stage == "handling_objection":
-            prior_objections = self._count_objection_turns(conversation_history)
-            total_objections = prior_objections + 1  # +1 pela atual
-            if total_objections >= MAX_OBJECTION_TURNS:
-                stage = "failed"
-                response_message = safe_str(result.response_message, "").strip()
-                if not response_message or response_message.lower() == "null":
-                    response_message = "Compreendo, obrigado pela atenção! Sucesso à clínica."
-
         # Get response message
         response_message = safe_str(result.response_message, "").strip()
 
         # --- SMART FALLBACKS ---
 
-        # 1. Phone contact received → success
+        # 1. Phone contact received → success (checked BEFORE objection count, so a contact
+        #    given on the 3rd objection turn still wins over the objection limit)
         if extracted_contact and stage not in ["success", "failed"]:
             stage = "success"
 
-        # 2. Email contact received → success
+        # 2. Email contact received → success (same priority logic as phone)
         if extracted_email and not extracted_contact and stage not in ["success", "failed"]:
             stage = "success"
 
-        # 3. Force failed if max total attempts reached
-        if attempt_count >= self.max_attempts and stage in ["opening", "requesting", "handling_objection"]:
-            stage = "failed"
-            response_message = response_message or "Obrigado pelo tempo! Bom trabalho."
-            should_continue = True  # Send the goodbye message
+        # --- PÓS-CHECK: LLM confirmou que é objeção → conta objeções reais e decide ---
+        # Runs AFTER contact check so a contact given on the Nth objection turn is not lost.
+        if stage == "handling_objection":
+            prior_objections = self._count_objection_turns(conversation_history)
+            total_objections = prior_objections + 1  # +1 pela atual
+            if total_objections > MAX_OBJECTION_TURNS:
+                stage = "failed"
+                if not response_message or response_message.lower() == "null":
+                    response_message = "Ok! Se quiser — a gente desafoga 60% do atendimento. Você foca nos pacientes."
 
-        # 4. Success → stop (no more messages needed beyond the thank-you)
+        # 3. Success → send thank-you, then stop (evaluator breaks loop after success stage)
         if stage == "success":
-            should_continue = False
+            if not response_message or response_message.lower() == "null":
+                response_message = "Obrigado!"
+            should_continue = True
 
-        # 5. Failed → send goodbye if we have one, then stop
+        # 4. Failed → send goodbye if we have one, then stop
         if stage == "failed":
             if not response_message or response_message.lower() == "null":
                 response_message = "Entendido, obrigado pela atenção!"
             should_continue = True  # Send the goodbye message
 
-        # 6. Empty response → don't send
+        # 5. Empty response → don't send
         if not response_message or response_message.lower() == "null":
             should_continue = False
             response_message = ""

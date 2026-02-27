@@ -96,6 +96,10 @@ class GatekeeperRequest(BaseModel):
         None,
         description="Última mensagem recebida (None se primeira mensagem)"
     )
+    current_weekday: Optional[int] = Field(
+        None,
+        description="Dia da semana (0=segunda … 6=domingo). Opcional — servidor computa se ausente."
+    )
 
 
 class GatekeeperResponse(BaseModel):
@@ -244,7 +248,9 @@ async def sdr_gatekeeper(request: GatekeeperRequest):
     - extracted_manager_contact: telefone do gestor se conseguiu
     """
     start_time = time.time()
-    current_hour = datetime.now().hour
+    now = datetime.now()
+    current_hour    = now.hour
+    current_weekday = request.current_weekday if request.current_weekday is not None else now.weekday()
 
     try:
         # Count agent messages in history
@@ -261,6 +267,7 @@ async def sdr_gatekeeper(request: GatekeeperRequest):
             ],
             "latest_message": request.latest_message,
             "current_hour": current_hour,
+            "current_weekday": current_weekday,
             "attempt_count": attempt_count,
         })
 

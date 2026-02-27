@@ -40,6 +40,10 @@ class GatekeeperInput(BaseModel):
         None,
         description="Última mensagem recebida da recepção (None se primeira mensagem)"
     )
+    current_weekday: Optional[int] = Field(
+        None,
+        description="Dia da semana (0=segunda … 6=domingo). Se ausente, o servidor computa automaticamente."
+    )
 
 
 class GatekeeperOutput(BaseModel):
@@ -134,11 +138,13 @@ class GatekeeperState(TypedDict):
     conversation_history: list
     latest_message: Optional[str]
     current_hour: int
+    current_weekday: int
     attempt_count: int
     # Outputs
     response_message: Optional[str]
     conversation_stage: str
     extracted_manager_contact: Optional[str]
+    extracted_manager_email: Optional[str]
     extracted_manager_name: Optional[str]
     should_send_message: bool
     reasoning: str

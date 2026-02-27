@@ -5,6 +5,8 @@ Simple linear graph: receive message → process → return action
 The n8n workflow handles the actual messaging and state persistence.
 """
 
+from datetime import datetime as _dt
+
 from langgraph.graph import StateGraph, END
 from ..state import GatekeeperState
 from .agent import GatekeeperAgent
@@ -31,6 +33,7 @@ def process_message(state: GatekeeperState) -> dict:
             conversation_history=state.get("conversation_history", []),
             latest_message=state.get("latest_message"),
             current_hour=state.get("current_hour", 12),
+            current_weekday=state.get("current_weekday", _dt.now().weekday()),
             attempt_count=state.get("attempt_count", 0),
         )
 
