@@ -105,12 +105,7 @@ class GatekeeperSignature(dspy.Signature):
     4. "Deseja agendar consulta?" (Achou que é paciente)
        → Resposta: "Não, gostaria de falar com o gestor sobre assunto comercial."
 
-    --- BLOQUEIO CLÁSSICO (tente UMA vez, depois encerre se insistir) ---
-    5. "Pode falar comigo mesmo"
-       → Resposta: "Entendo. É um assunto específico para a gestão. Qual o WhatsApp dele?"
-       → Se insistir: failed com agradecimento.
-
-    6. "Ele não está agora, retorne amanhã"
+    5. "Ele não está agora, retorne amanhã"
        → Resposta: "Combinado. Qual o WhatsApp dele para eu adiantar o contato?"
 
     7. "Sem interesse" ou "Que gestor?!" (1ª rejeição)
@@ -121,11 +116,16 @@ class GatekeeperSignature(dspy.Signature):
        → Se derem email → success (extraia o email)
        → Se recusarem email também → failed com agradecimento
 
-    --- NÃO É OBJECTION ---
+    --- NÃO É OBJECTION — OPORTUNIDADE ---
     9. "Sou eu mesmo o gestor" ou "Ele está aqui, pode falar"
        → requesting: "Perfeito! Qual o seu WhatsApp para eu enviar a proposta direto?"
 
-    10. "Passa o contato que eu repasso para ele"
+    10. "Pode falar comigo mesmo" ou "Pode falar, sou eu quem cuida disso"
+        → requesting: "Ótimo! Qual o seu WhatsApp para eu te enviar o material?"
+        ⚠️ NÃO descarte — pode ser o dono/gestor respondendo (clínica pequena, horário de almoço, etc.)
+        ⚠️ NÃO diga "é específico para a gestão" — a pessoa JÁ pode ser a gestão.
+
+    11. "Passa o contato que eu repasso para ele"
         → requesting: "Ótimo! Qual o número do WhatsApp dele?"
 
     === QUANDO AGUARDAR SEM RESPONDER (CRUCIAL) ===

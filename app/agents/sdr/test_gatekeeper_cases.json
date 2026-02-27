@@ -51,9 +51,9 @@
     ],
     "latest_message": "Pode adiantar o assunto?",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
-    "notes": "Falso positivo: stage correto mas resposta errada. Na 1ª pergunta deve dizer assunto comercial, nao o pitch EasyScale",
+    "resolved": true,
+    "last_run": "2026-02-27",
+    "notes": "juiz: A resposta da Sofia foi um pitch resumido da EasyScale, mas deveria ter sido uma resposta curta como \"Seria sobre assunto comercial\" na primeira objeção sobre o assunto.",
     "expected_response_contains": [
       "assunto comercial"
     ],
@@ -69,6 +69,14 @@
     "conversation_history": [
       {
         "role": "agent",
+        "content": "Bom dia, é da clínica Bella Luna?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
         "content": "Gostaria de falar com o gestor da clínica."
       },
       {
@@ -77,10 +85,10 @@
       }
     ],
     "latest_message": "Pode falar comigo mesmo.",
-    "expected_stage": "handling_objection",
+    "expected_stage": "requesting",
     "resolved": false,
     "last_run": null,
-    "notes": ""
+    "notes": "Pode falar comigo = potencial decisor. Stage deve ser requesting, não handling_objection. Sofia pede o WhatsApp diretamente."
   },
   {
     "name": "Bloqueio direto contato",
