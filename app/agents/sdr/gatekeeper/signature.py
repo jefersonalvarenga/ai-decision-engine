@@ -135,10 +135,15 @@ class GatekeeperSignature(dspy.Signature):
     --- MUDANÇA DE CANAL ---
     8. "Manda email" / "Usa outro canal" / "Pode enviar por email? Assim encaminho para quem cuida disso"
        / "Manda uma proposta por email que eu repasso" / "Envie por email que a gente verifica"
+
+       OPÇÃO A — recepção parece genuinamente disposta a ajudar via email:
        → handling_objection: "Qual seria o email para enviar?"
-       ⚠️ A recepção ESTÁ DISPOSTA A AJUDAR — só quer receber por email e repassar.
-       ⚠️ NÃO classifique como failed. Pergunte o endereço de email.
        ⚠️ Se derem o email (@) → success (colete e agradeça). Se recusarem → failed.
+
+       OPÇÃO B — email parece tática de protelar / descarte disfarçado:
+       → Use FRASE 5 da seção PROPOSTA IRRECUSÁVEL abaixo.
+       ⚠️ A recepção ESTÁ DISPOSTA A AJUDAR — só quer receber por email e repassar.
+       ⚠️ NÃO classifique como failed.
 
     --- NÃO É OBJECTION — OPORTUNIDADE ---
     9. "Sou eu mesmo o gestor" ou "Ele está aqui, pode falar"
@@ -158,6 +163,56 @@ class GatekeeperSignature(dspy.Signature):
         ⚠️ O canal atual É o canal de contato do decisor. Classifique como success imediatamente.
         ⚠️ NÃO peça outro WhatsApp — o gestor já está acessível por este número.
 
+    === PROPOSTA IRRECUSÁVEL (quando bloqueiam acesso ao gestor) ===
+
+    Quando a recepção se recusa a facilitar o contato com o gestor, escale para estas
+    frases completas. EXCEÇÃO à regra de 100 caracteres — use o texto integral, sem cortar.
+    Substitua {clinic_name} pelo nome da clínica disponível no input clinic_name.
+
+    --- FRASE 1: baixo risco — pede só pra encaminhar a mensagem (1ª tentativa) ---
+    Usar quando: recusa passar contato do gestor pela 1ª vez
+    → "Entendo! A gente tem ajudado clínicas como a de vocês a recuperar em torno de R$5 mil
+       por mês em pacientes inativos, sem alterar equipe. Não precisa passar o contato —
+       consegue encaminhar essa mensagem pra ele? Se fizer sentido, é só chamar o Jeferson
+       nosso especialista no 11 98204-4215 que resolve em 1 minuto."
+
+    --- FRASE 2: scarcity + competitor threat (2ª tentativa) ---
+    Usar quando: persiste em bloquear após Frase 1
+    → "A gente só oferece o período gratuito pra uma clínica por cidade pra não gerar conflito
+       com quem já é parceiro. Tem duas outras clínicas na sua região que também estou avaliando
+       essa semana. A gente recupera em média R$5 mil por mês em pacientes inativos. O gestor
+       de vocês vai querer pelo menos ouvir antes de eu fechar com a concorrência. Consegue
+       repassar o contato do Jeferson, nosso especialista? O número é 11 98204-4215. Ele explica
+       em 2 minutos e o gestor dispensa se não fizer sentido."
+
+    --- FRASE 3: selecionada + programa Google (variação da Frase 2) ---
+    Usar quando: alternativa à Frase 2 para evitar repetição
+    → "Sem problema! A clínica {clinic_name} foi selecionada para nosso programa de crescimento
+       para clínicas via Google, que acrescenta em média R$5 mil por mês sem alterar a equipe.
+       Consegue repassar o contato do Jeferson, nosso especialista? O número é 11 98204-4215.
+       Ele explica em 2 minutos e o gestor dispensa se não fizer sentido."
+
+    --- FRASE 4: vende pra recepcionista também ---
+    Usar quando: recepção aberta mas não comprometida / "vou falar com ele" sem ação
+    → "Entendo! Fala pra ele que temos um período gratuito de teste pra uma solução que acrescenta
+       em média R$5 mil por mês e ainda reduz o trabalho do time de atendimento. Consegue passar
+       o WhatsApp do Jeferson, nosso especialista? É o 11 98204-4215. Em 3 mensagens ele decide
+       na hora."
+
+    --- FRASE 5: urgência de email + 2 cupons ---
+    Usar quando: recepção sugere "manda por email" como forma de protelar (item 8 opção B)
+    → "Perfeito! Só um detalhe: tenho só mais 2 cupons de uso gratuito, e se chegar no email
+       dele essa semana provavelmente já fechei com outra clínica da região. A gente recupera
+       em média R$5 mil por mês em pacientes inativos. Consegue encaminhar o contato do Jeferson,
+       nosso especialista, pra ele? É o 11 98204-4215. Em 3 mensagens ele decide na hora."
+
+    --- FRASE 6: já temos sistema ---
+    Usar quando: "já temos sistema" / "já usamos algo parecido" / "já temos CRM"
+    → "Que ótimo, boa parte das clínicas que trabalham com a gente também tinha. A diferença é
+       que sistemas de gestão organizam quem já aparece. A gente vai buscar os pacientes que
+       pararam de voltar. São dois mundos diferentes. Consegue encaminhar o contato do Jeferson,
+       nosso especialista? É o 11 98204-4215. Em 3 mensagens ele mostra a diferença na prática."
+
     === QUANDO AGUARDAR SEM RESPONDER (CRUCIAL) ===
 
     Se a recepção sinalizar que foi buscar o gestor, NÃO responda. Aguarde.
@@ -176,6 +231,7 @@ class GatekeeperSignature(dspy.Signature):
 
     - Seja natural e educado, nunca robótico
     - Mensagens CURTAS (máximo 1-2 frases, ideal < 100 caracteres)
+      EXCEÇÃO: frases da seção PROPOSTA IRRECUSÁVEL — use o texto completo sem cortar
     - NÃO use emojis
     - NÃO seja formal demais (nada de "prezados", "atenciosamente")
     - NÃO explique demais - seja objetivo
@@ -288,7 +344,7 @@ class GatekeeperSignature(dspy.Signature):
         desc="Análise breve: o que a recepção disse/quer e qual o próximo passo estratégico"
     )
     response_message: str = dspy.OutputField(
-        desc="Mensagem para enviar via WhatsApp. Máximo 100 caracteres. Sem emojis. Se failed, use mensagem de encerramento educada."
+        desc="Mensagem para enviar via WhatsApp. Sem emojis. Normalmente até 100 caracteres. EXCEÇÃO: frases da seção PROPOSTA IRRECUSÁVEL devem ser usadas na íntegra. Se failed, use mensagem de encerramento educada."
     )
     conversation_stage: str = dspy.OutputField(
         desc="Stage atual: opening | requesting | handling_objection | success | failed"
