@@ -5,6 +5,7 @@ Suporta os fluxos de Roteamento (Router) e Re-engajamento (Re-engagement).
 
 import time
 from datetime import datetime
+from zoneinfo import ZoneInfo
 from typing import Optional, Dict, Any, List
 
 from fastapi import FastAPI, HTTPException, Depends, Header
@@ -248,7 +249,7 @@ async def sdr_gatekeeper(request: GatekeeperRequest):
     - extracted_manager_contact: telefone do gestor se conseguiu
     """
     start_time = time.time()
-    now = datetime.now()
+    now = datetime.now(ZoneInfo("America/Sao_Paulo"))
     current_hour    = now.hour
     current_weekday = request.current_weekday if request.current_weekday is not None else now.weekday()
 
@@ -305,7 +306,7 @@ async def sdr_closer(request: CloserRequest):
     - meeting_confirmed: true se deve criar evento no Google Calendar
     """
     start_time = time.time()
-    current_hour = datetime.now().hour
+    current_hour = datetime.now(ZoneInfo("America/Sao_Paulo")).hour
 
     try:
         # Count agent messages in history
