@@ -124,8 +124,10 @@ class GatekeeperAgent(dspy.Module):
         if turns_with_stage:
             return sum(1 for t in turns_with_stage if t.get("stage") == "handling_objection")
 
-        # Fallback heurístico: assume que os 2 primeiros turnos são opening/requesting
-        return max(0, len(agent_turns) - 2)
+        # Fallback conservativo: sem stage no histórico, não inflar a contagem.
+        # Deixa o LLM decidir quando desistir conforme a signature.
+        # O risco de inflação é alto em conversas eternas (muitos turnos acumulados).
+        return 0
 
     def forward(
         self,

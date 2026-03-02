@@ -56,12 +56,17 @@ class GatekeeperSignature(dspy.Signature):
        → failed: "Entendido, obrigado pela atenção! Sucesso à clínica."
     4. "Não fornecemos contato direto de ninguém por WhatsApp"
        → failed após 1 tentativa: "Compreendo, obrigado! Bom trabalho."
-    5. "Não repassamos o contato do gestor" / "Não posso ajudar com isso" / "Posso ajudar com mais alguma coisa?"
+    5. "Não repassamos o contato do gestor" / "Não posso ajudar com isso" /
+       "Posso ajudar com mais alguma coisa?" (pergunta genérica de encerramento, sem oferta de encaminhar)
        → failed IMEDIATO: agradeça e encerre. Não tente novamente.
        ⚠️ EXCEÇÃO CRÍTICA 1: se a frase contém "verificar com o gestor" / "perguntar para ele" /
        "falar com ele" → NÃO é failed, é handling_objection. A recepção está sendo cooperativa.
-       ⚠️ EXCEÇÃO CRÍTICA 2: se a frase contém "email" / "enviar por email" / "encaminhar" →
-       NÃO é failed, é handling_objection. A recepção está oferecendo um canal. Pergunte o email.
+       ⚠️ EXCEÇÃO CRÍTICA 2: se a frase contém "email" / "enviar por email" / "encaminhar" /
+       "encaminho" / "anotar o motivo" / "anotar" / "repasso" / "repassar" →
+       NÃO é failed, é handling_objection. A recepção quer ajudar — responda com o mínimo.
+       ⚠️ DISTINÇÃO CRUCIAL:
+          "Posso ajudar com mais alguma coisa?" = encerramento, não quer saber → failed
+          "Posso anotar o motivo? Assim encaminho para a pessoa certa." = cooperação → handling_objection step 1
 
     --- NÃO É failed (é handling_objection) ---
     5. "Não aceitamos abordagem por texto. Se quiser, liga no fixo X"
@@ -74,6 +79,12 @@ class GatekeeperSignature(dspy.Signature):
        → handling_objection (step 1b): "É sobre atendimento da clínica."
        ⚠️ A recepção está COOPERANDO — quer ajudar, só precisa de um contexto mínimo.
        ⚠️ NÃO classifique como failed. Responda com o mínimo e deixe o fluxo continuar.
+    8. "Posso anotar o motivo? Assim encaminho para a pessoa certa." /
+       "Me passa o motivo que eu encaminho" / "Qual o motivo para encaminhar?" /
+       "Anota o motivo para eu repassar" / "Me diz o motivo que eu passo pra ele"
+       → handling_objection (step 1): "Seria sobre assunto comercial"
+       ⚠️ ESTA É A RESPOSTA MAIS COOPERATIVA POSSÍVEL — a recepção quer encaminhar.
+       ⚠️ NUNCA classifique como failed. Responda com "Seria sobre assunto comercial" e aguarde.
 
     === EMAIL COMO CONTATO ALTERNATIVO (success com email) ===
 
@@ -99,9 +110,12 @@ class GatekeeperSignature(dspy.Signature):
     MÁXIMO 3 vezes em handling_objection. Na 4ª tentativa sem progresso → failed.
 
     --- PERGUNTAS E TESTES (handling_objection) ---
-    1. "Qual empresa? Quem indicou?" ou "Pode adiantar o assunto?" (1ª vez)
+    1. "Qual empresa? Quem indicou?" / "Pode adiantar o assunto?" /
+       "Posso anotar o motivo?" / "Qual o motivo?" / "Me passa o motivo que eu encaminho" (1ª vez)
        → Resposta MÍNIMA: "Seria sobre assunto comercial"
        ⚠️ NÃO mencione a empresa nem o produto aqui. Apenas "assunto comercial".
+       ⚠️ "Posso anotar o motivo? Assim encaminho para a pessoa certa." → stage = handling_objection.
+          NUNCA é failed. Responda "Seria sobre assunto comercial" e aguarde o retorno.
 
     1b. INSISTEM em saber mais (2ª vez — perguntam de novo após "assunto comercial")
         Exemplos: "Poderia me informar mais detalhes sobre essa proposta comercial?"
