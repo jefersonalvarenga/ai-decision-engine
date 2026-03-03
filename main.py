@@ -19,6 +19,7 @@ from app.agents.reengage.graph import app_graph as reengage_graph
 from app.agents.sdr import gatekeeper_graph, closer_graph
 from app.agents.sdr.state import ConversationTurn
 from app.core.security import SecurityMiddleware, AccessLogMiddleware
+from app.utils.name_cleaner import extract_short_name
 
 # ============================================================================
 # APP INITIALIZATION
@@ -148,6 +149,16 @@ class CloserResponse(BaseModel):
     reasoning: str
     processing_time_ms: float
 
+
+class ExtractShortNameRequest(BaseModel):
+    full_name: str = Field(..., description="Nome completo da clínica (Google Maps / CRM)")
+
+
+class ExtractShortNameResponse(BaseModel):
+    short_name: str = Field(..., description="Nome curto e natural da clínica")
+    original_name: str = Field(..., description="Nome original recebido")
+
+
 # ============================================================================
 # STARTUP EVENT
 # ============================================================================
@@ -169,6 +180,29 @@ async def startup_event():
 @app.get("/v1/health")
 async def health():
     return {"status": "online", "timestamp": datetime.utcnow()}
+
+
+@app.post("/v1/utils/extract-short-name", response_model=ExtractShortNameResponse)
+async def extract_short_name_endpoint(request: ExtractShortNameRequest):
+    """
+    Extrai o nome curto e natural de uma clínica a partir do nome completo do Google Maps.
+
+    Chamado pelo greeting workflow antes de enviar a saudação, para evitar que o bot
+    use nomes com keywords de SEO como "Dentista 24 horas - Clínica SoRio emergência
+    dentista de Duque de Caxias" em vez de simplesmente "Clínica SoRio".
+    """
+    start_time = time.time()
+    try:
+        short = extract_short_name(request.full_name)
+        return ExtractShortNameResponse(
+            short_name=short,
+            original_name=request.full_name,
+        )
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Name extraction error: {str(e)}"
+        )
 
 @app.post("/v1/router", response_model=RouterResponse)
 async def route_message(request: RouterRequest):
