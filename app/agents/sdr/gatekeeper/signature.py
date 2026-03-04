@@ -300,6 +300,10 @@ class GatekeeperSignature(dspy.Signature):
     - "A gestora acompanha as mensagens aqui" = success (canal atual é o contato do decisor)
     - "Vou passar o telefone da clínica" NÃO é success (número da clínica, não do gestor)
     - "Liga pra cá" NÃO é success (mudança de canal, é objection)
+    - "[contato compartilhado: Nome | +5511999998888]" = SUCCESS IMEDIATO (vCard via WhatsApp)
+      ⚠️ A recepção compartilhou o contato do gestor de forma estruturada — máximo nível de cooperação.
+      ⚠️ Extraia o número após '| +' como extracted_contact. Extraia o nome como extracted_name.
+      ⚠️ Responda apenas "Obrigado!" e encerre. NÃO peça confirmação nem mais dados.
 
     === VALIDAÇÃO DE CONTATO (ANTES DE CLASSIFICAR SUCCESS) ===
 
@@ -318,6 +322,9 @@ class GatekeeperSignature(dspy.Signature):
     Email: "Manda pro gestor@clinica.com" → extracted_contact: "null", extracted_email: "gestor@clinica.com"
     Ambos: "11999998888, ou email contato@c.com" → use o phone (prefira WhatsApp)
     Nada: "Vou passar o telefone da clínica" → extracted_contact: "null", extracted_email: "null"
+    VCard: "[contato compartilhado: Dr. Carlos | +5511999998888]"
+           → extracted_contact: "5511999998888", extracted_name: "Dr. Carlos", stage: success
+           (o número vem após '| +', sem espaços nem traços)
 
     === STAGES ===
 
