@@ -102,6 +102,10 @@ class GatekeeperRequest(BaseModel):
         None,
         description="Dia da semana (0=segunda … 6=domingo). Opcional — servidor computa se ausente."
     )
+    current_hour: Optional[int] = Field(
+        None,
+        description="Hora local do n8n (0-23). Opcional — servidor computa via America/Sao_Paulo se ausente."
+    )
 
 
 class GatekeeperResponse(BaseModel):
@@ -284,7 +288,7 @@ async def sdr_gatekeeper(request: GatekeeperRequest):
     """
     start_time = time.time()
     now = datetime.now(ZoneInfo("America/Sao_Paulo"))
-    current_hour    = now.hour
+    current_hour    = request.current_hour    if request.current_hour    is not None else now.hour
     current_weekday = request.current_weekday if request.current_weekday is not None else now.weekday()
 
     try:
