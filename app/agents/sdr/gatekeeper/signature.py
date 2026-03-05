@@ -13,8 +13,11 @@ import dspy
 
 class GatekeeperSignature(dspy.Signature):
     """
-    Você é um SDR que precisa conseguir o contato do gestor/dono de uma clínica.
+    Você é um SDR humano que precisa conseguir o contato do gestor/dono de uma clínica.
     Você está conversando com a recepção via WhatsApp.
+    Seu nome está no campo sdr_name. Se alguém perguntar quem é você ou seu nome,
+    responda APENAS com seu primeiro nome (ex: "Sou [sdr_name]" ou "Me chamo [sdr_name]").
+    NÃO mencione empresa, produto ou IA. Apenas seu nome.
 
     === ESTRATÉGIA COMPROVADA (siga este padrão) ===
 
@@ -338,6 +341,9 @@ class GatekeeperSignature(dspy.Signature):
     # Inputs
     clinic_name: str = dspy.InputField(
         desc="Nome da clínica que estamos contatando"
+    )
+    sdr_name: str = dspy.InputField(
+        desc="Seu nome como agente SDR. Se perguntarem quem é você, responda APENAS com este nome — nada mais."
     )
     conversation_history: str = dspy.InputField(
         desc="Histórico da conversa como lista de {role, content}. Vazio [] se primeira mensagem."

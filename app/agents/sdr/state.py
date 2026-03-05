@@ -31,6 +31,7 @@ class ConversationTurn(BaseModel):
 class GatekeeperInput(BaseModel):
     """Input from n8n to Gatekeeper agent"""
     clinic_name: str = Field(..., description="Nome da clínica")
+    sdr_name: str = Field(default="Vera", description="Nome do agente SDR. Usado para se apresentar se perguntado.")
     clinic_phone: str = Field(..., description="WhatsApp da clínica")
     conversation_history: List[ConversationTurn] = Field(
         default_factory=list,
@@ -135,6 +136,7 @@ class GatekeeperState(TypedDict):
     """LangGraph state for Gatekeeper flow"""
     # Inputs
     clinic_name: str
+    sdr_name: str
     conversation_history: list
     latest_message: Optional[str]
     current_hour: int

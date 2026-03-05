@@ -30,6 +30,7 @@ def process_message(state: GatekeeperState) -> dict:
     try:
         result = gatekeeper_agent.forward(
             clinic_name=state["clinic_name"],
+            sdr_name=state.get("sdr_name", "Vera"),
             conversation_history=state.get("conversation_history", []),
             latest_message=state.get("latest_message"),
             current_hour=state.get("current_hour", 12),

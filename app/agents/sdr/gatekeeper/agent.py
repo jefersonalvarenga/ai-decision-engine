@@ -132,9 +132,10 @@ class GatekeeperAgent(dspy.Module):
     def forward(
         self,
         clinic_name: str,
-        conversation_history: list,
-        latest_message: Optional[str],
-        current_hour: int,
+        sdr_name: str = "Vera",
+        conversation_history: list = None,
+        latest_message: Optional[str] = None,
+        current_hour: int = 12,
         current_weekday: int = 0,
         attempt_count: int = 0,
     ) -> dict:
@@ -179,6 +180,7 @@ class GatekeeperAgent(dspy.Module):
 
         result = self.process(
             clinic_name=clinic_name,
+            sdr_name=sdr_name,
             conversation_history=str(conversation_history) if conversation_history else "[]",
             latest_message=latest_message or "PRIMEIRA_MENSAGEM",
             current_hour=str(current_hour),

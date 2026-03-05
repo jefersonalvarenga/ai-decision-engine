@@ -89,6 +89,7 @@ class SDRConversationTurn(BaseModel):
 class GatekeeperRequest(BaseModel):
     """Request from n8n webhook for Gatekeeper agent"""
     clinic_name: str = Field(..., description="Nome da clínica")
+    sdr_name: str = Field(default="Vera", description="Nome do agente SDR. Usado para se apresentar se perguntado.")
     clinic_phone: str = Field(..., description="WhatsApp da clínica")
     conversation_history: List[SDRConversationTurn] = Field(
         default_factory=list,
@@ -300,6 +301,7 @@ async def sdr_gatekeeper(request: GatekeeperRequest):
 
         result = gatekeeper_graph.invoke({
             "clinic_name": request.clinic_name,
+            "sdr_name": request.sdr_name,
             "conversation_history": [
                 {"role": t.role, "content": t.content}
                 for t in request.conversation_history
