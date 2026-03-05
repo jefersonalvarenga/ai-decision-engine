@@ -16,9 +16,9 @@ FastAPI com agentes DSPy que alimentam o SDR automatizado. Os agentes processam 
 - **DSPy** — framework de otimização de prompts (LLM-agnóstico)
 - **LangGraph** — grafos de agentes (`gatekeeper_graph`, `closer_graph`)
 - **LLM configurável via `.env`:** `DSPY_PROVIDER` + `DSPY_MODEL`
-  - Produção atual: GLM5 (`glm` provider)
-  - Testes históricos: GPT-4o (`openai` provider)
-  - Candidato a substituição: Claude API (melhor em português BR e raciocínio contextual)
+  - Produção atual: `DSPY_PROVIDER=xai` + `DSPY_MODEL=grok-4-1-fast-non-reasoning`
+  - Testes históricos: GPT-4o (`openai` provider), GLM5 (`glm` provider)
+  - Candidato a avaliar: Claude API (melhor em português BR e raciocínio contextual)
 
 ---
 

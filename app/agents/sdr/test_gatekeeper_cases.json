@@ -139,10 +139,12 @@
       }
     ],
     "latest_message": "Mande pelo nosso email contato@saudeviva.com.br",
-    "expected_stage": "handling_objection",
+    "expected_stage": "success",
     "resolved": false,
     "last_run": null,
-    "notes": ""
+    "notes": "REGRA: qualquer email com @ indicado como canal comercial = success imediato. Extrair contato@saudeviva.com.br. Resposta = agradecimento curto. NÃO pedir email pessoal nem WhatsApp.",
+    "expected_response_contains": ["Obrigad"],
+    "forbidden_keywords": ["WhatsApp", "pessoal", "outro email", "mais algum"]
   },
   {
     "name": "Recepção confusa sobre gestor",
@@ -1118,5 +1120,235 @@
     "resolved": false,
     "last_run": null,
     "notes": ""
+  },
+  {
+    "name": "Email institucional como canal do gestor (padrão Graciosa)",
+    "clinic_name": "Clínica Graciosa",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Graciosa?"
+      },
+      {
+        "role": "human",
+        "content": "Bom dia! Sim."
+      },
+      {
+        "role": "agent",
+        "content": "Gostaria de falar com o gestor da clínica."
+      },
+      {
+        "role": "human",
+        "content": "Você pode falar com o gestor pelo nosso email gestao@clinicagraciosa.com.br"
+      }
+    ],
+    "latest_message": "Você pode falar com o gestor pelo nosso email gestao@clinicagraciosa.com.br",
+    "expected_stage": "success",
+    "resolved": false,
+    "last_run": null,
+    "notes": "Baseado em conversa real (Clínica Graciosa, 03/05/2026). Email institucional com @ = success imediato. Extrair gestao@clinicagraciosa.com.br. Resposta = agradecimento. NÃO pedir WhatsApp ou email pessoal adicional.",
+    "expected_response_contains": ["Obrigad"],
+    "forbidden_keywords": ["WhatsApp", "celular", "pessoal", "outro", "complementar"]
+  },
+  {
+    "name": "Recepcionista pergunta quem fala — responder só o nome (padrão Tayná)",
+    "clinic_name": "Clínica Bella",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Bella?"
+      },
+      {
+        "role": "human",
+        "content": "Bom dia! Quem fala?"
+      }
+    ],
+    "latest_message": "Bom dia! Quem fala?",
+    "expected_stage": "requesting",
+    "resolved": false,
+    "last_run": null,
+    "notes": "Baseado em conversa real (Tayná, 27/01/2026). Recepcionista pede o nome antes de continuar. Agente deve dar APENAS o primeiro nome (sdr_name) — nada mais. NÃO mencionar empresa, produto, motivo ou IA. Resposta natural e curta.",
+    "forbidden_keywords": ["EasyScale", "empresa", "comercial", "sistema", "automação", "IA", "WhatsApp"]
+  },
+  {
+    "name": "Recepcionista coopera: quer anotar nome e assunto para repassar (padrão Tayná)",
+    "clinic_name": "Clínica Bella",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Bella?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
+        "content": "Gostaria de falar com o gestor da clínica."
+      },
+      {
+        "role": "human",
+        "content": "Sou a recepcionista. O dono está ocupado agora. Quero anotar seu nome e assunto pra perguntar pra ele."
+      }
+    ],
+    "latest_message": "Sou a recepcionista. O dono está ocupado agora. Quero anotar seu nome e assunto pra perguntar pra ele.",
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": "Baseado em conversa real (Tayná, 27/01/2026). Recepcionista coopera ativamente — quer anotar para repassar. NÃO é failed. Stage = handling_objection. Resposta OBRIGATÓRIA: apenas 'assunto comercial'. NÃO mencionar empresa, produto ou IA.",
+    "expected_response_contains": ["assunto comercial"],
+    "forbidden_keywords": ["EasyScale", "empresa", "sistema", "IA", "R$5", "faturamento", "automação"]
+  },
+  {
+    "name": "Pede nome da empresa ao anotar — deflectir sem revelar (padrão Tayná)",
+    "clinic_name": "Clínica Bella",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Bella?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
+        "content": "Gostaria de falar com o gestor da clínica."
+      },
+      {
+        "role": "human",
+        "content": "O dono está ocupado. Posso anotar o assunto?"
+      },
+      {
+        "role": "agent",
+        "content": "Seria sobre assunto comercial."
+      },
+      {
+        "role": "human",
+        "content": "Certo! Tem o nome da empresa para eu anotar também?"
+      }
+    ],
+    "latest_message": "Certo! Tem o nome da empresa para eu anotar também?",
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": "Baseado em conversa real (Tayná, 27/01/2026). Recepcionista quer anotar a empresa. Agente NÃO deve revelar empresa. Deve desviar com leveza (ex: 'não precisa de empresa, só de mim') e oferecer o WhatsApp do especialista direto para o gestor.",
+    "forbidden_keywords": ["EasyScale", "empresa é", "somos a", "nosso produto", "nosso sistema"]
+  },
+  {
+    "name": "Anotar motivo para encaminhar — cooperação máxima (CRÍTICO)",
+    "clinic_name": "Clínica Harmonia",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Harmonia?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
+        "content": "Gostaria de falar com o gestor da clínica."
+      },
+      {
+        "role": "human",
+        "content": "Posso anotar o motivo? Assim encaminho para a pessoa certa."
+      }
+    ],
+    "latest_message": "Posso anotar o motivo? Assim encaminho para a pessoa certa.",
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": "CENÁRIO CRÍTICO descrito na assinatura. Recepcionista quer encaminhar ativamente. Stage = handling_objection (NUNCA failed). Resposta OBRIGATÓRIA = 'Seria sobre assunto comercial'. NÃO revelar empresa, produto ou IA. Erro comum do modelo: classificar como failed.",
+    "expected_response_contains": ["assunto comercial"],
+    "forbidden_keywords": ["EasyScale", "empresa", "IA", "sistema", "encerr", "desculpe o incômodo"]
+  },
+  {
+    "name": "Pede mais detalhes para verificar com o gestor — resposta mínima",
+    "clinic_name": "Clínica Renovar",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Renovar?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
+        "content": "Gostaria de falar com o gestor."
+      },
+      {
+        "role": "human",
+        "content": "Poderia me informar mais detalhes para que eu possa verificar com o gestor?"
+      }
+    ],
+    "latest_message": "Poderia me informar mais detalhes para que eu possa verificar com o gestor?",
+    "expected_stage": "handling_objection",
+    "resolved": false,
+    "last_run": null,
+    "notes": "Recepcionista quer verificar com o gestor — COOPERAÇÃO ativa, não rejeição. NÃO é failed. Resposta MÍNIMA = 'É sobre atendimento da clínica.' (step 1b da assinatura). NÃO revelar empresa nem produto. Erro comum: tratar como failed ou pitch completo.",
+    "expected_response_contains": ["atendimento"],
+    "forbidden_keywords": ["EasyScale", "empresa", "IA", "automação", "desculpe o incômodo"]
+  },
+  {
+    "name": "Gestora acompanha esse WhatsApp — success imediato (canal = decisora)",
+    "clinic_name": "Clínica Saúde Plena",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Saúde Plena?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
+        "content": "Gostaria de falar com a gestora da clínica."
+      },
+      {
+        "role": "human",
+        "content": "A gestora acompanha as mensagens aqui, pode falar por esse número."
+      }
+    ],
+    "latest_message": "A gestora acompanha as mensagens aqui, pode falar por esse número.",
+    "expected_stage": "success",
+    "resolved": false,
+    "last_run": null,
+    "notes": "Canal atual É o canal da decisora (gestora monitora este WhatsApp). Success imediato. NÃO pedir outro número ou WhatsApp. Resposta = agradecimento breve + menção que representante entrará em contato.",
+    "expected_response_contains": ["Obrigad"],
+    "forbidden_keywords": ["WhatsApp", "celular", "outro número", "pessoal", "direto"]
+  },
+  {
+    "name": "vCard compartilhado via WhatsApp — success com extração de dados",
+    "clinic_name": "Clínica Estética Plus",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Estética Plus?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, pode falar."
+      },
+      {
+        "role": "agent",
+        "content": "Gostaria de falar com a responsável pela clínica."
+      },
+      {
+        "role": "human",
+        "content": "[contato compartilhado: Dra. Carla Mendes | +5511997776655]"
+      }
+    ],
+    "latest_message": "[contato compartilhado: Dra. Carla Mendes | +5511997776655]",
+    "expected_stage": "success",
+    "resolved": false,
+    "last_run": null,
+    "notes": "vCard compartilhado via WhatsApp = success imediato (nível máximo de cooperação). Extrair número após '| +': 5511997776655. Extrair nome: Dra. Carla Mendes. Resposta = APENAS 'Obrigado!' — NÃO pedir confirmação nem mais dados.",
+    "expected_response_contains": ["Obrigad"],
+    "forbidden_keywords": ["confirmar", "correto?", "certo?", "mesmo número", "ligar"]
   }
 ]
