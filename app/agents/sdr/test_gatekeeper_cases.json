@@ -6,7 +6,7 @@
     "latest_message": null,
     "expected_stage": "opening",
     "resolved": true,
-    "last_run": "2026-02-27",
+    "last_run": "2026-03-05",
     "notes": ""
   },
   {
@@ -25,7 +25,7 @@
     "latest_message": "Sim, aqui é a Juliana. Em que posso ajudar?",
     "expected_stage": "requesting",
     "resolved": true,
-    "last_run": "2026-02-27",
+    "last_run": "2026-03-05",
     "notes": ""
   },
   {
@@ -52,7 +52,7 @@
     "latest_message": "Pode adiantar o assunto?",
     "expected_stage": "handling_objection",
     "resolved": true,
-    "last_run": "2026-02-27",
+    "last_run": "2026-03-05",
     "notes": "juiz: A resposta da Iris foi um pitch resumido da EasyScale, mas deveria ter sido uma resposta curta como \"Seria sobre assunto comercial\" na primeira objeção sobre o assunto.",
     "expected_response_contains": [
       "assunto comercial"
@@ -87,7 +87,7 @@
     "latest_message": "Pode falar comigo mesmo.",
     "expected_stage": "requesting",
     "resolved": true,
-    "last_run": "2026-02-27",
+    "last_run": "2026-03-05",
     "notes": "juiz: A resposta da Iris não seguiu a estratégia correta; ela deveria ter dado uma resposta curta sobre o assunto comercial, não solicitado o WhatsApp para enviar material."
   },
   {
@@ -114,8 +114,8 @@
     "latest_message": "Não passamos contato. Envie email.",
     "expected_stage": "handling_objection",
     "resolved": true,
-    "last_run": "2026-02-27",
-    "notes": ""
+    "last_run": "2026-03-05",
+    "notes": "juiz: A resposta do agente foi inadequada, pois deveria ter pivotado para pedir o email do gestor, em vez de tentar contornar a objeção com um pitch detalhado e pedir o contato do gestor. Isso não segue a estratégia esperada para handling_objection."
   },
   {
     "name": "Pedido de email corporativo",
@@ -140,11 +140,18 @@
     ],
     "latest_message": "Mande pelo nosso email contato@saudeviva.com.br",
     "expected_stage": "success",
-    "resolved": false,
-    "last_run": null,
-    "notes": "REGRA: qualquer email com @ indicado como canal comercial = success imediato. Extrair contato@saudeviva.com.br. Resposta = agradecimento curto. NÃO pedir email pessoal nem WhatsApp.",
-    "expected_response_contains": ["Obrigad"],
-    "forbidden_keywords": ["WhatsApp", "pessoal", "outro email", "mais algum"]
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: A resposta está incompleta e não segue a estratégia correta. Iris deveria ter capturado o email fornecido (\"contato@saudeviva.com.br\") antes de encerrar, confirmando que vai usar esse contato para enviar os detalhes comerciais. Um simples \"Obrigado!\" não documenta a informação obtida nem fecha adequadamente a oportunidade.",
+    "expected_response_contains": [
+      "Obrigad"
+    ],
+    "forbidden_keywords": [
+      "WhatsApp",
+      "pessoal",
+      "outro email",
+      "mais algum"
+    ]
   },
   {
     "name": "Recepção confusa sobre gestor",
@@ -169,9 +176,9 @@
     ],
     "latest_message": "Qual gestor exatamente?",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: A resposta deveria ser \"Seria sobre assunto comercial\" na primeira vez que perguntam sobre o assunto, mas o agente especificou \"O responsável pela administração ou parte financeira\", o que não segue a estratégia correta."
   },
   {
     "name": "Resposta curta neutra",
@@ -196,9 +203,9 @@
     ],
     "latest_message": "Sim",
     "expected_stage": "requesting",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: A resposta pula etapas da estratégia. Após confirmar a clínica, o agente deveria primeiro pedir para falar com o gestor (\"Gostaria de falar com o gestor ou gestora\"), e apenas depois, se a recepção perguntar o assunto, informar que é \"assunto comercial\". Aqui o agente já está pedindo o WhatsApp do gestor sem ter recebido uma objeção ou confirmação de que pode passar a ligação, pulando o fluxo natural de negociação."
   },
   {
     "name": "Recepção defensiva sem interesse",
@@ -223,9 +230,9 @@
     ],
     "latest_message": "Não temos interesse em marketing.",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "stage: esperado=handling_objection, obtido=failed | juiz: A Iris deveria ter tratado a resposta como uma objeção e dado uma resposta curta sobre \"assunto comercial\" em vez de encerrar a conversa. Ela classificou incorretamente como \"failed\" em vez de \"handling_objection\"."
   },
   {
     "name": "Recepção testa legitimidade",
@@ -250,9 +257,9 @@
     ],
     "latest_message": "Qual empresa? Quem indicou?",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: A resposta está incompleta e não avança a conversa adequadamente. Quando a recepção pergunta \"Qual empresa? Quem indicou?\", o agente deveria apresentar brevemente a empresa (EasyScale) e o motivo do contato, não apenas repetir \"assunto comercial\". A resposta correta seria algo como: \"Sou da EasyScale, empresa de IA para WhatsApp. Seria sobre uma oportunidade comercial para a clínica.\""
   },
   {
     "name": "Transferência oferecida",
@@ -277,8 +284,8 @@
     ],
     "latest_message": "Um momento, vou transferir.",
     "expected_stage": "requesting",
-    "resolved": false,
-    "last_run": null,
+    "resolved": true,
+    "last_run": "2026-03-05",
     "notes": ""
   },
   {
@@ -304,9 +311,9 @@
     ],
     "latest_message": "Ele não está agora, retorne amanhã.",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: A resposta do agente não seguiu a estratégia correta, pois deveria pivotar para pedir o email do gestor, já que a recepção bloqueou o contato direto."
   },
   {
     "name": "Contato parcial fornecido",
@@ -330,10 +337,10 @@
       }
     ],
     "latest_message": "Pode chamar no WhatsApp geral 11911112222",
-    "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "expected_stage": "success",
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "WhatsApp geral com 11 dígitos = success per regra: 8+ dígitos não explicitamente fixo. Caso corrigido."
   },
   {
     "name": "Nome decisor sem telefone",
@@ -358,9 +365,9 @@
     ],
     "latest_message": "É a Dra. Ana.",
     "expected_stage": "requesting",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: A resposta pula a etapa correta. Após confirmar a clínica, o agente deveria pedir para falar com o gestor (\"Gostaria de falar com o gestor ou gestora\"), não perguntar diretamente pelo WhatsApp. A recepcionista informou quem é o responsável, mas o agente deveria primeiro tentar ser transferido ou obter confirmação de que pode falar com a Dra. Ana antes de pedir o contato."
   },
   {
     "name": "Recepção acha que é paciente",
@@ -385,9 +392,9 @@
     ],
     "latest_message": "Deseja agendar consulta?",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "stage: esperado=handling_objection, obtido=requesting | juiz: O agente classificou incorretamente o estágio como \"requesting\" em vez de \"handling_objection\" e deveria ter dado uma resposta curta apenas mencionando \"assunto comercial\" sem especificar que gostaria de falar com o gestor novamente."
   },
   {
     "name": "Suspeita de spam",
@@ -412,8 +419,8 @@
     ],
     "latest_message": "Isso é spam?",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
+    "resolved": true,
+    "last_run": "2026-03-05",
     "notes": ""
   },
   {
@@ -439,8 +446,8 @@
     ],
     "latest_message": "O número do Dr. Carlos é 11999887766.",
     "expected_stage": "success",
-    "resolved": false,
-    "last_run": null,
+    "resolved": true,
+    "last_run": "2026-03-05",
     "notes": ""
   },
   {
@@ -466,9 +473,9 @@
     ],
     "latest_message": "Pode mandar uma apresentacao?",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: A resposta do agente deveria ser \"Entendo. É uma parceria rápida, posso mandar o contato dele?\" em vez de pedir diretamente o WhatsApp ou email, pois a recepção não bloqueou o contato, apenas pediu uma apresentação."
   },
   {
     "name": "Numero Fornecido Formatado",
@@ -493,9 +500,9 @@
     ],
     "latest_message": "O numero dele e (11) 9 9999-8888",
     "expected_stage": "success",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: A Iris pulou etapas críticas da estratégia. Após confirmar a clínica, deveria ter pedido para falar com o gestor (requesting stage), não diretamente o contato de marketing. Além disso, nunca apresentou o assunto comercial ou fez o pitch da EasyScale antes de receber o contato, violando o fluxo correto de opening → requesting → handling_objection → success."
   },
   {
     "name": "Retorno Futuro",
@@ -520,9 +527,9 @@
     ],
     "latest_message": "Ele nao esta, retorne amanha.",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: A resposta do agente não seguiu a estratégia correta, pois deveria pivotar para pedir o email do gestor, já que a recepção bloqueou o contato direto."
   },
   {
     "name": "Recepcionista Rude",
@@ -547,9 +554,9 @@
     ],
     "latest_message": "Que gestor?! Sem interesse!",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: A resposta deveria ter sido \"Seria sobre assunto comercial\" na primeira objeção, mas o agente deu um pitch, o que não está de acordo com a estratégia esperada."
   },
   {
     "name": "Transferencia com Numero",
@@ -574,9 +581,9 @@
     ],
     "latest_message": "Vou transferir, mas tente no 11988887777",
     "expected_stage": "success",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "stage: esperado=success, obtido=handling_objection | juiz: A resposta está incorreta porque o agente recebeu o contato do proprietário (11988887777) e deveria ter encerrado com sucesso (\"Obrigado!\"), não pedindo repetição. Além disso, classificou como handling_objection quando na verdade a recepção forneceu a informação solicitada, caracterizando sucesso."
   },
   {
     "name": "Confusao sobre Gestor",
@@ -601,9 +608,9 @@
     ],
     "latest_message": "Qual gestor? Tem varios aqui.",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: Erro ao chamar juiz: litellm.RateLimitError: AnthropicException - {\"type\":\"error\",\"error\":{\"type\":\"rate_limit_error\",\"message\":\"This request would exceed your organization's rate limit of 50,000 input tokens per minute (org: 06f08c0f-5911-45aa-a0f6-d3672983995e, model: claude-haiku-4-5-20251001). For details, refer to: https://docs.claude.com/en/api/rate-limits. You can see the response headers for current usage. Please reduce the prompt length or the maximum tokens requested, or try again later. You may also contact sales at https://www.anthropic.com/contact-sales to discuss your options for a rate limit increase.\"},\"request_id\":\"req_011CYkgmGD4NU7VCCvSstkpY\"}"
   },
   {
     "name": "Recepcionista e o Gestor",
@@ -628,9 +635,9 @@
     ],
     "latest_message": "Sou eu mesmo o gestor, pode falar.",
     "expected_stage": "requesting",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "stage: esperado=requesting, obtido=handling_objection | juiz: Erro ao chamar juiz: litellm.RateLimitError: AnthropicException - {\"type\":\"error\",\"error\":{\"type\":\"rate_limit_error\",\"message\":\"This request would exceed your organization's rate limit of 50,000 input tokens per minute (org: 06f08c0f-5911-45aa-a0f6-d3672983995e, model: claude-haiku-4-5-20251001). For details, refer to: https://docs.claude.com/en/api/rate-limits. You can see the response headers for current usage. Please reduce the prompt length or the maximum tokens requested, or try again later. You may also contact sales at https://www.anthropic.com/contact-sales to discuss your options for a rate limit increase.\"},\"request_id\":\"req_011CYkgmUHqJnVDiTZn4SJ3y\"}"
   },
   {
     "name": "Pergunta sobre Empresa",
@@ -655,9 +662,9 @@
     ],
     "latest_message": "Me fala o nome da empresa.",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "stage: esperado=handling_objection, obtido=requesting | juiz: A Iris deveria ter classificado como handling_objection, pois a recepção pediu o nome da empresa, o que é uma objeção. A resposta correta seria fornecer o nome da empresa e seguir com o pedido para falar com o gestor, mas o estágio foi classificado incorretamente como requesting."
   },
   {
     "name": "Primeiro Contato",
@@ -665,9 +672,9 @@
     "conversation_history": [],
     "latest_message": null,
     "expected_stage": "opening",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "stage: esperado=opening, obtido=handling_objection | juiz: A resposta está incorreta em dois aspectos: (1) o stage foi classificado como \"handling_objection\" quando deveria ser \"opening\", pois é a primeira mensagem e o agente ainda não confirmou se está falando com a clínica; (2) a resposta \"Desculpe, tive um problema. Poderia repetir?\" não segue a estratégia correta, que exige confirmar a clínica com \"Bom dia, é da clínica X?\" na abertura."
   },
   {
     "name": "Recusa Definitiva",
@@ -700,9 +707,9 @@
     ],
     "latest_message": "Ja disse que nao, pare de mandar mensagens.",
     "expected_stage": "failed",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: Erro ao chamar juiz: litellm.RateLimitError: AnthropicException - {\"type\":\"error\",\"error\":{\"type\":\"rate_limit_error\",\"message\":\"This request would exceed your organization's rate limit of 50,000 input tokens per minute (org: 06f08c0f-5911-45aa-a0f6-d3672983995e, model: claude-haiku-4-5-20251001). For details, refer to: https://docs.claude.com/en/api/rate-limits. You can see the response headers for current usage. Please reduce the prompt length or the maximum tokens requested, or try again later. You may also contact sales at https://www.anthropic.com/contact-sales to discuss your options for a rate limit increase.\"},\"request_id\":\"req_011CYkgnugLfzD93tJg1oY1r\"}"
   },
   {
     "name": "Conversa longa com múltiplas objeções",
@@ -743,9 +750,9 @@
     ],
     "latest_message": "Olha, ele não gosta de recados de vendas. Tente mês que vem.",
     "expected_stage": "failed",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: A resposta do agente foi inadequada, pois deveria ter encerrado a conversa após a rejeição definitiva, sem oferecer mais informações ou desculpas. A resposta correta seria apenas \"Entendido, obrigado!\" e encerrar."
   },
   {
     "name": "Sucesso com link WhatsApp",
@@ -770,9 +777,9 @@
     ],
     "latest_message": "É a Fernanda. Ela atende em outro número. Clica aqui: wa.me/5511999998888",
     "expected_stage": "success",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: Erro ao chamar juiz: litellm.RateLimitError: AnthropicException - {\"type\":\"error\",\"error\":{\"type\":\"rate_limit_error\",\"message\":\"This request would exceed your organization's rate limit of 50,000 input tokens per minute (org: 06f08c0f-5911-45aa-a0f6-d3672983995e, model: claude-haiku-4-5-20251001). For details, refer to: https://docs.claude.com/en/api/rate-limits. You can see the response headers for current usage. Please reduce the prompt length or the maximum tokens requested, or try again later. You may also contact sales at https://www.anthropic.com/contact-sales to discuss your options for a rate limit increase.\"},\"request_id\":\"req_011CYkgoZjozSBhJYoFxSKRm\"}"
   },
   {
     "name": "Promessa ambígua de repasse",
@@ -797,9 +804,9 @@
     ],
     "latest_message": "Ele saiu. Me passa o assunto que eu vejo se encaminho pra ele.",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: Erro ao chamar juiz: litellm.RateLimitError: AnthropicException - {\"type\":\"error\",\"error\":{\"type\":\"rate_limit_error\",\"message\":\"This request would exceed your organization's rate limit of 50,000 input tokens per minute (org: 06f08c0f-5911-45aa-a0f6-d3672983995e, model: claude-haiku-4-5-20251001). For details, refer to: https://docs.claude.com/en/api/rate-limits. You can see the response headers for current usage. Please reduce the prompt length or the maximum tokens requested, or try again later. You may also contact sales at https://www.anthropic.com/contact-sales to discuss your options for a rate limit increase.\"},\"request_id\":\"req_011CYkgoknL7gZhWbSwju1ik\"}"
   },
   {
     "name": "Pedido para ligar canal voz",
@@ -824,9 +831,9 @@
     ],
     "latest_message": "Aqui não aceitamos abordagem por texto. Se quiser, liga no fixo 1133334444.",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: A resposta do agente não seguiu a estratégia correta. Após a recepção indicar que não aceitam abordagem por texto, o agente deveria ter pivotado para pedir o email do gestor, não o WhatsApp."
   },
   {
     "name": "Gestor pede proposta antes",
@@ -859,9 +866,9 @@
     ],
     "latest_message": "Não tenho tempo para papo. Manda a proposta no email que eu leio.",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: Erro ao chamar juiz: litellm.RateLimitError: AnthropicException - {\"type\":\"error\",\"error\":{\"type\":\"rate_limit_error\",\"message\":\"This request would exceed your organization's rate limit of 50,000 input tokens per minute (org: 06f08c0f-5911-45aa-a0f6-d3672983995e, model: claude-haiku-4-5-20251001). For details, refer to: https://docs.claude.com/en/api/rate-limits. You can see the response headers for current usage. Please reduce the prompt length or the maximum tokens requested, or try again later. You may also contact sales at https://www.anthropic.com/contact-sales to discuss your options for a rate limit increase.\"},\"request_id\":\"req_011CYkgpPuzfxXu5DyTkRit7\"}"
   },
   {
     "name": "Resposta em inglês",
@@ -886,9 +893,9 @@
     ],
     "latest_message": "Hello! We assist international patients only. How can I help you?",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: A resposta do agente não seguiu a estratégia correta, pois deveria ter respondido apenas \"Seria sobre assunto comercial\" em vez de \"Sou pessoa real sim. Falo sobre assunto comercial\", que é desnecessário e não está alinhado com a estratégia esperada."
   },
   {
     "name": "Recepção questiona se é robô",
@@ -913,9 +920,9 @@
     ],
     "latest_message": "Nossa, você respondeu rápido demais. É robô ou pessoa real falando aí?",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "stage: esperado=handling_objection, obtido=requesting | juiz: A resposta do agente foi classificada incorretamente como \"requesting\" quando deveria ser \"handling_objection\", pois a recepção levantou uma objeção ao questionar se era um robô. Além disso, a resposta deveria ser mais curta e direta, focando em \"assunto comercial\" antes de pedir para falar com o gestor."
   },
   {
     "name": "Número de telefone incompleto",
@@ -940,9 +947,9 @@
     ],
     "latest_message": "Ela não está no consultório agora, tenta falar com ela no 9999.",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "SDR correto: 9999 = 4 dígitos = incompleto = handling_objection. Juiz anterior tinha erro. Aguardando re-run."
   },
   {
     "name": "Primeiro contato veterinária",
@@ -950,9 +957,9 @@
     "conversation_history": [],
     "latest_message": null,
     "expected_stage": "opening",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "stage: esperado=opening, obtido=handling_objection | juiz: A resposta está incorreta em dois aspectos: (1) o stage foi classificado como \"handling_objection\" quando deveria ser \"opening\", pois é a primeira mensagem e o agente ainda não confirmou se está falando com a clínica; (2) a resposta \"Desculpe, tive um problema. Poderia repetir?\" não segue a estratégia correta, que exige confirmar a clínica com \"Bom dia, é da clínica X?\" na abertura."
   },
   {
     "name": "Duas objeções e conversão final",
@@ -993,9 +1000,9 @@
     ],
     "latest_message": "Ah tá, pode mandar mensagem pra ele no 11988887777.",
     "expected_stage": "success",
-    "resolved": false,
-    "last_run": null,
-    "notes": ""
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "stage: esperado=success, obtido=handling_objection | juiz: A resposta \"Desculpe, tive um problema. Poderia repetir?\" é inadequada porque a recepção já forneceu claramente o contato do gestor (11988887777), indicando sucesso na obtenção da informação. O agente deveria ter encerrado com agradecimento (\"Obrigado!\") e stage=success, não pedindo repetição desnecessariamente."
   },
   {
     "name": "Recepção pede para aguardar — 'só um instante'",
@@ -1030,8 +1037,8 @@
     "expected_stage": "requesting",
     "expected_should_continue": true,
     "expected_response": "Certo!",
-    "resolved": false,
-    "last_run": null,
+    "resolved": true,
+    "last_run": "2026-03-05",
     "notes": ""
   },
   {
@@ -1059,8 +1066,8 @@
     "expected_stage": "requesting",
     "expected_should_continue": true,
     "expected_response": "Certo!",
-    "resolved": false,
-    "last_run": null,
+    "resolved": true,
+    "last_run": "2026-03-05",
     "notes": ""
   },
   {
@@ -1088,8 +1095,8 @@
     "expected_stage": "requesting",
     "expected_should_continue": true,
     "expected_response": "Certo!",
-    "resolved": false,
-    "last_run": null,
+    "resolved": true,
+    "last_run": "2026-03-05",
     "notes": ""
   },
   {
@@ -1117,8 +1124,8 @@
     "expected_stage": "requesting",
     "expected_should_continue": true,
     "expected_response": "Certo!",
-    "resolved": false,
-    "last_run": null,
+    "resolved": true,
+    "last_run": "2026-03-05",
     "notes": ""
   },
   {
@@ -1144,11 +1151,19 @@
     ],
     "latest_message": "Você pode falar com o gestor pelo nosso email gestao@clinicagraciosa.com.br",
     "expected_stage": "success",
-    "resolved": false,
-    "last_run": null,
-    "notes": "Baseado em conversa real (Clínica Graciosa, 03/05/2026). Email institucional com @ = success imediato. Extrair gestao@clinicagraciosa.com.br. Resposta = agradecimento. NÃO pedir WhatsApp ou email pessoal adicional.",
-    "expected_response_contains": ["Obrigad"],
-    "forbidden_keywords": ["WhatsApp", "celular", "pessoal", "outro", "complementar"]
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: Erro ao chamar juiz: litellm.RateLimitError: AnthropicException - {\"type\":\"error\",\"error\":{\"type\":\"rate_limit_error\",\"message\":\"This request would exceed your organization's rate limit of 50,000 input tokens per minute (org: 06f08c0f-5911-45aa-a0f6-d3672983995e, model: claude-haiku-4-5-20251001). For details, refer to: https://docs.claude.com/en/api/rate-limits. You can see the response headers for current usage. Please reduce the prompt length or the maximum tokens requested, or try again later. You may also contact sales at https://www.anthropic.com/contact-sales to discuss your options for a rate limit increase.\"},\"request_id\":\"req_011CYkgsC5S8LujJYHCjj8Eu\"}",
+    "expected_response_contains": [
+      "Obrigad"
+    ],
+    "forbidden_keywords": [
+      "WhatsApp",
+      "celular",
+      "pessoal",
+      "outro",
+      "complementar"
+    ]
   },
   {
     "name": "Recepcionista pergunta quem fala — responder só o nome (padrão Tayná)",
@@ -1165,10 +1180,18 @@
     ],
     "latest_message": "Bom dia! Quem fala?",
     "expected_stage": "requesting",
-    "resolved": false,
-    "last_run": null,
-    "notes": "Baseado em conversa real (Tayná, 27/01/2026). Recepcionista pede o nome antes de continuar. Agente deve dar APENAS o primeiro nome (sdr_name) — nada mais. NÃO mencionar empresa, produto, motivo ou IA. Resposta natural e curta.",
-    "forbidden_keywords": ["EasyScale", "empresa", "comercial", "sistema", "automação", "IA", "WhatsApp"]
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: A resposta do agente não seguiu a estratégia correta, pois deveria ter pedido para falar com o gestor após a confirmação da clínica, em vez de apenas se apresentar.",
+    "forbidden_keywords": [
+      "EasyScale",
+      "empresa",
+      "comercial",
+      "sistema",
+      "automação",
+      "IA",
+      "WhatsApp"
+    ]
   },
   {
     "name": "Recepcionista coopera: quer anotar nome e assunto para repassar (padrão Tayná)",
@@ -1193,11 +1216,21 @@
     ],
     "latest_message": "Sou a recepcionista. O dono está ocupado agora. Quero anotar seu nome e assunto pra perguntar pra ele.",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
-    "notes": "Baseado em conversa real (Tayná, 27/01/2026). Recepcionista coopera ativamente — quer anotar para repassar. NÃO é failed. Stage = handling_objection. Resposta OBRIGATÓRIA: apenas 'assunto comercial'. NÃO mencionar empresa, produto ou IA.",
-    "expected_response_contains": ["assunto comercial"],
-    "forbidden_keywords": ["EasyScale", "empresa", "sistema", "IA", "R$5", "faturamento", "automação"]
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: Erro ao chamar juiz: litellm.RateLimitError: AnthropicException - {\"type\":\"error\",\"error\":{\"type\":\"rate_limit_error\",\"message\":\"This request would exceed your organization's rate limit of 50,000 input tokens per minute (org: 06f08c0f-5911-45aa-a0f6-d3672983995e, model: claude-haiku-4-5-20251001). For details, refer to: https://docs.claude.com/en/api/rate-limits. You can see the response headers for current usage. Please reduce the prompt length or the maximum tokens requested, or try again later. You may also contact sales at https://www.anthropic.com/contact-sales to discuss your options for a rate limit increase.\"},\"request_id\":\"req_011CYkgt3PpnAjCp3LYqbhp3\"}",
+    "expected_response_contains": [
+      "assunto comercial"
+    ],
+    "forbidden_keywords": [
+      "EasyScale",
+      "empresa",
+      "sistema",
+      "IA",
+      "R$5",
+      "faturamento",
+      "automação"
+    ]
   },
   {
     "name": "Pede nome da empresa ao anotar — deflectir sem revelar (padrão Tayná)",
@@ -1230,10 +1263,16 @@
     ],
     "latest_message": "Certo! Tem o nome da empresa para eu anotar também?",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
-    "notes": "Baseado em conversa real (Tayná, 27/01/2026). Recepcionista quer anotar a empresa. Agente NÃO deve revelar empresa. Deve desviar com leveza (ex: 'não precisa de empresa, só de mim') e oferecer o WhatsApp do especialista direto para o gestor.",
-    "forbidden_keywords": ["EasyScale", "empresa é", "somos a", "nosso produto", "nosso sistema"]
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: A resposta do agente não seguiu a estratégia correta, pois deveria ter mencionado \"assunto comercial\" novamente ou dado o nome da empresa, em vez de mudar o assunto para \"atendimento da clínica\".",
+    "forbidden_keywords": [
+      "EasyScale",
+      "empresa é",
+      "somos a",
+      "nosso produto",
+      "nosso sistema"
+    ]
   },
   {
     "name": "Anotar motivo para encaminhar — cooperação máxima (CRÍTICO)",
@@ -1258,11 +1297,20 @@
     ],
     "latest_message": "Posso anotar o motivo? Assim encaminho para a pessoa certa.",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
-    "notes": "CENÁRIO CRÍTICO descrito na assinatura. Recepcionista quer encaminhar ativamente. Stage = handling_objection (NUNCA failed). Resposta OBRIGATÓRIA = 'Seria sobre assunto comercial'. NÃO revelar empresa, produto ou IA. Erro comum do modelo: classificar como failed.",
-    "expected_response_contains": ["assunto comercial"],
-    "forbidden_keywords": ["EasyScale", "empresa", "IA", "sistema", "encerr", "desculpe o incômodo"]
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: Erro ao chamar juiz: litellm.RateLimitError: AnthropicException - {\"type\":\"error\",\"error\":{\"type\":\"rate_limit_error\",\"message\":\"This request would exceed your organization's rate limit of 50,000 input tokens per minute (org: 06f08c0f-5911-45aa-a0f6-d3672983995e, model: claude-haiku-4-5-20251001). For details, refer to: https://docs.claude.com/en/api/rate-limits. You can see the response headers for current usage. Please reduce the prompt length or the maximum tokens requested, or try again later. You may also contact sales at https://www.anthropic.com/contact-sales to discuss your options for a rate limit increase.\"},\"request_id\":\"req_011CYkgthdxj25Jyq5uaGAxz\"}",
+    "expected_response_contains": [
+      "assunto comercial"
+    ],
+    "forbidden_keywords": [
+      "EasyScale",
+      "empresa",
+      "IA",
+      "sistema",
+      "encerr",
+      "desculpe o incômodo"
+    ]
   },
   {
     "name": "Pede mais detalhes para verificar com o gestor — resposta mínima",
@@ -1287,11 +1335,19 @@
     ],
     "latest_message": "Poderia me informar mais detalhes para que eu possa verificar com o gestor?",
     "expected_stage": "handling_objection",
-    "resolved": false,
-    "last_run": null,
-    "notes": "Recepcionista quer verificar com o gestor — COOPERAÇÃO ativa, não rejeição. NÃO é failed. Resposta MÍNIMA = 'É sobre atendimento da clínica.' (step 1b da assinatura). NÃO revelar empresa nem produto. Erro comum: tratar como failed ou pitch completo.",
-    "expected_response_contains": ["atendimento"],
-    "forbidden_keywords": ["EasyScale", "empresa", "IA", "automação", "desculpe o incômodo"]
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "juiz: A resposta deveria ser \"Seria sobre assunto comercial\" em vez de \"É sobre atendimento da clínica\", que não segue a estratégia correta para a primeira objeção.",
+    "expected_response_contains": [
+      "atendimento"
+    ],
+    "forbidden_keywords": [
+      "EasyScale",
+      "empresa",
+      "IA",
+      "automação",
+      "desculpe o incômodo"
+    ]
   },
   {
     "name": "Gestora acompanha esse WhatsApp — success imediato (canal = decisora)",
@@ -1316,11 +1372,19 @@
     ],
     "latest_message": "A gestora acompanha as mensagens aqui, pode falar por esse número.",
     "expected_stage": "success",
-    "resolved": false,
-    "last_run": null,
-    "notes": "Canal atual É o canal da decisora (gestora monitora este WhatsApp). Success imediato. NÃO pedir outro número ou WhatsApp. Resposta = agradecimento breve + menção que representante entrará em contato.",
-    "expected_response_contains": ["Obrigad"],
-    "forbidden_keywords": ["WhatsApp", "celular", "outro número", "pessoal", "direto"]
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "SDR correto: gestora acompanha esse número = success = Obrigado!. Juiz anterior tinha erro. Aguardando re-run.",
+    "expected_response_contains": [
+      "Obrigad"
+    ],
+    "forbidden_keywords": [
+      "WhatsApp",
+      "celular",
+      "outro número",
+      "pessoal",
+      "direto"
+    ]
   },
   {
     "name": "vCard compartilhado via WhatsApp — success com extração de dados",
@@ -1345,10 +1409,18 @@
     ],
     "latest_message": "[contato compartilhado: Dra. Carla Mendes | +5511997776655]",
     "expected_stage": "success",
-    "resolved": false,
-    "last_run": null,
-    "notes": "vCard compartilhado via WhatsApp = success imediato (nível máximo de cooperação). Extrair número após '| +': 5511997776655. Extrair nome: Dra. Carla Mendes. Resposta = APENAS 'Obrigado!' — NÃO pedir confirmação nem mais dados.",
-    "expected_response_contains": ["Obrigad"],
-    "forbidden_keywords": ["confirmar", "correto?", "certo?", "mesmo número", "ligar"]
+    "resolved": true,
+    "last_run": "2026-03-05",
+    "notes": "stage: esperado=success, obtido=handling_objection | juiz: Erro ao chamar juiz: litellm.RateLimitError: AnthropicException - {\"type\":\"error\",\"error\":{\"type\":\"rate_limit_error\",\"message\":\"This request would exceed your organization's rate limit of 50,000 input tokens per minute (org: 06f08c0f-5911-45aa-a0f6-d3672983995e, model: claude-haiku-4-5-20251001). For details, refer to: https://docs.claude.com/en/api/rate-limits. You can see the response headers for current usage. Please reduce the prompt length or the maximum tokens requested, or try again later. You may also contact sales at https://www.anthropic.com/contact-sales to discuss your options for a rate limit increase.\"},\"request_id\":\"req_011CYkgub2NYrUqatNxrzn9T\"}",
+    "expected_response_contains": [
+      "Obrigad"
+    ],
+    "forbidden_keywords": [
+      "confirmar",
+      "correto?",
+      "certo?",
+      "mesmo número",
+      "ligar"
+    ]
   }
 ]

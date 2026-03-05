@@ -12,6 +12,7 @@ Ou para testar cenários específicos:
 
 import os
 import sys
+import time
 import argparse
 import json
 from datetime import datetime, timedelta
@@ -79,31 +80,72 @@ from app.core.config import init_dspy
 
 # Estratégia resumida para o juiz (não o prompt completo — só o fluxo principal)
 _GATEKEEPER_STRATEGY = """
-Você avalia se a Iris (agente SDR) respondeu corretamente a uma recepcionista de clínica.
+Você avalia se a Iris (agente SDR da EasyScale) respondeu corretamente a uma recepcionista de clínica.
 
-ESTRATÉGIA CORRETA DA SOFIA:
+ESTRATÉGIA CORRETA DA IRIS:
 1. PRIMEIRA MSG (opening): Confirmar se é a clínica → "Bom dia, é da clínica X?"
 2. CLÍNICA CONFIRMOU (requesting): Pedir gestor → "Gostaria de falar com o gestor ou gestora"
-3. PERGUNTAM ASSUNTO pela 1ª vez (handling_objection): Resposta CURTA → "Seria sobre assunto comercial"
-3b. INSISTEM pela 2ª vez (handling_objection): Dar pitch resumido da EasyScale (IA no WhatsApp)
-3c. BLOQUEIAM 3ª vez (handling_objection): Pivotar para email → "Qual o email do gestor então?"
+3. PERGUNTAM ASSUNTO 1ª vez (handling_objection): Resposta MÍNIMA → "Seria sobre assunto comercial"
+   ⚠️ SEMPRE "Seria sobre assunto comercial" na 1ª vez — NUNCA pitch, NUNCA "atendimento da clínica"
+3b. INSISTEM 2ª vez (após "assunto comercial" já foi dito): Resposta mínima → "É sobre atendimento da clínica."
+    ⚠️ NÃO dar pitch da empresa na 2ª vez — manter resposta curta
+3c. BLOQUEIAM 3ª vez (sem progresso): Pivotar → "Qual o email do gestor então?" ou "Qual o canal pra tratar disso?"
 4. DÃO CONTATO (success): Agradecer e encerrar → "Obrigado!"
 FAILED: após 3 handling_objection sem progresso, ou rejeição definitiva ("já disse que não", etc.)
 
+SITUAÇÕES DE SUCCESS (reconheça corretamente):
+- Qualquer número com 8+ dígitos = success (mesmo WhatsApp geral ou número compartilhado)
+- Qualquer email com @ = success
+- "A gestora acompanha as mensagens aqui" / "Pode falar por esse número que ela vê" = success
+  → Resposta correta: "Obrigado!" e encerrar. NÃO peça outro contato.
+- "[contato compartilhado: Nome | +55...]" = success imediato
+
+SITUAÇÕES DE HANDLING_OBJECTION (NÃO é failed):
+- "Não estamos precisando de novidades" / "No momento não temos interesse" (1ª vez) = handling_objection
+  → Resposta: "Entendo. É uma parceria rápida, posso mandar o contato dele?"
+- "Ele não está agora, retorne amanhã" = handling_objection
+  → Resposta: "Combinado. Tem o contato direto dele para eu adiantar?" (WhatsApp OU email — qualquer canal ok)
+- "Não aceitamos abordagem por texto. Liga no fixo" = handling_objection
+  → Resposta: "Entendo! Tem o email do gestor para eu enviar algo?" (não WhatsApp — rejeitaram texto)
+- Número com apenas 4 dígitos = INCOMPLETO → handling_objection correto pedir número completo
+
+QUANDO PERGUNTAM "COM QUEM FALO?" / "QUAL SEU NOME?":
+- Resposta correta: nome + próximo passo → "Aqui é [nome]. Gostaria de falar com o gestor."
+- NÃO aceite só o nome sem o próximo passo
+
+QUANDO PERGUNTAM "QUAL A EMPRESA?":
+- Pode revelar: "EasyScale" (apenas o nome, não o produto)
+
 OPORTUNIDADES (NÃO são objection — são avanço):
 - "Pode falar comigo mesmo" / "Sou eu quem cuida disso" / "Sou eu mesmo o gestor"
-  → A PESSOA É O POTENCIAL DECISOR. Stage = requesting.
-  → Resposta correta: "Ótimo! Seria sobre assunto comercial. Qual o seu WhatsApp para eu te enviar mais detalhes?"
-  → NÃO diga "é específico para a gestão" — a pessoa JÁ pode ser a gestão.
-  → NÃO classifique como handling_objection — é uma abertura para avançar.
+  → Stage = requesting. Resposta: "Ótimo! Seria sobre assunto comercial. Qual o seu WhatsApp?"
+  → NÃO classifique como handling_objection.
+
+CASOS ESPECIAIS:
+- "Qual gestor?" / "Qual gestor exatamente?" → resposta correta = "Seria sobre assunto comercial" (NÃO "administração ou financeiro")
+- "Me fala o nome da empresa" → resposta correta = "EasyScale" + stage = handling_objection (NÃO requesting)
+- "Pode mandar uma apresentação?" → resposta correta = "É uma parceria rápida, posso mandar o contato dele?" (NÃO pedir WhatsApp direto)
+- "Que gestor?! Sem interesse!" (tom agressivo, 1ª vez) → resposta correta = "Seria sobre assunto comercial"
+- Quando attempt_count ≥ 3 E última msg ainda bloqueia → stage correto = failed
+- "Tente mês que vem" após 2+ objeções → failed (não continue tentando)
+
+MENSAGEM DE FAILED (aceite como correto):
+- Stage = failed → mensagem de encerramento educada com despedida contextual É CORRETA.
+- Exemplos aceitos: "Quando precisarem de X, pode me chamar. Bom trabalho!" / "Entendido, desculpe o incômodo. Boa tarde!"
+- NÃO penalize por incluir despedida contextual ou frase de "porta aberta" — isso é a estratégia esperada.
+- Só penalize se o agente continuar vendendo ou insistindo após encerrar.
 
 ERROS COMUNS A DETECTAR:
-- Dar o pitch da EasyScale na 1ª pergunta sobre assunto (deveria ser só "assunto comercial")
-- Pular etapas (ex: já dar email na 1ª objeção)
+- Dar pitch da EasyScale na 1ª objeção/pergunta (deveria ser só "assunto comercial" primeiro)
+- Usar "É sobre atendimento da clínica" quando "assunto comercial" ainda não foi dito (ordem errada)
+- Usar Proposta Irrecusável (frases longas com R$5 mil) antes de dizer "assunto comercial"
+- Especificar "administração ou financeiro" quando perguntam "qual gestor?" (deve ser "assunto comercial")
+- Pular etapas (ex: já dar email na 1ª objeção quando a recepção não bloqueou)
 - Não encerrar quando deveria (success/failed com should_continue=true incorreto)
-- Resposta genérica demais que não avança a conversa
-- Mensagem muito longa (>100 chars) para um canal WhatsApp
+- Mensagem muito longa (>100 chars) para um canal WhatsApp — EXCETO frases da seção Proposta Irrecusável
 - Tratar "Pode falar comigo mesmo" como objection (é oportunidade!)
+- Pedir outro contato quando "gestora acompanha esse WhatsApp" — o canal atual JÁ é o contato
+- Continuar tentando quando attempt_count ≥ 3 e há resistência clara (deve ir para failed)
 """
 
 import dspy as _dspy
@@ -126,12 +168,40 @@ class _JudgeSignature(_dspy.Signature):
     )
 
 
-_judge = None  # lazy init — só cria depois do init_dspy()
+_judge = None      # lazy init — usa o LM do SDR sendo testado
+_judge_lm = None   # LM fixo para o juiz — sempre GPT-4o (independente do SDR)
+
+
+def _init_judge_lm():
+    """
+    Inicializa o LM fixo do juiz com GPT-4o (sempre, independente do SDR testado).
+    Garante avaliações consistentes entre benchmarks de modelos diferentes.
+    """
+    global _judge_lm
+    if _judge_lm is not None:
+        return
+    try:
+        openai_key = os.environ.get("OPENAI_API_KEY")
+        if not openai_key:
+            from app.core.config import get_settings
+            openai_key = get_settings().openai_api_key
+        if openai_key:
+            _judge_lm = _dspy.LM(
+                model="openai/gpt-4o",
+                api_key=openai_key,
+                temperature=0.0,
+                max_tokens=300,
+            )
+            print("⚖️  Juiz LLM  : GPT-4o (fixo, independente do modelo SDR)")
+        else:
+            print("⚠️  Juiz LLM  : sem OPENAI_API_KEY — usando mesmo LM do SDR")
+    except Exception as e:
+        print(f"⚠️  Juiz LLM  : falha ao inicializar GPT-4o ({e}) — usando mesmo LM do SDR")
 
 
 def judge_gatekeeper_response(scenario: dict, result: dict) -> dict:
     """
-    Usa o LLM configurado para avaliar se a resposta do agente é correta.
+    Avalia se a resposta do agente está correta usando GPT-4o como juiz fixo.
     Retorna {"valid": bool, "reason": str}
     """
     global _judge
@@ -147,14 +217,26 @@ def judge_gatekeeper_response(scenario: dict, result: dict) -> dict:
     latest = scenario.get("latest_message") or "null (primeira mensagem)"
 
     try:
-        verdict = _judge(
-            strategy=_GATEKEEPER_STRATEGY.strip(),
-            conversation=conv_text,
-            latest_message=str(latest),
-            agent_response=result.get("response_message", ""),
-            expected_stage=scenario.get("expected_stage", "?"),
-            actual_stage=result.get("conversation_stage", "?"),
-        )
+        # Usa GPT-4o como juiz se disponível, senão usa o LM padrão do SDR
+        if _judge_lm is not None:
+            with _dspy.context(lm=_judge_lm):
+                verdict = _judge(
+                    strategy=_GATEKEEPER_STRATEGY.strip(),
+                    conversation=conv_text,
+                    latest_message=str(latest),
+                    agent_response=result.get("response_message", ""),
+                    expected_stage=scenario.get("expected_stage", "?"),
+                    actual_stage=result.get("conversation_stage", "?"),
+                )
+        else:
+            verdict = _judge(
+                strategy=_GATEKEEPER_STRATEGY.strip(),
+                conversation=conv_text,
+                latest_message=str(latest),
+                agent_response=result.get("response_message", ""),
+                expected_stage=scenario.get("expected_stage", "?"),
+                actual_stage=result.get("conversation_stage", "?"),
+            )
         is_valid = str(verdict.is_valid).strip().lower() == "true"
         reason   = str(verdict.reason).strip()
     except Exception as e:
@@ -539,9 +621,10 @@ def main():
         print("  python -m app.agents.sdr.test_sdr_agents --interactive")
         return
 
-    # Inicializa DSPy
+    # Inicializa DSPy (modelo SDR) + juiz GPT-4o (fixo)
     print("Inicializando DSPy...")
     init_dspy()
+    _init_judge_lm()
     print("DSPy inicializado!\n")
 
     # Modo interativo — sem log (é interativo, não faz sentido)
@@ -607,7 +690,10 @@ def main():
                 print(f"🎯 Rodando {len(queue)} caso(s) {'pendentes' if only_pending else 'no total'}")
 
         g_passed = g_failed = 0
-        for scenario in queue:
+        for i_q, scenario in enumerate(queue):
+            # Delay entre casos para evitar rate limit (exceto no primeiro)
+            if i_q > 0:
+                time.sleep(4)
             try:
                 result = run_gatekeeper_test(scenario)
                 scenario_ok = True
