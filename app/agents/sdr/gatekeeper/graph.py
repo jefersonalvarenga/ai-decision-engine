@@ -32,17 +32,25 @@ menu_bot_agent    = MenuBotAgent()
 def detect_persona(state: GatekeeperState) -> dict:
     """
     Classifica a persona na primeira resposta da clínica.
-    Pula se já detectada (detected_persona presente no state).
+    Pula se já detectada (exceto menu_bot — re-detecta para capturar humano que assumiu).
     Pula se ainda não há resposta da clínica (latest_message é None).
     """
-    # Já detectada em turno anterior — mantém
-    if state.get("detected_persona"):
-        return {}
-
-    # Primeira mensagem (agente ainda não recebeu resposta) — pula
+    current_persona = state.get("detected_persona")
     latest = state.get("latest_message")
+
+    # Sem resposta ainda — pula
     if not latest:
         return {}
+
+    # Persona já conhecida e não é menu_bot — mantém
+    if current_persona and current_persona != "menu_bot":
+        return {}
+
+    # menu_bot ou sem persona — (re-)detecta
+    if current_persona == "menu_bot":
+        print(f"--- PERSONA DETECTOR: Re-classificando — verificando se humano assumiu ---")
+    else:
+        print(f"--- PERSONA DETECTOR: Classificando resposta da {state['clinic_name']} ---")
 
     print(f"--- PERSONA DETECTOR: Classificando resposta da {state['clinic_name']} ---")
 
