@@ -16,11 +16,13 @@ from langgraph.graph import StateGraph, END
 from ..state import GatekeeperState
 from .agent import GatekeeperAgent
 from .persona_detector import PersonaDetector
+from .menu_bot_agent import MenuBotAgent
 
 
 # Singletons
 gatekeeper_agent = GatekeeperAgent()
 persona_detector  = PersonaDetector()
+menu_bot_agent    = MenuBotAgent()
 
 
 # ---------------------------------------------------------------------------
@@ -85,6 +87,33 @@ def exit_call_center(state: GatekeeperState) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Node: process_menu_bot
+# ---------------------------------------------------------------------------
+
+def process_menu_bot(state: GatekeeperState) -> dict:
+    """
+    Tenta bypassar o bot de menu para chegar em um humano.
+    Usa attempt_count para controlar quantas tentativas já foram feitas.
+    Após MAX_BYPASS_ATTEMPTS, encerra com failed.
+    """
+    attempt = state.get("attempt_count", 0)
+    print(f"--- GATEKEEPER: Persona=menu_bot — bypass attempt {attempt} ---")
+
+    result = menu_bot_agent.forward(
+        clinic_name=state["clinic_name"],
+        conversation_history=state.get("conversation_history", []),
+        latest_message=state.get("latest_message", ""),
+        attempt_count=attempt,
+    )
+
+    print(f"--- MENU BOT: stage={result['conversation_stage']} msg={result['response_message']!r} ---")
+
+    result["detected_persona"]   = state.get("detected_persona")
+    result["persona_confidence"] = state.get("persona_confidence")
+    return result
+
+
+# ---------------------------------------------------------------------------
 # Node: process_message
 # ---------------------------------------------------------------------------
 
@@ -140,6 +169,8 @@ def route_by_persona(state: GatekeeperState) -> str:
     persona = state.get("detected_persona") or "unknown"
     if persona == "call_center":
         return "exit_call_center"
+    if persona == "menu_bot":
+        return "process_menu_bot"
     return "process"
 
 
@@ -151,6 +182,7 @@ workflow = StateGraph(GatekeeperState)
 
 workflow.add_node("detect_persona",   detect_persona)
 workflow.add_node("exit_call_center", exit_call_center)
+workflow.add_node("process_menu_bot", process_menu_bot)
 workflow.add_node("process",          process_message)
 
 workflow.set_entry_point("detect_persona")
@@ -160,11 +192,13 @@ workflow.add_conditional_edges(
     route_by_persona,
     {
         "exit_call_center": "exit_call_center",
+        "process_menu_bot": "process_menu_bot",
         "process":          "process",
     },
 )
 
 workflow.add_edge("exit_call_center", END)
+workflow.add_edge("process_menu_bot", END)
 workflow.add_edge("process",          END)
 
 gatekeeper_graph = workflow.compile()
