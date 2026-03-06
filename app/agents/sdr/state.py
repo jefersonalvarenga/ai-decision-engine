@@ -164,6 +164,7 @@ class GatekeeperState(TypedDict):
     should_send_message: bool
     reasoning: str
     persona_confidence: Optional[str]
+    _node_executed: Optional[str]     # diagnóstico: qual nó processou o request
 
 
 class CloserState(TypedDict):

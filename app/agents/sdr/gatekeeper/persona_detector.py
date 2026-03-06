@@ -67,14 +67,23 @@ class PersonaDetectorSignature(dspy.Signature):
 
     === REGRAS DE CLASSIFICAÇÃO ===
 
-    1. Se a resposta menciona "assistente virtual", "IA", "inteligência artificial",
+    ATENÇÃO: As regras são aplicadas em ordem de prioridade. A primeira regra que
+    se aplicar define a persona — não continue avaliando as demais.
+
+    1. Se a mensagem contém "escolha uma das opções", "escolha uma opção",
+       "opções abaixo", "selecione uma opção", "selecione abaixo", "digite 1",
+       "para falar com" + número ou opção estruturada → menu_bot IMEDIATO.
+       Gramática perfeita, emojis e tom amigável NÃO alteram essa regra.
+       Exemplo: "sou a Samira e estou aqui para garantir... escolha uma das opções
+       abaixo para facilitar o seu atendimento" → menu_bot (não ai_assistant).
+    2. Se a resposta menciona "assistente virtual", "IA", "inteligência artificial",
        "chatbot" → ai_assistant (independente de qualquer outro sinal).
-    2. Se há lista numerada de opções ou estrutura de menu → menu_bot.
-    3. Se menciona "central de atendimento", "especialista de agendamento", 0800 → call_center.
-    4. Se se identifica como dono/gestor/responsável → manager.
-    5. Se parece humano mas o sinal é fraco → unknown (não force receptionist).
-    6. Em caso de dúvida entre ai_assistant e receptionist: prefira ai_assistant
-       se a gramática for perfeita demais para WhatsApp informal.
+    3. Se há lista numerada de opções ou estrutura de menu explícita → menu_bot.
+    4. Se menciona "central de atendimento", "especialista de agendamento", 0800 → call_center.
+    5. Se se identifica como dono/gestor/responsável → manager.
+    6. Se parece humano mas o sinal é fraco → unknown (não force receptionist).
+    7. Gramática perfeita e emojis sozinhos NÃO são suficientes para ai_assistant.
+       A IA deve se identificar explicitamente como IA ou chatbot para ser classificada assim.
     """
 
     clinic_name: str = dspy.InputField(

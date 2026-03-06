@@ -91,6 +91,7 @@ def exit_call_center(state: GatekeeperState) -> dict:
         "should_send_message": True,
         "detected_persona": state.get("detected_persona"),
         "persona_confidence": state.get("persona_confidence"),
+        "_node_executed": "exit_call_center",
     }
 
 
@@ -118,6 +119,7 @@ def process_menu_bot(state: GatekeeperState) -> dict:
 
     result["detected_persona"]   = state.get("detected_persona")
     result["persona_confidence"] = state.get("persona_confidence")
+    result["_node_executed"]     = "process_menu_bot"
     return result
 
 
@@ -152,6 +154,7 @@ def process_message(state: GatekeeperState) -> dict:
         # Propaga persona detectada para o output (n8n persiste)
         result["detected_persona"]   = state.get("detected_persona")
         result["persona_confidence"] = state.get("persona_confidence")
+        result["_node_executed"]     = "process"
         return result
 
     except Exception as e:
@@ -165,6 +168,7 @@ def process_message(state: GatekeeperState) -> dict:
             "should_send_message": True,
             "detected_persona": state.get("detected_persona"),
             "persona_confidence": state.get("persona_confidence"),
+            "_node_executed": "process_error",
         }
 
 

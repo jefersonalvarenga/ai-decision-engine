@@ -4,10 +4,12 @@ Suporta os fluxos de Roteamento (Router) e Re-engajamento (Re-engagement).
 """
 
 import time
+import asyncio
 from datetime import datetime
 from zoneinfo import ZoneInfo
 from typing import Optional, Dict, Any, List
 
+import httpx
 from fastapi import FastAPI, HTTPException, Depends, Header
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
@@ -175,6 +177,31 @@ class ExtractShortNameResponse(BaseModel):
 
 
 # ============================================================================
+# LOGGING HELPERS
+# ============================================================================
+
+async def _log_gk(payload: dict) -> None:
+    """Fire-and-forget: insere uma linha em gk_logs via Supabase REST API."""
+    try:
+        settings = get_settings()
+        if not settings.supabase_url or not settings.supabase_key:
+            return
+        async with httpx.AsyncClient(timeout=5.0) as client:
+            await client.post(
+                f"{settings.supabase_url}/rest/v1/gk_logs",
+                headers={
+                    "apikey": settings.supabase_key,
+                    "Authorization": f"Bearer {settings.supabase_key}",
+                    "Content-Type": "application/json",
+                    "Prefer": "return=minimal",
+                },
+                json=payload,
+            )
+    except Exception as e:
+        print(f"[gk_log] falhou (não crítico): {e}")
+
+
+# ============================================================================
 # STARTUP EVENT
 # ============================================================================
 
@@ -324,6 +351,29 @@ async def sdr_gatekeeper(request: GatekeeperRequest):
             "persona_confidence": request.persona_confidence,
         })
 
+        processing_time_ms = (time.time() - start_time) * 1000
+
+        # Log assíncrono — não bloqueia a resposta
+        asyncio.create_task(_log_gk({
+            "remote_jid": request.clinic_phone,
+            "clinic_name": request.clinic_name,
+            "attempt_count": attempt_count,
+            "detected_persona_in": request.detected_persona,
+            "persona_confidence_in": request.persona_confidence,
+            "latest_message": request.latest_message,
+            "node_executed": result.get("_node_executed"),
+            "detected_persona_out": result.get("detected_persona"),
+            "persona_confidence_out": result.get("persona_confidence"),
+            "conversation_stage": result.get("conversation_stage", "opening"),
+            "should_send_message": result.get("should_send_message", False),
+            "response_message": result.get("response_message", ""),
+            "extracted_manager_contact": result.get("extracted_manager_contact"),
+            "extracted_manager_email": result.get("extracted_manager_email"),
+            "extracted_manager_name": result.get("extracted_manager_name"),
+            "reasoning": result.get("reasoning", ""),
+            "processing_time_ms": processing_time_ms,
+        }))
+
         return GatekeeperResponse(
             response_message=result.get("response_message", ""),
             conversation_stage=result.get("conversation_stage", "opening"),
@@ -332,7 +382,7 @@ async def sdr_gatekeeper(request: GatekeeperRequest):
             extracted_manager_name=result.get("extracted_manager_name"),
             should_send_message=result.get("should_send_message", False),
             reasoning=result.get("reasoning", ""),
-            processing_time_ms=(time.time() - start_time) * 1000,
+            processing_time_ms=processing_time_ms,
             detected_persona=result.get("detected_persona"),
             persona_confidence=result.get("persona_confidence"),
         )
