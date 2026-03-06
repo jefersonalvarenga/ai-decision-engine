@@ -45,6 +45,10 @@ class GatekeeperInput(BaseModel):
         None,
         description="Dia da semana (0=segunda … 6=domingo). Se ausente, o servidor computa automaticamente."
     )
+    detected_persona: Optional[str] = Field(
+        None,
+        description="Persona já detectada em turno anterior (receptionist/menu_bot/ai_assistant/call_center/manager/unknown). Se presente, pula a detecção."
+    )
 
 
 class GatekeeperOutput(BaseModel):
@@ -70,6 +74,14 @@ class GatekeeperOutput(BaseModel):
         description="Se deve enviar a mensagem (false quando acabou)"
     )
     reasoning: str = Field(..., description="Explicação da decisão do agente")
+    detected_persona: Optional[str] = Field(
+        None,
+        description="Persona detectada nesta conversa (receptionist/menu_bot/ai_assistant/call_center/manager/unknown). Persistir e reenviar no próximo turno."
+    )
+    persona_confidence: Optional[str] = Field(
+        None,
+        description="Confiança na detecção da persona: high | medium | low"
+    )
 
 
 # ============================================================
@@ -142,6 +154,7 @@ class GatekeeperState(TypedDict):
     current_hour: int
     current_weekday: int
     attempt_count: int
+    detected_persona: Optional[str]   # persistido pelo n8n entre turnos
     # Outputs
     response_message: Optional[str]
     conversation_stage: str
@@ -150,6 +163,7 @@ class GatekeeperState(TypedDict):
     extracted_manager_name: Optional[str]
     should_send_message: bool
     reasoning: str
+    persona_confidence: Optional[str]
 
 
 class CloserState(TypedDict):

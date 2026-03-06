@@ -441,6 +441,7 @@ def run_interactive_gatekeeper():
 
     clinic_name = input("\nNome da clínica: ").strip() or "Clínica Teste"
     conversation_history = []
+    detected_persona = None  # persiste entre turnos
 
     print(f"\nIniciando conversa com {clinic_name}...")
     print("(Digite 'sair' para encerrar)\n")
@@ -454,17 +455,22 @@ def run_interactive_gatekeeper():
         if conversation_history and conversation_history[-1]["role"] == "human":
             latest_message = conversation_history[-1]["content"]
 
-        # Invoca agente
+        # Invoca agente — repassa detected_persona para evitar re-classificação
         result = gatekeeper_graph.invoke({
             "clinic_name": clinic_name,
             "conversation_history": conversation_history,
             "latest_message": latest_message,
             "current_hour": datetime.now().hour,
             "attempt_count": attempt_count,
+            "detected_persona": detected_persona,
         })
 
+        # Persiste persona detectada para o próximo turno
+        if result.get("detected_persona"):
+            detected_persona = result["detected_persona"]
+
         print(f"🤖 Agente: {result['response_message']}")
-        print(f"   [Stage: {result['conversation_stage']}]")
+        print(f"   [Stage: {result['conversation_stage']}  |  Persona: {detected_persona or 'unknown'}]")
 
         if result.get("extracted_manager_contact"):
             print(f"   ✅ Contato extraído: {result['extracted_manager_contact']}")
@@ -482,6 +488,8 @@ def run_interactive_gatekeeper():
 
         # Input do usuário (simula recepção)
         user_input = input("\n👤 Recepção: ").strip()
+        if not user_input:
+            continue
         if user_input.lower() == "sair":
             break
 
@@ -565,8 +573,8 @@ def run_interactive_closer():
 # MAIN
 # ============================================================================
 
-def mark_resolved(json_path: Path, scenario_name: str, passed: bool, notes: str = ""):
-    """Atualiza resolved + last_run no JSON após cada teste."""
+def mark_resolved(json_path: Path, scenario_name: str, passed: bool, notes: str = "", response: str = "", stage: str = ""):
+    """Atualiza resolved + last_run + last_response + last_stage no JSON após cada teste."""
     try:
         with open(json_path, "r", encoding="utf-8") as f:
             cases = json.load(f)
@@ -577,6 +585,10 @@ def mark_resolved(json_path: Path, scenario_name: str, passed: bool, notes: str 
                 c["last_run"] = datetime.now().strftime("%Y-%m-%d")
                 if notes:
                     c["notes"] = notes
+                if response:
+                    c["last_response"] = response
+                if stage:
+                    c["last_stage"] = stage
                 break
         with open(json_path, "w", encoding="utf-8") as f:
             json.dump(cases, f, ensure_ascii=False, indent=2)
@@ -723,15 +735,17 @@ def main():
                     scenario_ok = False
                     fail_reasons.append(f"juiz: {verdict['reason']}")
 
+                last_response = result.get("response_message", "")
+                last_stage = result.get("conversation_stage", "")
                 if scenario_ok:
                     g_passed += 1
                     print(f"  ✅ PASSOU — marcando resolved=true")
-                    mark_resolved(GATEKEEPER_JSON, scenario["name"], passed=True)
+                    mark_resolved(GATEKEEPER_JSON, scenario["name"], passed=True, response=last_response, stage=last_stage)
                 else:
                     g_failed += 1
                     reason_str = " | ".join(fail_reasons)
                     failures.append(f"GATEKEEPER | {scenario['name']} | {reason_str}")
-                    mark_resolved(GATEKEEPER_JSON, scenario["name"], passed=False, notes=reason_str)
+                    mark_resolved(GATEKEEPER_JSON, scenario["name"], passed=False, notes=reason_str, response=last_response, stage=last_stage)
             except Exception as e:
                 g_failed += 1
                 failures.append(f"GATEKEEPER | {scenario['name']} | ERRO: {e}")

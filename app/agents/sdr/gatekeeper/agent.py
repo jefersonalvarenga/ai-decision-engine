@@ -4,6 +4,7 @@ Gatekeeper Agent - DSPy module for collecting manager contact from reception
 
 import dspy
 import re
+from pathlib import Path
 from typing import Optional
 from .signature import GatekeeperSignature
 from .utils import safe_str
@@ -60,11 +61,28 @@ class GatekeeperAgent(dspy.Module):
     - failed:   MAX_OBJECTION_TURNS handling_objection turns OR immediate rejection → send goodbye, stop
     Note: total message count (attempt_count) is passed to the LLM as context only — it
     does NOT trigger forced termination. Only objection turns count towards the limit.
+
+    Otimização:
+    - Se artifacts/gatekeeper_optimized.json existir, carrega os few-shot demos automaticamente.
+    - Gere o artifact com: python -m app.agents.sdr.optimize_gatekeeper
+    - load_optimized=False força uso do modelo base (usado pelo próprio optimizer).
     """
 
-    def __init__(self):
+    # agent.py está em: app/agents/sdr/gatekeeper/agent.py
+    # 5x .parent chega na raiz do projeto (ai-decision-engine/)
+    _ARTIFACT_PATH = Path(__file__).parent.parent.parent.parent.parent / "artifacts" / "gatekeeper_optimized.json"
+
+    def __init__(self, load_optimized: bool = True):
         super().__init__()
         self.process = dspy.ChainOfThought(GatekeeperSignature)
+
+        if load_optimized and self._ARTIFACT_PATH.exists():
+            try:
+                self.load(str(self._ARTIFACT_PATH))
+                size_kb = self._ARTIFACT_PATH.stat().st_size // 1024
+                print(f"✅ GatekeeperAgent: demos otimizados carregados ({size_kb}KB)")
+            except Exception as e:
+                print(f"⚠️  GatekeeperAgent: falha ao carregar {self._ARTIFACT_PATH.name} — {e}")
 
     def _clean_phone(self, phone: Optional[str]) -> Optional[str]:
         """Extract only digits from phone number"""

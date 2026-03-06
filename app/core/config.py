@@ -1,7 +1,19 @@
+import os
 import dspy
+from pathlib import Path
 from typing import Optional
 from pydantic import BaseModel, Field, ConfigDict
 from pydantic_settings import BaseSettings
+
+# Carrega .env automaticamente ao importar este módulo.
+# Necessário quando rodando como -m (módulo), onde pydantic-settings
+# não encontra o .env pelo caminho relativo.
+try:
+    from dotenv import load_dotenv as _load_dotenv
+    _env_path = Path(__file__).parent.parent.parent / ".env"
+    _load_dotenv(_env_path, override=True)
+except ImportError:
+    pass  # python-dotenv não instalado — ok em produção via variáveis de ambiente
 
 class SupabaseConfig(BaseModel):
     url: str = Field(description="Supabase project URL")
