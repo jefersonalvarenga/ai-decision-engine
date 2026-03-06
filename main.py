@@ -107,6 +107,14 @@ class GatekeeperRequest(BaseModel):
         None,
         description="Hora local do n8n (0-23). Opcional — servidor computa via America/Sao_Paulo se ausente."
     )
+    detected_persona: Optional[str] = Field(
+        None,
+        description="Persona já detectada em turno anterior. Se presente, pula re-detecção (exceto menu_bot)."
+    )
+    persona_confidence: Optional[str] = Field(
+        None,
+        description="Confiança na detecção da persona: high | medium | low"
+    )
 
 
 class GatekeeperResponse(BaseModel):
@@ -119,6 +127,8 @@ class GatekeeperResponse(BaseModel):
     should_send_message: bool
     reasoning: str
     processing_time_ms: float
+    detected_persona: Optional[str] = None
+    persona_confidence: Optional[str] = None
 
 
 class CloserRequest(BaseModel):
@@ -310,6 +320,8 @@ async def sdr_gatekeeper(request: GatekeeperRequest):
             "current_hour": current_hour,
             "current_weekday": current_weekday,
             "attempt_count": attempt_count,
+            "detected_persona": request.detected_persona,
+            "persona_confidence": request.persona_confidence,
         })
 
         return GatekeeperResponse(
@@ -321,6 +333,8 @@ async def sdr_gatekeeper(request: GatekeeperRequest):
             should_send_message=result.get("should_send_message", False),
             reasoning=result.get("reasoning", ""),
             processing_time_ms=(time.time() - start_time) * 1000,
+            detected_persona=result.get("detected_persona"),
+            persona_confidence=result.get("persona_confidence"),
         )
 
     except Exception as e:
