@@ -121,6 +121,10 @@ class GatekeeperRequest(BaseModel):
         default=False,
         description="True se a conversa é de homologação (n8n envia com base em gk_conversations.is_homolog)."
     )
+    current_status: Optional[str] = Field(
+        default=None,
+        description="Status atual da conversa no Supabase (opted_out, denied, etc.)."
+    )
 
 
 class GatekeeperResponse(BaseModel):
@@ -334,6 +338,30 @@ async def sdr_gatekeeper(request: GatekeeperRequest):
     current_weekday = request.current_weekday if request.current_weekday is not None else now.weekday()
 
     try:
+        # Bloqueios determinísticos — sem chamar LLM
+        if request.current_status == "opted_out":
+            return GatekeeperResponse(
+                response_message="",
+                conversation_stage="failed",
+                should_send_message=False,
+                reasoning="Conversa marcada como opted_out — silenciando.",
+                processing_time_ms=(time.time() - start_time) * 1000,
+            )
+
+        latest = request.latest_message or ""
+        opt_out_words = ["sim", "não quero", "nao quero", "encerrar", "encerra", "para", "pare", "stop", "não", "nao"]
+        if request.current_status == "pending_optout" and any(
+            latest.lower().strip() == w or latest.lower().strip().startswith(w + " ") or latest.lower().strip().endswith(" " + w)
+            for w in opt_out_words
+        ):
+            return GatekeeperResponse(
+                response_message="",
+                conversation_stage="opted_out",
+                should_send_message=False,
+                reasoning="Opt-out confirmado pelo contato.",
+                processing_time_ms=(time.time() - start_time) * 1000,
+            )
+
         result = gatekeeper_graph.invoke({
             "clinic_name": request.clinic_name,
             "sdr_name": request.sdr_name,
