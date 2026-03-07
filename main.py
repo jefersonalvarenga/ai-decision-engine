@@ -334,12 +334,6 @@ async def sdr_gatekeeper(request: GatekeeperRequest):
     current_weekday = request.current_weekday if request.current_weekday is not None else now.weekday()
 
     try:
-        # Count agent messages in history
-        attempt_count = len([
-            t for t in request.conversation_history
-            if t.role == "agent"
-        ])
-
         result = gatekeeper_graph.invoke({
             "clinic_name": request.clinic_name,
             "sdr_name": request.sdr_name,
@@ -350,7 +344,6 @@ async def sdr_gatekeeper(request: GatekeeperRequest):
             "latest_message": request.latest_message,
             "current_hour": current_hour,
             "current_weekday": current_weekday,
-            "attempt_count": attempt_count,
             "detected_persona": request.detected_persona,
             "persona_confidence": request.persona_confidence,
         })
@@ -362,7 +355,6 @@ async def sdr_gatekeeper(request: GatekeeperRequest):
             "remote_jid": request.clinic_phone,
             "clinic_name": request.clinic_name,
             "is_homolog": request.is_homolog,
-            "attempt_count": attempt_count,
             "detected_persona_in": request.detected_persona,
             "persona_confidence_in": request.persona_confidence,
             "latest_message": request.latest_message,

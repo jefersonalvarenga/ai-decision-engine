@@ -154,7 +154,6 @@ class GatekeeperState(TypedDict):
     latest_message: Optional[str]
     current_hour: int
     current_weekday: int
-    attempt_count: int
     detected_persona: Optional[str]   # persistido pelo n8n entre turnos
     # Outputs
     response_message: Optional[str]

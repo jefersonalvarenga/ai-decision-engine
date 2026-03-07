@@ -155,7 +155,6 @@ class GatekeeperAgent(dspy.Module):
         latest_message: Optional[str] = None,
         current_hour: int = 12,
         current_weekday: int = 0,
-        attempt_count: int = 0,
     ) -> dict:
         """
         Process the conversation and generate next response.
@@ -195,6 +194,9 @@ class GatekeeperAgent(dspy.Module):
                 "extracted_manager_name": None,
                 "should_send_message": True,
             }
+
+        # Calcula attempt_count a partir do histórico — sem depender de inputs externos
+        attempt_count = sum(1 for t in (conversation_history or []) if t.get("role") == "agent")
 
         result = self.process(
             clinic_name=clinic_name,

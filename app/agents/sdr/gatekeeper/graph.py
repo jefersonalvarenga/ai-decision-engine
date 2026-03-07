@@ -172,7 +172,6 @@ def process_message(state: GatekeeperState) -> dict:
             latest_message=state.get("latest_message"),
             current_hour=state.get("current_hour", 12),
             current_weekday=state.get("current_weekday", _dt.now().weekday()),
-            attempt_count=state.get("attempt_count", 0),
         )
 
         print(
