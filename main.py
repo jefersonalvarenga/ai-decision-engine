@@ -86,6 +86,7 @@ class ReengageResponse(BaseModel):
 class SDRConversationTurn(BaseModel):
     role: str = Field(..., pattern="^(agent|human)$")
     content: str
+    stage: Optional[str] = None
 
 
 class GatekeeperRequest(BaseModel):
@@ -366,7 +367,7 @@ async def sdr_gatekeeper(request: GatekeeperRequest):
             "clinic_name": request.clinic_name,
             "sdr_name": request.sdr_name,
             "conversation_history": [
-                {"role": t.role, "content": t.content}
+                {k: v for k, v in {"role": t.role, "content": t.content, "stage": getattr(t, "stage", None)}.items() if v is not None}
                 for t in request.conversation_history
             ],
             "latest_message": request.latest_message,
