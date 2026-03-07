@@ -48,7 +48,7 @@ class MenuBotSignature(dspy.Signature):
     reasoning: str = dspy.OutputField(desc="Raciocínio sobre qual opção tentar")
     response_message: str = dspy.OutputField(desc="Mensagem a enviar ao bot")
     conversation_stage: str = dspy.OutputField(
-        desc="'handling_objection' se ainda tentando bypass, 'failed' se esgotado"
+        desc="'handling_menu_bot' se ainda tentando bypass, 'failed' se esgotado"
     )
     should_send_message: bool = dspy.OutputField(desc="Sempre True")
 
@@ -77,6 +77,7 @@ class MenuBotAgent(dspy.Module):
                 "extracted_manager_name": None,
             }
 
+
         history_text = "\n".join(
             f"{'Agente' if t['role'] == 'agent' else 'Bot'}: {t['content']}"
             for t in conversation_history
@@ -92,8 +93,8 @@ class MenuBotAgent(dspy.Module):
             )
 
             stage = str(result.conversation_stage).strip().lower()
-            if stage not in {"handling_objection", "failed"}:
-                stage = "handling_objection"
+            if stage not in {"handling_menu_bot", "failed"}:
+                stage = "handling_menu_bot"
 
             return {
                 "response_message": str(result.response_message).strip(),
@@ -108,7 +109,7 @@ class MenuBotAgent(dspy.Module):
         except Exception as e:
             return {
                 "response_message": "falar com atendente",
-                "conversation_stage": "handling_objection",
+                "conversation_stage": "handling_menu_bot",
                 "should_send_message": True,
                 "reasoning": f"Erro: {e}",
                 "extracted_manager_contact": None,

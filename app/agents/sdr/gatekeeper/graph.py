@@ -126,17 +126,21 @@ def exit_ai_assistant(state: GatekeeperState) -> dict:
 def process_menu_bot(state: GatekeeperState) -> dict:
     """
     Tenta bypassar o bot de menu para chegar em um humano.
-    Usa attempt_count para controlar quantas tentativas já foram feitas.
+    Calcula bypass_attempts a partir do histórico (mensagens com stage handling_menu_bot).
     Após MAX_BYPASS_ATTEMPTS, encerra com failed.
     """
-    attempt = state.get("attempt_count", 0)
-    print(f"--- GATEKEEPER: Persona=menu_bot — bypass attempt {attempt} ---")
+    history = state.get("conversation_history", [])
+    bypass_attempts = sum(
+        1 for t in history
+        if t.get("role") == "agent" and t.get("stage") == "handling_menu_bot"
+    )
+    print(f"--- GATEKEEPER: Persona=menu_bot — bypass attempt {bypass_attempts} ---")
 
     result = menu_bot_agent.forward(
         clinic_name=state["clinic_name"],
-        conversation_history=state.get("conversation_history", []),
+        conversation_history=history,
         latest_message=state.get("latest_message", ""),
-        attempt_count=attempt,
+        attempt_count=bypass_attempts,
     )
 
     print(f"--- MENU BOT: stage={result['conversation_stage']} msg={result['response_message']!r} ---")

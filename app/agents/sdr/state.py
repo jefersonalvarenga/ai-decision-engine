@@ -58,6 +58,7 @@ class GatekeeperOutput(BaseModel):
         "opening",            # Primeira msg: "é da clínica X?"
         "requesting",         # Pedindo contato do gestor
         "handling_objection", # Respondendo "do que se trata?"
+        "handling_menu_bot",  # Tentando bypass de bot de menu
         "success",            # Conseguiu o contato
         "failed"              # Desistiu (muitas tentativas ou negativa definitiva)
     ] = Field(..., description="Estágio atual da conversa")
