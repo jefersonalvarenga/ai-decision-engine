@@ -397,6 +397,7 @@ async def sdr_gatekeeper(request: GatekeeperRequest):
             "extracted_manager_email": result.get("extracted_manager_email"),
             "extracted_manager_name": result.get("extracted_manager_name"),
             "reasoning": result.get("reasoning", ""),
+            "attempt_count": result.get("attempt_count", 0),
             "processing_time_ms": processing_time_ms,
         }))
 

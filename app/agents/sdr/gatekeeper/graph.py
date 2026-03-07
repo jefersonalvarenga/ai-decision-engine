@@ -148,6 +148,7 @@ def process_menu_bot(state: GatekeeperState) -> dict:
 
     result["detected_persona"]   = state.get("detected_persona")
     result["persona_confidence"] = state.get("persona_confidence")
+    result["attempt_count"]      = bypass_attempts + 1  # inclui a tentativa atual
     result["_node_executed"]     = "process_menu_bot"
     return result
 
