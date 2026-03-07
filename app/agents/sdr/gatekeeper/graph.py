@@ -134,7 +134,8 @@ def process_menu_bot(state: GatekeeperState) -> dict:
         1 for t in history
         if t.get("role") == "agent" and t.get("stage") == "handling_menu_bot"
     )
-    print(f"--- GATEKEEPER: Persona=menu_bot — bypass attempt {bypass_attempts} ---")
+    print(f"--- GATEKEEPER: Persona=menu_bot — bypass_attempts={bypass_attempts} history_len={len(history)} ---")
+    print(f"--- GATEKEEPER: history stages={[(t.get('role'), t.get('stage')) for t in history]} ---")
 
     result = menu_bot_agent.forward(
         clinic_name=state["clinic_name"],
