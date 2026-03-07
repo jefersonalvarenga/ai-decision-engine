@@ -117,6 +117,10 @@ class GatekeeperRequest(BaseModel):
         None,
         description="Confiança na detecção da persona: high | medium | low"
     )
+    is_homolog: bool = Field(
+        default=False,
+        description="True se a conversa é de homologação (n8n envia com base em gk_conversations.is_homolog)."
+    )
 
 
 class GatekeeperResponse(BaseModel):
@@ -357,6 +361,7 @@ async def sdr_gatekeeper(request: GatekeeperRequest):
         asyncio.create_task(_log_gk({
             "remote_jid": request.clinic_phone,
             "clinic_name": request.clinic_name,
+            "is_homolog": request.is_homolog,
             "attempt_count": attempt_count,
             "detected_persona_in": request.detected_persona,
             "persona_confidence_in": request.persona_confidence,
