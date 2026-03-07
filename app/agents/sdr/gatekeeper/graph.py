@@ -96,6 +96,30 @@ def exit_call_center(state: GatekeeperState) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Node: exit_ai_assistant
+# ---------------------------------------------------------------------------
+
+def exit_ai_assistant(state: GatekeeperState) -> dict:
+    """
+    Saída imediata para clínicas com IA conversacional.
+    Não faz sentido tentar negociar com uma IA — ela nunca vai passar o contato do gestor.
+    """
+    print(f"--- GATEKEEPER: Persona=ai_assistant — saída imediata ---")
+    return {
+        "reasoning": "Assistente virtual de IA detectado. A IA não tem acesso ao gestor — encerrando.",
+        "response_message": "Entendido, obrigado pela atenção!",
+        "conversation_stage": "failed",
+        "extracted_manager_contact": None,
+        "extracted_manager_email": None,
+        "extracted_manager_name": None,
+        "should_send_message": True,
+        "detected_persona": state.get("detected_persona"),
+        "persona_confidence": state.get("persona_confidence"),
+        "_node_executed": "exit_ai_assistant",
+    }
+
+
+# ---------------------------------------------------------------------------
 # Node: process_menu_bot
 # ---------------------------------------------------------------------------
 
@@ -181,6 +205,8 @@ def route_by_persona(state: GatekeeperState) -> str:
     persona = state.get("detected_persona") or "unknown"
     if persona == "call_center":
         return "exit_call_center"
+    if persona == "ai_assistant":
+        return "exit_ai_assistant"
     if persona == "menu_bot":
         return "process_menu_bot"
     return "process"
@@ -194,6 +220,7 @@ workflow = StateGraph(GatekeeperState)
 
 workflow.add_node("detect_persona",   detect_persona)
 workflow.add_node("exit_call_center", exit_call_center)
+workflow.add_node("exit_ai_assistant", exit_ai_assistant)
 workflow.add_node("process_menu_bot", process_menu_bot)
 workflow.add_node("process",          process_message)
 
@@ -203,14 +230,16 @@ workflow.add_conditional_edges(
     "detect_persona",
     route_by_persona,
     {
-        "exit_call_center": "exit_call_center",
-        "process_menu_bot": "process_menu_bot",
-        "process":          "process",
+        "exit_call_center":  "exit_call_center",
+        "exit_ai_assistant": "exit_ai_assistant",
+        "process_menu_bot":  "process_menu_bot",
+        "process":           "process",
     },
 )
 
-workflow.add_edge("exit_call_center", END)
-workflow.add_edge("process_menu_bot", END)
-workflow.add_edge("process",          END)
+workflow.add_edge("exit_call_center",  END)
+workflow.add_edge("exit_ai_assistant", END)
+workflow.add_edge("process_menu_bot",  END)
+workflow.add_edge("process",           END)
 
 gatekeeper_graph = workflow.compile()
