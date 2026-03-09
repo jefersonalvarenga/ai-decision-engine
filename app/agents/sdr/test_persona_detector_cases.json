@@ -30,7 +30,7 @@
     "last_stage": "menu_bot"
   },
   {
-    "name": "menu_bot — gramática perfeita e tom amigável (caso Samira)",
+    "name": "receptionist — boas-vindas padronizada sem opções (caso Samira)",
     "clinic_name": "Rede Odonto Campinas",
     "conversation_history": [
       {
@@ -38,11 +38,11 @@
         "content": "Bom dia, é da Rede Odonto Campinas?"
       }
     ],
-    "latest_message": "Bem-vindo(a) à Clínica! 🩺\n\nOlá, sou a Samira e estou aqui para garantir que seu atendimento seja o mais ágil e confortável possível. Como podemos ajudá-lo(a) hoje? Por favor, escolha uma das opções abaixo para facilitar o seu atendimento:",
-    "expected_persona": "menu_bot",
+    "latest_message": "Bem-vindo(a) à Clínica! 🩺\n\nOlá, sou a Samira e estou aqui para garantir que seu atendimento seja o mais ágil e confortável possível. Como podemos ajudá-lo(a) hoje?",
+    "expected_persona": "unknown",
     "resolved": true,
-    "last_run": "2026-03-09",
-    "last_stage": "menu_bot"
+    "last_stage": "unknown",
+    "last_run": "2026-03-09"
   },
   {
     "name": "waiting — recepcionista pede espera",
@@ -219,6 +219,89 @@
     "last_run": "2026-03-09",
     "notes": "persona: esperado=unknown, obtido=receptionist (confiança=high)",
     "last_stage": "receptionist"
+  },
+  {
+    "name": "waiting — gestor foi buscar o responsável",
+    "clinic_name": "Clínica Bella Luna",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Bella Luna?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, boa tarde!"
+      },
+      {
+        "role": "agent",
+        "content": "Gostaria de falar com o gestor da clínica."
+      }
+    ],
+    "latest_message": "Vou chamar ela pra você.",
+    "expected_persona": "waiting",
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "last_stage": "waiting"
+  },
+  {
+    "name": "call_center — número 0800",
+    "clinic_name": "Clínica Bella Luna",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Bella Luna?"
+      }
+    ],
+    "latest_message": "Olá! Você está falando com a central de atendimento 0800. Como posso ajudar?",
+    "expected_persona": "call_center",
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "last_stage": "call_center"
+  },
+  {
+    "name": "receptionist — pergunta quem é você antes de confirmar",
+    "clinic_name": "Clínica Bella Luna",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Bella Luna?"
+      }
+    ],
+    "latest_message": "Bom dia! Com quem estou falando?",
+    "expected_persona": "receptionist",
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "last_stage": "receptionist"
+  },
+  {
+    "name": "unknown — mensagem mínima ambígua",
+    "clinic_name": "Clínica Bella Luna",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Bella Luna?"
+      }
+    ],
+    "latest_message": "Pois não?",
+    "expected_persona": "unknown",
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "last_stage": "unknown"
+  },
+  {
+    "name": "unknown — só oi",
+    "clinic_name": "Clínica Bella Luna",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Bella Luna?"
+      }
+    ],
+    "latest_message": "Oi",
+    "expected_persona": "unknown",
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "last_stage": "unknown"
   },
   {
     "name": "manager — gestor atende diretamente",
