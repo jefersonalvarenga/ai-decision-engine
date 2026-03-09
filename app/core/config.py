@@ -40,6 +40,7 @@ class EasyScaleSettings(BaseSettings):
     openai_api_key: Optional[str] = Field(default=None, env="OPENAI_API_KEY")
     anthropic_api_key: Optional[str] = Field(default=None, env="ANTHROPIC_API_KEY")
     groq_api_key: Optional[str] = Field(default=None, env="GROQ_API_KEY")
+    gemini_api_key: Optional[str] = Field(default=None, env="GEMINI_API_KEY")
     xai_api_key: Optional[str] = Field(default=None, env="XAI_API_KEY")
     glm_api_key: Optional[str] = Field(default=None, env="GLM_API_KEY")
     glm_model: str = Field(default="glm-4.7-flash", env="GLM_MODEL")
@@ -69,6 +70,7 @@ class EasyScaleSettings(BaseSettings):
         if self.dspy_provider == "openai": return self.openai_api_key
         if self.dspy_provider == "anthropic": return self.anthropic_api_key
         if self.dspy_provider == "groq": return self.groq_api_key
+        if self.dspy_provider == "gemini": return self.gemini_api_key
         if self.dspy_provider == "xai": return self.xai_api_key
         if self.dspy_provider == "glm": return self.glm_api_key
         return None

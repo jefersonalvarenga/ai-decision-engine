@@ -2,12 +2,10 @@
 Gatekeeper Graph - LangGraph workflow for collecting manager contact
 
 Flow:
-  1. detect_persona  — classifica quem responde (roda só uma vez por conversa)
+  1. detect_persona  — classifica quem responde (roda a cada turno)
   2. route           — decide nó seguinte com base na persona
-  3. process_message — agente principal (Persona 1 e 5)
-  4. exit_call_center — saída imediata sem LLM (Persona 4)
-
-O n8n persiste detected_persona entre turnos para evitar re-classificação.
+  3. process         — GatekeeperAgent (receptionist, manager, unknown, waiting, ai_assistant, call_center)
+  4. process_menu_bot — MenuBotAgent (menu_bot)
 """
 
 from datetime import datetime as _dt
@@ -31,26 +29,14 @@ menu_bot_agent    = MenuBotAgent()
 
 def detect_persona(state: GatekeeperState) -> dict:
     """
-    Classifica a persona na primeira resposta da clínica.
-    Pula se já detectada (exceto menu_bot — re-detecta para capturar humano que assumiu).
-    Pula se ainda não há resposta da clínica (latest_message é None).
+    Classifica a persona a cada turno com base na latest_message + histórico.
+    Roda sempre — sem cache, sem depender do detected_persona do Supabase.
+    Pula apenas se ainda não há resposta da clínica (latest_message é None).
     """
-    current_persona = state.get("detected_persona")
     latest = state.get("latest_message")
 
-    # Sem resposta ainda — pula
     if not latest:
         return {}
-
-    # Persona já conhecida e não é menu_bot nem waiting — mantém
-    if current_persona and current_persona not in ("menu_bot", "waiting"):
-        return {}
-
-    # menu_bot ou waiting ou sem persona — (re-)detecta
-    if current_persona in ("menu_bot", "waiting"):
-        print(f"--- PERSONA DETECTOR: Re-classificando — persona anterior={current_persona} ---")
-    else:
-        print(f"--- PERSONA DETECTOR: Classificando resposta da {state['clinic_name']} ---")
 
     print(f"--- PERSONA DETECTOR: Classificando resposta da {state['clinic_name']} ---")
 
@@ -72,157 +58,63 @@ def detect_persona(state: GatekeeperState) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Node: exit_waiting
-# ---------------------------------------------------------------------------
-
-def exit_waiting(state: GatekeeperState) -> dict:
-    """
-    Sinal de espera detectado — não envia mensagem, aguarda próxima resposta.
-    A persona será re-detectada no próximo turno.
-    """
-    print(f"--- GATEKEEPER: Persona=waiting — aguardando sem resposta ---")
-    return {
-        "reasoning": "Sinal de espera detectado. Aguardando próxima mensagem sem responder.",
-        "response_message": "",
-        "conversation_stage": "requesting",
-        "extracted_manager_contact": None,
-        "extracted_manager_email": None,
-        "extracted_manager_name": None,
-        "should_send_message": False,
-        "detected_persona": "waiting",  # mantém waiting — re-detecta no próximo turno
-        "persona_confidence": None,
-        "_node_executed": "exit_waiting",
-    }
-
-
-# ---------------------------------------------------------------------------
-# Node: exit_call_center
-# ---------------------------------------------------------------------------
-
-def exit_call_center(state: GatekeeperState) -> dict:
-    """
-    Saída imediata para centrais de atendimento terceirizadas.
-    Não chama LLM — a atendente não tem acesso ao gestor.
-    """
-    print(f"--- GATEKEEPER: Persona=call_center — saída imediata ---")
-    return {
-        "reasoning": "Central de atendimento detectada. Sem acesso ao gestor — encerrando.",
-        "response_message": "Entendido, obrigado pela atenção!",
-        "conversation_stage": "call_center_blocked",
-        "extracted_manager_contact": None,
-        "extracted_manager_email": None,
-        "extracted_manager_name": None,
-        "should_send_message": True,
-        "detected_persona": state.get("detected_persona"),
-        "persona_confidence": state.get("persona_confidence"),
-        "_node_executed": "exit_call_center",
-    }
-
-
-# ---------------------------------------------------------------------------
-# Node: exit_ai_assistant
-# ---------------------------------------------------------------------------
-
-def exit_ai_assistant(state: GatekeeperState) -> dict:
-    """
-    Saída imediata para clínicas com IA conversacional.
-    Não faz sentido tentar negociar com uma IA — ela nunca vai passar o contato do gestor.
-    """
-    print(f"--- GATEKEEPER: Persona=ai_assistant — saída imediata ---")
-    return {
-        "reasoning": "Assistente virtual de IA detectado. A IA não tem acesso ao gestor — encerrando.",
-        "response_message": "Entendido, obrigado pela atenção!",
-        "conversation_stage": "ai_blocked",
-        "extracted_manager_contact": None,
-        "extracted_manager_email": None,
-        "extracted_manager_name": None,
-        "should_send_message": True,
-        "detected_persona": state.get("detected_persona"),
-        "persona_confidence": state.get("persona_confidence"),
-        "_node_executed": "exit_ai_assistant",
-    }
-
-
-# ---------------------------------------------------------------------------
 # Node: process_menu_bot
 # ---------------------------------------------------------------------------
 
 def process_menu_bot(state: GatekeeperState) -> dict:
     """
     Tenta bypassar o bot de menu para chegar em um humano.
-    Calcula bypass_attempts a partir do histórico (mensagens com stage handling_menu_bot).
-    Após MAX_BYPASS_ATTEMPTS, encerra com failed.
+    O LLM analisa o histórico e decide a próxima ação.
     """
     history = state.get("conversation_history", [])
-    bypass_attempts = sum(
-        1 for t in history
-        if t.get("role") == "agent" and t.get("stage") == "handling_menu_bot"
-    )
-    print(f"--- GATEKEEPER: Persona=menu_bot — bypass_attempts={bypass_attempts} history_len={len(history)} ---")
-    print(f"--- GATEKEEPER: history stages={[(t.get('role'), t.get('stage')) for t in history]} ---")
+    print(f"--- GATEKEEPER: Persona=menu_bot — history_len={len(history)} ---")
 
     result = menu_bot_agent.forward(
         clinic_name=state["clinic_name"],
         conversation_history=history,
         latest_message=state.get("latest_message", ""),
-        attempt_count=bypass_attempts,
     )
 
     print(f"--- MENU BOT: stage={result['conversation_stage']} msg={result['response_message']!r} ---")
 
     result["detected_persona"]   = state.get("detected_persona")
     result["persona_confidence"] = state.get("persona_confidence")
-    result["attempt_count"]      = bypass_attempts + 1  # inclui a tentativa atual
     result["_node_executed"]     = "process_menu_bot"
     return result
 
 
 # ---------------------------------------------------------------------------
-# Node: process_message
+# Node: process
 # ---------------------------------------------------------------------------
 
 def process_message(state: GatekeeperState) -> dict:
     """
     Nó principal — processa com DSPy e gera a próxima resposta.
-    Recebe detected_persona como contexto (sem alterar a signature atual).
+    Lida com todas as personas exceto menu_bot: receptionist, manager,
+    unknown, waiting, ai_assistant, call_center.
     """
     persona = state.get("detected_persona") or "unknown"
     print(f"--- GATEKEEPER: Processing [{persona}] for {state['clinic_name']} ---")
 
-    try:
-        result = gatekeeper_agent.forward(
-            clinic_name=state["clinic_name"],
-            sdr_name=state.get("sdr_name", "Vera"),
-            conversation_history=state.get("conversation_history", []),
-            latest_message=state.get("latest_message"),
-            current_hour=state.get("current_hour", 12),
-            current_weekday=state.get("current_weekday", _dt.now().weekday()),
-        )
+    result = gatekeeper_agent.forward(
+        clinic_name=state["clinic_name"],
+        sdr_name=state.get("sdr_name", "Vera"),
+        conversation_history=state.get("conversation_history", []),
+        latest_message=state.get("latest_message"),
+        current_hour=state.get("current_hour", 12),
+        current_weekday=state.get("current_weekday", _dt.now().weekday()),
+        detected_persona=persona,
+    )
 
-        print(
-            f"--- GATEKEEPER: Stage={result['conversation_stage']}, "
-            f"Contact={result.get('extracted_manager_contact')} ---"
-        )
+    print(
+        f"--- GATEKEEPER: Stage={result['conversation_stage']}, "
+        f"Contact={result.get('extracted_manager_contact')} ---"
+    )
 
-        # Propaga persona detectada para o output (n8n persiste)
-        result["detected_persona"]   = state.get("detected_persona")
-        result["persona_confidence"] = state.get("persona_confidence")
-        result["_node_executed"]     = "process"
-        return result
-
-    except Exception as e:
-        print(f"--- GATEKEEPER ERROR: {str(e)} ---")
-        return {
-            "reasoning": f"Erro no processamento: {str(e)}",
-            "response_message": "Desculpe, tive um problema. Poderia repetir?",
-            "conversation_stage": "handling_objection",
-            "extracted_manager_contact": None,
-            "extracted_manager_name": None,
-            "should_send_message": True,
-            "detected_persona": state.get("detected_persona"),
-            "persona_confidence": state.get("persona_confidence"),
-            "_node_executed": "process_error",
-        }
+    result["detected_persona"]   = state.get("detected_persona")
+    result["persona_confidence"] = state.get("persona_confidence")
+    result["_node_executed"]     = "process"
+    return result
 
 
 # ---------------------------------------------------------------------------
@@ -232,12 +124,6 @@ def process_message(state: GatekeeperState) -> dict:
 def route_by_persona(state: GatekeeperState) -> str:
     """Decide o próximo nó com base na persona detectada."""
     persona = state.get("detected_persona") or "unknown"
-    if persona == "waiting":
-        return "exit_waiting"
-    if persona == "call_center":
-        return "exit_call_center"
-    if persona == "ai_assistant":
-        return "exit_ai_assistant"
     if persona == "menu_bot":
         return "process_menu_bot"
     return "process"
@@ -250,9 +136,6 @@ def route_by_persona(state: GatekeeperState) -> str:
 workflow = StateGraph(GatekeeperState)
 
 workflow.add_node("detect_persona",   detect_persona)
-workflow.add_node("exit_waiting",     exit_waiting)
-workflow.add_node("exit_call_center", exit_call_center)
-workflow.add_node("exit_ai_assistant", exit_ai_assistant)
 workflow.add_node("process_menu_bot", process_menu_bot)
 workflow.add_node("process",          process_message)
 
@@ -262,18 +145,12 @@ workflow.add_conditional_edges(
     "detect_persona",
     route_by_persona,
     {
-        "exit_waiting":      "exit_waiting",
-        "exit_call_center":  "exit_call_center",
-        "exit_ai_assistant": "exit_ai_assistant",
-        "process_menu_bot":  "process_menu_bot",
-        "process":           "process",
+        "process_menu_bot": "process_menu_bot",
+        "process":          "process",
     },
 )
 
-workflow.add_edge("exit_waiting",      END)
-workflow.add_edge("exit_call_center",  END)
-workflow.add_edge("exit_ai_assistant", END)
-workflow.add_edge("process_menu_bot",  END)
-workflow.add_edge("process",           END)
+workflow.add_edge("process_menu_bot", END)
+workflow.add_edge("process",          END)
 
 gatekeeper_graph = workflow.compile()

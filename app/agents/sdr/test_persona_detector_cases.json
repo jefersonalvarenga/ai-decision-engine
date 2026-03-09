@@ -12,7 +12,8 @@
     "expected_persona": "menu_bot",
     "resolved": true,
     "last_run": "2026-03-09",
-    "last_stage": "menu_bot"
+    "last_stage": "menu_bot",
+    "notes": "persona: esperado=menu_bot, obtido=unknown (confiança=low)"
   },
   {
     "name": "menu_bot — emojis e opções estruturadas",
@@ -27,7 +28,8 @@
     "expected_persona": "menu_bot",
     "resolved": true,
     "last_run": "2026-03-09",
-    "last_stage": "menu_bot"
+    "last_stage": "menu_bot",
+    "notes": "persona: esperado=menu_bot, obtido=unknown (confiança=low)"
   },
   {
     "name": "receptionist — boas-vindas padronizada sem opções (caso Samira)",
@@ -42,7 +44,8 @@
     "expected_persona": "unknown",
     "resolved": true,
     "last_stage": "unknown",
-    "last_run": "2026-03-09"
+    "last_run": "2026-03-09",
+    "notes": "persona: esperado=unknown, obtido=receptionist (confiança=high)"
   },
   {
     "name": "waiting — recepcionista pede espera",
@@ -65,7 +68,8 @@
     "expected_persona": "waiting",
     "resolved": true,
     "last_run": "2026-03-09",
-    "last_stage": "waiting"
+    "last_stage": "waiting",
+    "notes": "persona: esperado=waiting, obtido=unknown (confiança=low)"
   },
   {
     "name": "waiting — bot responde aguarde após falar com atendente",
@@ -88,7 +92,8 @@
     "expected_persona": "waiting",
     "resolved": true,
     "last_run": "2026-03-09",
-    "last_stage": "waiting"
+    "last_stage": "waiting",
+    "notes": "persona: esperado=waiting, obtido=unknown (confiança=low)"
   },
   {
     "name": "waiting — mensagem curta de espera",
@@ -111,7 +116,8 @@
     "expected_persona": "waiting",
     "resolved": true,
     "last_run": "2026-03-09",
-    "last_stage": "waiting"
+    "last_stage": "waiting",
+    "notes": "persona: esperado=waiting, obtido=unknown (confiança=low)"
   },
   {
     "name": "ai_assistant — se identifica explicitamente como IA",
@@ -126,7 +132,8 @@
     "expected_persona": "ai_assistant",
     "resolved": true,
     "last_run": "2026-03-09",
-    "last_stage": "ai_assistant"
+    "last_stage": "ai_assistant",
+    "notes": "persona: esperado=ai_assistant, obtido=unknown (confiança=low)"
   },
   {
     "name": "ai_assistant — IA com nome próprio",
@@ -141,7 +148,8 @@
     "expected_persona": "ai_assistant",
     "resolved": true,
     "last_run": "2026-03-09",
-    "last_stage": "ai_assistant"
+    "last_stage": "ai_assistant",
+    "notes": "persona: esperado=ai_assistant, obtido=unknown (confiança=low)"
   },
   {
     "name": "call_center — menciona central de atendimento",
@@ -156,7 +164,8 @@
     "expected_persona": "call_center",
     "resolved": true,
     "last_run": "2026-03-09",
-    "last_stage": "call_center"
+    "last_stage": "call_center",
+    "notes": "persona: esperado=call_center, obtido=unknown (confiança=low)"
   },
   {
     "name": "call_center — especialista de agendamento",
@@ -171,7 +180,8 @@
     "expected_persona": "call_center",
     "resolved": true,
     "last_run": "2026-03-09",
-    "last_stage": "call_center"
+    "last_stage": "call_center",
+    "notes": "persona: esperado=call_center, obtido=unknown (confiança=low)"
   },
   {
     "name": "receptionist — se apresenta com nome",
@@ -186,7 +196,8 @@
     "expected_persona": "receptionist",
     "resolved": true,
     "last_run": "2026-03-09",
-    "last_stage": "receptionist"
+    "last_stage": "receptionist",
+    "notes": "persona: esperado=receptionist, obtido=unknown (confiança=low)"
   },
   {
     "name": "menu_bot — listMessage com opções interativas (Clínica Fares)",
@@ -200,7 +211,7 @@
     "latest_message": "Bem-vindo(a) à Clínica Fares! 🩺\n\nOlá, sou a Samira e estou aqui para garantir que seu atendimento seja o mais ágil e confortável possível. Como podemos ajudá-lo(a) hoje? Por favor, escolha uma das opções abaixo para facilitar o seu atendimento:\n\nOpções: Agendar Consulta | Agendar Exame | Agendar Retorno | Cirurgias | Reagendar | Dúvidas | Preços e orçamentos | Endereço e Horários",
     "expected_persona": "menu_bot",
     "resolved": true,
-    "notes": "Payload real de listMessage da Clínica Fares — valida extração do Parse Evolution Payload",
+    "notes": "persona: esperado=menu_bot, obtido=unknown (confiança=low)",
     "last_run": "2026-03-09",
     "last_stage": "menu_bot"
   },
@@ -217,7 +228,7 @@
     "expected_persona": "receptionist",
     "resolved": true,
     "last_run": "2026-03-09",
-    "notes": "persona: esperado=unknown, obtido=receptionist (confiança=high)",
+    "notes": "persona: esperado=receptionist, obtido=unknown (confiança=low)",
     "last_stage": "receptionist"
   },
   {
@@ -241,7 +252,8 @@
     "expected_persona": "waiting",
     "resolved": true,
     "last_run": "2026-03-09",
-    "last_stage": "waiting"
+    "last_stage": "waiting",
+    "notes": "persona: esperado=waiting, obtido=unknown (confiança=low)"
   },
   {
     "name": "call_center — número 0800",
@@ -256,7 +268,8 @@
     "expected_persona": "call_center",
     "resolved": true,
     "last_run": "2026-03-09",
-    "last_stage": "call_center"
+    "last_stage": "call_center",
+    "notes": "persona: esperado=call_center, obtido=unknown (confiança=low)"
   },
   {
     "name": "receptionist — pergunta quem é você antes de confirmar",
@@ -271,7 +284,8 @@
     "expected_persona": "receptionist",
     "resolved": true,
     "last_run": "2026-03-09",
-    "last_stage": "receptionist"
+    "last_stage": "receptionist",
+    "notes": "persona: esperado=receptionist, obtido=unknown (confiança=low)"
   },
   {
     "name": "unknown — mensagem mínima ambígua",
@@ -316,7 +330,8 @@
     "expected_persona": "manager",
     "resolved": true,
     "last_run": "2026-03-09",
-    "last_stage": "manager"
+    "last_stage": "manager",
+    "notes": "persona: esperado=manager, obtido=unknown (confiança=low)"
   },
   {
     "name": "manager — responsável responde diretamente",
@@ -331,6 +346,7 @@
     "expected_persona": "manager",
     "resolved": true,
     "last_run": "2026-03-09",
-    "last_stage": "manager"
+    "last_stage": "manager",
+    "notes": "persona: esperado=manager, obtido=unknown (confiança=low)"
   }
 ]

@@ -275,19 +275,23 @@ class GatekeeperSignature(dspy.Signature):
        pararam de voltar. São dois mundos diferentes. Consegue encaminhar o contato do Jeferson,
        nosso especialista? É o 11 98204-4215. Em 3 mensagens ele mostra a diferença na prática."
 
-    === QUANDO AGUARDAR SEM RESPONDER (CRUCIAL) ===
+    === COMPORTAMENTO POR PERSONA (detected_persona) ===
 
-    Se a recepção sinalizar que foi buscar o gestor, NÃO responda. Aguarde.
+    waiting — A pessoa foi buscar o gestor ou pediu espera. NÃO responda.
+    → should_continue = "false", response_message = "null"
+    → Exemplos: "Um momento", "Aguarda", "Vou chamar ele", "Só um instante"
+    → NÃO confunda com objeção. Sinal de espera = cooperação. Aguarde o próximo turno.
 
-    Exemplos de sinais de espera — should_continue = "false", response_message = "null":
-    - "Tá bem, só um instante por gentileza"
-    - "Um momento, vou chamar ele"
-    - "Aguarda um segundo"
-    - "Deixa eu ver se ele está"
-    - "Vou perguntar para ele"
-    - "Já chamo ela pra você"
+    ai_assistant — IA conversacional detectada. Tente UMA vez pedir transferência para humano.
+    → "Poderia falar com um atendente humano?"
+    → Se a IA continuar respondendo sem transferir → failed com despedida educada.
+    → NÃO insista mais de uma vez com IA.
 
-    NÃO confunda com objeção. Objeção = recepção bloqueia. Sinal de espera = recepção coopera.
+    call_center — Central de atendimento terceirizada sem acesso ao gestor.
+    → Tente UMA vez: "Tem como falar diretamente com alguém da clínica?"
+    → Se confirmarem que não têm acesso → failed com despedida educada.
+
+    receptionist | manager | unknown — fluxo normal conforme estratégia acima.
 
     === REGRAS IMPORTANTES ===
 
@@ -327,16 +331,11 @@ class GatekeeperSignature(dspy.Signature):
 
     === QUANDO DESISTIR (failed) ===
 
-    - MÁXIMO 3 tentativas de rebater objeções. Na 4ª negativa → failed.
+    - MÁXIMO 3 tentativas de rebater objeções. Analise o histórico — se já houve 3 trocas
+      de handling_objection sem progresso → failed.
     - Se receberem 'Já disse que não' ou 'Pare de insistir' → failed IMEDIATO.
     - Se o contato fornecido for apenas email → success (não failed).
-    - REGRA DE attempt_count: quando attempt_count ≥ 3 E a última mensagem ainda bloqueia/rejeita → failed.
-      ⚠️ NÃO continue tentando quando já tentou 3+ vezes sem progresso.
-      ⚠️ "Tente mês que vem" + attempt_count ≥ 3 = failed. Agradeça e encerre.
-
-    - CONVERSA LONGA COM HISTÓRICO DE ERROS: se o histórico da conversa já mostra que o agente
-      anterior revelou empresa/produto E houve rejeição clara → não continue. Encerre com failed.
-      O attempt_count alto (≥ 3) indica que essa conversa já está além do limite razoável.
+    - CONVERSA LONGA: se o histórico mostra rejeição clara após múltiplas tentativas → encerre com failed.
 
     === O QUE É requesting ===
 
@@ -384,10 +383,10 @@ class GatekeeperSignature(dspy.Signature):
     === STAGES ===
 
     - opening: Primeira mensagem confirmando a clínica
-    - requesting: Pedindo o contato do gestor (inclui gestor se identificar)
-    - handling_objection: Recepção criou obstáculo (máx 2 vezes)
-    - success: Conseguiu contato (phone ou email)! Agradecer e encerrar
-    - failed: Encerrou sem contato (após limite ou rejeição clara) — enviar mensagem de agradecimento
+    - requesting: Pedindo o contato do gestor (inclui quando gestor se identifica)
+    - handling_objection: Recepção criou obstáculo
+    - success: Conseguiu contato (phone ou email) — agradecer e encerrar
+    - failed: Encerrou sem contato — enviar mensagem de agradecimento e encerrar
     """
 
     # Inputs
@@ -414,8 +413,8 @@ class GatekeeperSignature(dspy.Signature):
     current_weekday: str = dspy.InputField(
         desc="Dia da semana (0=segunda, 1=terça, 2=quarta, 3=quinta, 4=sexta, 5=sábado, 6=domingo)"
     )
-    attempt_count: str = dspy.InputField(
-        desc="Quantas mensagens o agente já enviou nesta conversa"
+    detected_persona: str = dspy.InputField(
+        desc="Persona detectada de quem está respondendo: receptionist | manager | unknown | waiting | ai_assistant | call_center"
     )
 
     # Outputs

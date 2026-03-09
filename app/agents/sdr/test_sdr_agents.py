@@ -137,10 +137,11 @@ MENSAGEM DE FAILED (aceite como correto):
 
 PERSONAS ESPECIAIS (comportamento diferente do fluxo normal):
 
-MENU BOT (stage=handling_menu_bot):
+MENU BOT (stage=requesting):
 - Detectado quando a clínica responde com menu numerado/estruturado ("escolha uma opção", "1. Agendar", etc.)
-- Resposta CORRETA: "falar com atendente" (fixo, sem LLM). should_send_message=true.
-- NÃO penalize esta resposta — é a estratégia de bypass do bot.
+- Resposta CORRETA: qualquer abordagem que tente chegar em um humano — "2", "falar com atendente", número da opção, etc.
+- Se o bot já repetiu o mesmo menu após tentativas anteriores visíveis no histórico → stage=menu_blocked é CORRETO.
+- NÃO penalize variações de bypass (ex: "2" em vez de "falar com atendente") — o objetivo é chegar no humano.
 
 WAITING (stage=requesting, should_send_message=false):
 - Detectado quando a clínica responde com sinal de espera ("aguarde", "um momento", "já te atendo", etc.)
@@ -256,6 +257,65 @@ def judge_gatekeeper_response(scenario: dict, result: dict) -> dict:
         reason   = f"Erro ao chamar juiz: {e}"
 
     return {"valid": is_valid, "reason": reason}
+
+
+# ============================================================================
+# TEST SCENARIOS - MENU BOT
+# ============================================================================
+
+MENU_BOT_JSON = SCRIPT_DIR / "test_menu_bot_cases.json"
+if MENU_BOT_JSON.exists():
+    with open(MENU_BOT_JSON, 'r', encoding='utf-8') as f:
+        MENU_BOT_SCENARIOS = json.load(f)
+else:
+    MENU_BOT_SCENARIOS = []
+
+
+def run_menu_bot_test(scenario: Dict, verbose: bool = True) -> dict:
+    """Executa um cenário de teste do MenuBotAgent via gatekeeper_graph."""
+    from app.agents.sdr.gatekeeper.graph import gatekeeper_graph
+
+    idx      = scenario.get("_idx", "?")
+    expected_stage = scenario.get("expected_stage", "?")
+    resolved = "✓ resolved" if scenario.get("resolved") else "⏳ pending"
+
+    print(f"\n{'='*60}")
+    print(f"[#{idx}] {scenario['name']}")
+    print(f"  Clínica   : {scenario['clinic_name']}")
+    print(f"  Esperado  : stage={expected_stage}")
+    print(f"  {resolved}")
+    print(f"{'='*60}")
+
+    history = scenario.get("conversation_history", [])
+    if verbose and history:
+        print("\n  Histórico:")
+        for turn in history:
+            prefix = "🤖" if turn["role"] == "agent" else "👤"
+            print(f"    {prefix} [{turn.get('stage', '')}] {turn['content'][:80]}")
+
+    latest = scenario.get("latest_message", "")
+    print(f"  Última msg: {repr(latest[:80])}")
+
+    result = gatekeeper_graph.invoke({
+        "clinic_name": scenario["clinic_name"],
+        "sdr_name": scenario.get("sdr_name", "Vera"),
+        "conversation_history": history,
+        "latest_message": latest,
+        "current_hour": 10,
+        "detected_persona": scenario.get("detected_persona"),
+        "persona_confidence": scenario.get("persona_confidence"),
+    })
+
+    stage_ok = result["conversation_stage"] == expected_stage
+    send_ok  = result["should_send_message"] == scenario.get("expected_should_send", True)
+
+    print(f"\n  {'✅' if stage_ok else '❌'} Stage      : {result['conversation_stage']}  (esperado: {expected_stage})")
+    print(f"  {'✅' if send_ok else '❌'} Envia?     : {result['should_send_message']}  (esperado: {scenario.get('expected_should_send', True)})")
+    print(f"  📨 Resposta : {repr(result['response_message'])}")
+    if result.get("reasoning"):
+        print(f"  🧠 Reasoning: {result['reasoning']}")
+
+    return result
 
 
 # ============================================================================
@@ -669,6 +729,7 @@ def main():
     parser = argparse.ArgumentParser(description="Testes dos agentes SDR")
     parser.add_argument("--gatekeeper", action="store_true", help="Rodar cenários do Gatekeeper")
     parser.add_argument("--persona-detector", action="store_true", help="Rodar cenários do PersonaDetector")
+    parser.add_argument("--menu-bot", action="store_true", help="Rodar cenários do MenuBotAgent")
     parser.add_argument("--closer", action="store_true", help="Rodar cenários do Closer")
     parser.add_argument("--interactive", action="store_true", help="Modo interativo")
     parser.add_argument("--all", action="store_true", help="Rodar todos os cenários")
@@ -692,7 +753,7 @@ def main():
     args = parser.parse_args()
 
     # Se nenhum argumento, mostra ajuda
-    if not any([args.gatekeeper, args.persona_detector, args.closer, args.interactive, args.all]):
+    if not any([args.gatekeeper, args.persona_detector, args.menu_bot, args.closer, args.interactive, args.all]):
         parser.print_help()
         print("\nExemplos:")
         print("  python -m app.agents.sdr.test_sdr_agents --gatekeeper          # próximos pendentes")
@@ -732,6 +793,8 @@ def main():
         agent_label = "closer"
     elif args.persona_detector and not args.gatekeeper and not args.closer:
         agent_label = "persona-detector"
+    elif args.menu_bot and not args.gatekeeper and not args.closer and not args.persona_detector:
+        agent_label = "menu-bot"
 
     # Inicia logger (após init_dspy para ter settings disponível)
     logger = setup_logger(agent_label)
@@ -829,6 +892,76 @@ def main():
         total_g = g_passed + g_failed
         print(f"\n{'='*60}")
         print(f"GATEKEEPER: {g_passed}/{total_g} ({100*g_passed//total_g if total_g else 0}%)")
+        print(f"{'='*60}")
+
+    # Cenários MenuBot
+    if args.menu_bot or args.all:
+        print("\n" + "#"*60)
+        print("# TESTES MENU BOT")
+        print("#"*60)
+
+        total_mb = len(MENU_BOT_SCENARIOS)
+        resolved_mb = sum(1 for s in MENU_BOT_SCENARIOS if s.get("resolved", False))
+        pending_mb = total_mb - resolved_mb
+        print(f"\n📊 Status: {resolved_mb}/{total_mb} resolved | {pending_mb} pendentes")
+
+        only_pending = not args.all_cases
+        mb_queue = [
+            {**s, "_idx": i}
+            for i, s in enumerate(MENU_BOT_SCENARIOS)
+            if not (only_pending and s.get("resolved", False))
+        ]
+        if args.n:
+            mb_queue = mb_queue[:args.n]
+        print(f"🎯 Rodando {len(mb_queue)} caso(s) {'pendentes' if only_pending else 'no total'}")
+
+        mb_passed = mb_failed = 0
+        for i_q, scenario in enumerate(mb_queue):
+            try:
+                result = run_menu_bot_test(scenario)
+
+                stage_ok = result["conversation_stage"] == scenario.get("expected_stage")
+                send_ok  = result["should_send_message"] == scenario.get("expected_should_send", True)
+
+                judge_ok = True
+                judge_reason = ""
+                if stage_ok and send_ok and result.get("response_message") and scenario.get("expected_response"):
+                    judge_result = judge_gatekeeper_response(scenario=scenario, result=result)
+                    judge_ok = judge_result.get("valid", True)
+                    judge_reason = judge_result.get("reason", "")
+                    print(f"  {'✅' if judge_ok else '❌'} Juiz       : {judge_reason}")
+
+                scenario_ok = stage_ok and send_ok and judge_ok
+
+                fail_reasons = []
+                if not stage_ok:
+                    fail_reasons.append(f"stage: esperado={scenario.get('expected_stage')}, obtido={result['conversation_stage']}")
+                if not send_ok:
+                    fail_reasons.append(f"should_send: esperado={scenario.get('expected_should_send')}, obtido={result['should_send_message']}")
+                if not judge_ok:
+                    fail_reasons.append(f"juiz: {judge_reason}")
+
+                if scenario_ok:
+                    mb_passed += 1
+                    print(f"  ✅ PASSOU — marcando resolved=true")
+                    mark_resolved(MENU_BOT_JSON, scenario["name"], passed=True, stage=result["conversation_stage"])
+                else:
+                    mb_failed += 1
+                    reason_str = " | ".join(fail_reasons)
+                    failures.append(f"MENU BOT | {scenario['name']} | {reason_str}")
+                    print(f"  ❌ FALHOU — {reason_str}")
+                    mark_resolved(MENU_BOT_JSON, scenario["name"], passed=False, notes=reason_str, stage=result["conversation_stage"])
+            except Exception as e:
+                mb_failed += 1
+                failures.append(f"MENU BOT | {scenario['name']} | ERRO: {e}")
+                print(f"\n❌ ERRO no cenário '{scenario['name']}': {e}")
+                mark_resolved(MENU_BOT_JSON, scenario["name"], passed=False, notes=str(e))
+
+        total_passed += mb_passed
+        total_failed += mb_failed
+        total_mb_run = mb_passed + mb_failed
+        print(f"\n{'='*60}")
+        print(f"MENU BOT: {mb_passed}/{total_mb_run} ({100*mb_passed//total_mb_run if total_mb_run else 0}%)")
         print(f"{'='*60}")
 
     # Cenários PersonaDetector

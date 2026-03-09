@@ -1,0 +1,92 @@
+[
+  {
+    "name": "menu_bot — primeira tentativa de bypass (attempt=0)",
+    "clinic_name": "Rede Odonto Campinas",
+    "sdr_name": "Vera",
+    "detected_persona": "menu_bot",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Rede Odonto Campinas?",
+        "stage": "opening"
+      }
+    ],
+    "latest_message": "Bem-vindo(a) à Clínica! Por favor, escolha uma das opções abaixo:\n1. Agendar consulta\n2. Falar com atendente",
+    "expected_stage": "requesting",
+    "expected_response": "bypass do menu — qualquer opção para falar com atendente (\"2\", \"falar com atendente\", etc)",
+    "expected_should_send": true,
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "last_stage": "requesting",
+    "notes": "juiz: A resposta deveria ter sido \"falar com atendente\" para bypass do menu bot, não apenas \"2\". O stage correto seria handling_menu_bot, não requesting."
+  },
+  {
+    "name": "menu_bot — segunda tentativa de bypass (attempt=1)",
+    "clinic_name": "Rede Odonto Campinas",
+    "sdr_name": "Vera",
+    "detected_persona": "menu_bot",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Rede Odonto Campinas?",
+        "stage": "opening"
+      },
+      {
+        "role": "human",
+        "content": "Bem-vindo(a) à Clínica! Por favor, escolha uma das opções abaixo:\n1. Agendar consulta\n2. Falar com atendente"
+      },
+      {
+        "role": "agent",
+        "content": "falar com atendente",
+        "stage": "requesting"
+      }
+    ],
+    "latest_message": "Por favor, escolha uma das opções:\n1. Agendar consulta\n2. Falar com atendente",
+    "expected_stage": "requesting",
+    "expected_response": "falar com atendente",
+    "expected_should_send": true,
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "last_stage": "requesting",
+    "notes": "name 'judge_response' is not defined"
+  },
+  {
+    "name": "menu_bot — bypass esgotado (attempt=2, encerra)",
+    "clinic_name": "Rede Odonto Campinas",
+    "sdr_name": "Vera",
+    "detected_persona": "menu_bot",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Rede Odonto Campinas?",
+        "stage": "opening"
+      },
+      {
+        "role": "human",
+        "content": "Bem-vindo(a) à Clínica! Por favor, escolha uma das opções abaixo:\n1. Agendar consulta\n2. Falar com atendente"
+      },
+      {
+        "role": "agent",
+        "content": "2",
+        "stage": "requesting"
+      },
+      {
+        "role": "human",
+        "content": "Por favor, escolha uma das opções:\n1. Agendar consulta\n2. Falar com atendente"
+      },
+      {
+        "role": "agent",
+        "content": "2",
+        "stage": "requesting"
+      }
+    ],
+    "latest_message": "Por favor, escolha uma das opções:\n1. Agendar consulta\n2. Falar com atendente",
+    "expected_stage": "menu_blocked",
+    "expected_response": "Entendido, obrigado pela atenção!",
+    "expected_should_send": true,
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "last_stage": "menu_blocked",
+    "notes": "should_send: esperado=True, obtido=False"
+  }
+]
