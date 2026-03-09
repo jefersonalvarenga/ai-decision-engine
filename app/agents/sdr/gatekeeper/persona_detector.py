@@ -77,11 +77,16 @@ class PersonaDetectorSignature(dspy.Signature):
 
     === REGRAS DE CLASSIFICAÇÃO ===
 
+    ⚠️ REGRA FUNDAMENTAL: Classifique EXCLUSIVAMENTE com base no campo latest_message.
+    O conversation_history é apenas contexto — NUNCA classifique com base em mensagens
+    anteriores do histórico. Se o histórico continha "aguarde" mas a latest_message é
+    uma saudação humana, a persona é receptionist (ou conforme a latest_message).
+
     ATENÇÃO: As regras são aplicadas em ordem de prioridade. A primeira regra que
     se aplicar define a persona — não continue avaliando as demais.
 
-    1. Se a mensagem indica espera ou transferência ("aguarde", "um momento",
-       "já te atendo", "atendente vai te atender", "vou chamar", "só um instante")
+    1. Se a latest_message (e somente ela) indica espera ou transferência ("aguarde",
+       "um momento", "já te atendo", "atendente vai te atender", "vou chamar", "só um instante")
        → waiting IMEDIATO. Independe de persona anterior, gramática ou contexto.
     2. Se a mensagem contém "escolha uma das opções", "escolha uma opção",
        "opções abaixo", "selecione uma opção", "selecione abaixo", "digite 1",
@@ -104,7 +109,7 @@ class PersonaDetectorSignature(dspy.Signature):
         desc="Histórico da conversa até agora (incluindo a primeira mensagem do agente)"
     )
     latest_message: str = dspy.InputField(
-        desc="Resposta recebida da clínica — base principal para classificação"
+        desc="Resposta ATUAL recebida da clínica — ÚNICA base para classificação. Ignore mensagens anteriores do histórico."
     )
 
     reasoning: str = dspy.OutputField(
