@@ -89,7 +89,7 @@ def exit_waiting(state: GatekeeperState) -> dict:
         "extracted_manager_email": None,
         "extracted_manager_name": None,
         "should_send_message": False,
-        "detected_persona": None,  # reseta para re-detectar no próximo turno
+        "detected_persona": "waiting",  # mantém waiting — re-detecta no próximo turno
         "persona_confidence": None,
         "_node_executed": "exit_waiting",
     }
