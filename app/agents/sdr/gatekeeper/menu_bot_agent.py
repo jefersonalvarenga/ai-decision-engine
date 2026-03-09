@@ -77,6 +77,17 @@ class MenuBotAgent(dspy.Module):
                 "extracted_manager_name": None,
             }
 
+        # Primeira tentativa: sempre "falar com atendente" — direto e natural
+        if attempt_count == 0:
+            return {
+                "response_message": "falar com atendente",
+                "conversation_stage": "handling_menu_bot",
+                "should_send_message": True,
+                "reasoning": "Primeira tentativa de bypass: envia 'falar com atendente' diretamente.",
+                "extracted_manager_contact": None,
+                "extracted_manager_email": None,
+                "extracted_manager_name": None,
+            }
 
         history_text = "\n".join(
             f"{'Agente' if t['role'] == 'agent' else 'Bot'}: {t['content']}"
