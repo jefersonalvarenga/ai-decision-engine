@@ -1422,5 +1422,88 @@
       "mesmo número",
       "ligar"
     ]
+  },
+  {
+    "name": "menu_bot — turno 1 (menu recebido)",
+    "clinic_name": "Rede Odonto Campinas",
+    "sdr_name": "Vera",
+    "detected_persona": null,
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Rede Odonto Campinas?",
+        "stage": "opening"
+      }
+    ],
+    "latest_message": "Bem-vindo(a) à Clínica! 🩺\n\nOlá, sou a Samira e estou aqui para garantir que seu atendimento seja o mais ágil e confortável possível. Como podemos ajudá-lo(a) hoje? Por favor, escolha uma das opções abaixo para facilitar o seu atendimento:",
+    "expected_stage": "handling_menu_bot",
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "notes": "juiz: A resposta \"falar com atendente\" não segue a estratégia esperada, que seria pedir para falar com o gestor ou gestora após a confirmação de que é a clínica correta.",
+    "last_response": "falar com atendente",
+    "last_stage": "handling_menu_bot"
+  },
+  {
+    "name": "menu_bot — turno 2 (aguarde após falar com atendente)",
+    "clinic_name": "Rede Odonto Campinas",
+    "sdr_name": "Vera",
+    "detected_persona": "menu_bot",
+    "persona_confidence": "high",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Rede Odonto Campinas?",
+        "stage": "opening"
+      },
+      {
+        "role": "human",
+        "content": "Bem-vindo(a) à Clínica! 🩺\n\nOlá, sou a Samira e estou aqui para garantir que seu atendimento seja o mais ágil e confortável possível. Como podemos ajudá-lo(a) hoje? Por favor, escolha uma das opções abaixo para facilitar o seu atendimento:"
+      },
+      {
+        "role": "agent",
+        "content": "falar com atendente",
+        "stage": "handling_menu_bot"
+      }
+    ],
+    "latest_message": "aguarde que a nossa atendente vai te atender",
+    "expected_stage": "requesting",
+    "expected_should_send": false,
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "notes": "juiz: A Iris não respondeu à última mensagem da recepção, o que é necessário para seguir a estratégia correta. Ela deveria ter pedido para falar com o gestor ou gestora após a confirmação da clínica.",
+    "last_stage": "requesting"
+  },
+  {
+    "name": "menu_bot — turno 3 (humana assume após waiting)",
+    "clinic_name": "Rede Odonto Campinas",
+    "sdr_name": "Vera",
+    "detected_persona": "waiting",
+    "persona_confidence": "high",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Rede Odonto Campinas?",
+        "stage": "opening"
+      },
+      {
+        "role": "human",
+        "content": "Bem-vindo(a) à Clínica! 🩺\n\nOlá, sou a Samira e estou aqui para garantir que seu atendimento seja o mais ágil e confortável possível. Como podemos ajudá-lo(a) hoje? Por favor, escolha uma das opções abaixo para facilitar o seu atendimento:"
+      },
+      {
+        "role": "agent",
+        "content": "falar com atendente",
+        "stage": "handling_menu_bot"
+      },
+      {
+        "role": "human",
+        "content": "aguarde que a nossa atendente vai te atender"
+      }
+    ],
+    "latest_message": "oi bom dia, aqui é Michele, como posso te ajudar?",
+    "expected_stage": "requesting",
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "last_response": "Oi Michele! Gostaria de falar com o gestor ou gestora da clínica.",
+    "last_stage": "requesting"
   }
 ]

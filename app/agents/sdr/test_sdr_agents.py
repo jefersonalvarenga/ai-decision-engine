@@ -135,6 +135,18 @@ MENSAGEM DE FAILED (aceite como correto):
 - NÃO penalize por incluir despedida contextual ou frase de "porta aberta" — isso é a estratégia esperada.
 - Só penalize se o agente continuar vendendo ou insistindo após encerrar.
 
+PERSONAS ESPECIAIS (comportamento diferente do fluxo normal):
+
+MENU BOT (stage=handling_menu_bot):
+- Detectado quando a clínica responde com menu numerado/estruturado ("escolha uma opção", "1. Agendar", etc.)
+- Resposta CORRETA: "falar com atendente" (fixo, sem LLM). should_send_message=true.
+- NÃO penalize esta resposta — é a estratégia de bypass do bot.
+
+WAITING (stage=requesting, should_send_message=false):
+- Detectado quando a clínica responde com sinal de espera ("aguarde", "um momento", "já te atendo", etc.)
+- Resposta CORRETA: NÃO enviar nada (response_message vazio, should_send_message=false).
+- NÃO penalize silêncio aqui — é a estratégia correta aguardar o próximo turno.
+
 ERROS COMUNS A DETECTAR:
 - Dar pitch da EasyScale na 1ª objeção/pergunta (deveria ser só "assunto comercial" primeiro)
 - Usar "É sobre atendimento da clínica" quando "assunto comercial" ainda não foi dito (ordem errada)
@@ -346,10 +358,13 @@ def run_gatekeeper_test(scenario: Dict, verbose: bool = True):
     # Invoca o grafo
     result = gatekeeper_graph.invoke({
         "clinic_name": scenario["clinic_name"],
+        "sdr_name": scenario.get("sdr_name", "Vera"),
         "conversation_history": history,
         "latest_message": latest,
         "current_hour": datetime.now().hour,
         "attempt_count": attempt_count,
+        "detected_persona": scenario.get("detected_persona"),
+        "persona_confidence": scenario.get("persona_confidence"),
     })
 
     stage_ok = result['conversation_stage'] == expected
