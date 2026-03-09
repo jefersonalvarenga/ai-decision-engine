@@ -60,7 +60,10 @@ class GatekeeperOutput(BaseModel):
         "handling_objection", # Respondendo "do que se trata?"
         "handling_menu_bot",  # Tentando bypass de bot de menu
         "success",            # Conseguiu o contato
-        "failed"              # Desistiu (muitas tentativas ou negativa definitiva)
+        "failed",             # Desistiu (muitas tentativas ou negativa definitiva)
+        "ai_blocked",         # Clínica usa IA conversacional — descartado
+        "call_center_blocked",# Central terceirizada — sem acesso ao gestor
+        "menu_blocked"        # Bot de menu sem saída para humano
     ] = Field(..., description="Estágio atual da conversa")
     extracted_manager_contact: Optional[str] = Field(
         None,

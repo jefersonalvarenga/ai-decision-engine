@@ -84,7 +84,7 @@ def exit_call_center(state: GatekeeperState) -> dict:
     return {
         "reasoning": "Central de atendimento detectada. Sem acesso ao gestor — encerrando.",
         "response_message": "Entendido, obrigado pela atenção!",
-        "conversation_stage": "failed",
+        "conversation_stage": "call_center_blocked",
         "extracted_manager_contact": None,
         "extracted_manager_email": None,
         "extracted_manager_name": None,
@@ -108,7 +108,7 @@ def exit_ai_assistant(state: GatekeeperState) -> dict:
     return {
         "reasoning": "Assistente virtual de IA detectado. A IA não tem acesso ao gestor — encerrando.",
         "response_message": "Entendido, obrigado pela atenção!",
-        "conversation_stage": "failed",
+        "conversation_stage": "ai_blocked",
         "extracted_manager_contact": None,
         "extracted_manager_email": None,
         "extracted_manager_name": None,

@@ -217,7 +217,7 @@ class GatekeeperAgent(dspy.Module):
         should_continue = safe_str(result.should_continue, "true").lower().strip() == "true"
 
         # Validate stage
-        valid_stages = ["opening", "requesting", "handling_objection", "success", "failed"]
+        valid_stages = ["opening", "requesting", "handling_objection", "success", "failed", "ai_blocked", "call_center_blocked", "menu_blocked"]
         stage = safe_str(result.conversation_stage, "handling_objection").lower().strip()
         if stage not in valid_stages:
             stage = "handling_objection"

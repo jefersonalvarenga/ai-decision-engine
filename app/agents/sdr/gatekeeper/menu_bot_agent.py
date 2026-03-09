@@ -24,7 +24,7 @@ class MenuBotAgent:
         if attempt_count >= MAX_BYPASS_ATTEMPTS:
             return {
                 "response_message": "Entendido, obrigado pela atenção!",
-                "conversation_stage": "failed",
+                "conversation_stage": "menu_blocked",
                 "should_send_message": True,
                 "reasoning": "Bypass esgotado — bot não tem saída para humano.",
                 "extracted_manager_contact": None,
