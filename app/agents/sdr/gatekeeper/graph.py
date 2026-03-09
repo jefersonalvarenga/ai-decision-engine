@@ -42,13 +42,13 @@ def detect_persona(state: GatekeeperState) -> dict:
     if not latest:
         return {}
 
-    # Persona já conhecida e não é menu_bot — mantém
-    if current_persona and current_persona != "menu_bot":
+    # Persona já conhecida e não é menu_bot nem waiting — mantém
+    if current_persona and current_persona not in ("menu_bot", "waiting"):
         return {}
 
-    # menu_bot ou sem persona — (re-)detecta
-    if current_persona == "menu_bot":
-        print(f"--- PERSONA DETECTOR: Re-classificando — verificando se humano assumiu ---")
+    # menu_bot ou waiting ou sem persona — (re-)detecta
+    if current_persona in ("menu_bot", "waiting"):
+        print(f"--- PERSONA DETECTOR: Re-classificando — persona anterior={current_persona} ---")
     else:
         print(f"--- PERSONA DETECTOR: Classificando resposta da {state['clinic_name']} ---")
 
@@ -68,6 +68,30 @@ def detect_persona(state: GatekeeperState) -> dict:
     return {
         "detected_persona": result["persona"],
         "persona_confidence": result["confidence"],
+    }
+
+
+# ---------------------------------------------------------------------------
+# Node: exit_waiting
+# ---------------------------------------------------------------------------
+
+def exit_waiting(state: GatekeeperState) -> dict:
+    """
+    Sinal de espera detectado — não envia mensagem, aguarda próxima resposta.
+    A persona será re-detectada no próximo turno.
+    """
+    print(f"--- GATEKEEPER: Persona=waiting — aguardando sem resposta ---")
+    return {
+        "reasoning": "Sinal de espera detectado. Aguardando próxima mensagem sem responder.",
+        "response_message": "",
+        "conversation_stage": "requesting",
+        "extracted_manager_contact": None,
+        "extracted_manager_email": None,
+        "extracted_manager_name": None,
+        "should_send_message": False,
+        "detected_persona": None,  # reseta para re-detectar no próximo turno
+        "persona_confidence": None,
+        "_node_executed": "exit_waiting",
     }
 
 
@@ -208,6 +232,8 @@ def process_message(state: GatekeeperState) -> dict:
 def route_by_persona(state: GatekeeperState) -> str:
     """Decide o próximo nó com base na persona detectada."""
     persona = state.get("detected_persona") or "unknown"
+    if persona == "waiting":
+        return "exit_waiting"
     if persona == "call_center":
         return "exit_call_center"
     if persona == "ai_assistant":
@@ -224,6 +250,7 @@ def route_by_persona(state: GatekeeperState) -> str:
 workflow = StateGraph(GatekeeperState)
 
 workflow.add_node("detect_persona",   detect_persona)
+workflow.add_node("exit_waiting",     exit_waiting)
 workflow.add_node("exit_call_center", exit_call_center)
 workflow.add_node("exit_ai_assistant", exit_ai_assistant)
 workflow.add_node("process_menu_bot", process_menu_bot)
@@ -235,6 +262,7 @@ workflow.add_conditional_edges(
     "detect_persona",
     route_by_persona,
     {
+        "exit_waiting":      "exit_waiting",
         "exit_call_center":  "exit_call_center",
         "exit_ai_assistant": "exit_ai_assistant",
         "process_menu_bot":  "process_menu_bot",
@@ -242,6 +270,7 @@ workflow.add_conditional_edges(
     },
 )
 
+workflow.add_edge("exit_waiting",      END)
 workflow.add_edge("exit_call_center",  END)
 workflow.add_edge("exit_ai_assistant", END)
 workflow.add_edge("process_menu_bot",  END)
