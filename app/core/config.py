@@ -11,7 +11,7 @@ from pydantic_settings import BaseSettings
 try:
     from dotenv import load_dotenv as _load_dotenv
     _env_path = Path(__file__).parent.parent.parent / ".env"
-    _load_dotenv(_env_path, override=True)
+    _load_dotenv(_env_path, override=False)
 except ImportError:
     pass  # python-dotenv não instalado — ok em produção via variáveis de ambiente
 
