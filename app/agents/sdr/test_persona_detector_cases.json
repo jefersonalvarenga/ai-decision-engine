@@ -1,0 +1,237 @@
+[
+  {
+    "name": "menu_bot — opções numeradas clássico",
+    "clinic_name": "Clínica Bella Luna",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Bella Luna?"
+      }
+    ],
+    "latest_message": "Olá! Escolha uma opção:\n1. Agendar consulta\n2. Falar com atendente\n3. Informações",
+    "expected_persona": "menu_bot",
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "last_stage": "menu_bot"
+  },
+  {
+    "name": "menu_bot — emojis e opções estruturadas",
+    "clinic_name": "Clínica Bella Luna",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Bella Luna?"
+      }
+    ],
+    "latest_message": "Olá! Como posso ajudar? 😊\n\n📅 Agendar consulta\n👩 Falar com atendente\nℹ️ Informações",
+    "expected_persona": "menu_bot",
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "last_stage": "menu_bot"
+  },
+  {
+    "name": "menu_bot — gramática perfeita e tom amigável (caso Samira)",
+    "clinic_name": "Rede Odonto Campinas",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Rede Odonto Campinas?"
+      }
+    ],
+    "latest_message": "Bem-vindo(a) à Clínica! 🩺\n\nOlá, sou a Samira e estou aqui para garantir que seu atendimento seja o mais ágil e confortável possível. Como podemos ajudá-lo(a) hoje? Por favor, escolha uma das opções abaixo para facilitar o seu atendimento:",
+    "expected_persona": "menu_bot",
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "last_stage": "menu_bot"
+  },
+  {
+    "name": "waiting — recepcionista pede espera",
+    "clinic_name": "Clínica Bella Luna",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Bella Luna?"
+      },
+      {
+        "role": "human",
+        "content": "Sim, boa tarde!"
+      },
+      {
+        "role": "agent",
+        "content": "Gostaria de falar com o gestor da clínica."
+      }
+    ],
+    "latest_message": "Um momento, por favor.",
+    "expected_persona": "waiting",
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "last_stage": "waiting"
+  },
+  {
+    "name": "waiting — bot responde aguarde após falar com atendente",
+    "clinic_name": "Rede Odonto Campinas",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Rede Odonto Campinas?"
+      },
+      {
+        "role": "human",
+        "content": "Olá! Escolha uma opção:\n1. Agendar\n2. Falar com atendente"
+      },
+      {
+        "role": "agent",
+        "content": "falar com atendente"
+      }
+    ],
+    "latest_message": "aguarde que a nossa atendente vai te atender",
+    "expected_persona": "waiting",
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "last_stage": "waiting"
+  },
+  {
+    "name": "waiting — mensagem curta de espera",
+    "clinic_name": "Clínica Bella Luna",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Bella Luna?"
+      },
+      {
+        "role": "human",
+        "content": "Sim!"
+      },
+      {
+        "role": "agent",
+        "content": "Gostaria de falar com o gestor."
+      }
+    ],
+    "latest_message": "Só um instante!",
+    "expected_persona": "waiting",
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "last_stage": "waiting"
+  },
+  {
+    "name": "ai_assistant — se identifica explicitamente como IA",
+    "clinic_name": "Clínica Saúde Total",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Saúde Total?"
+      }
+    ],
+    "latest_message": "Olá! Sou a assistente virtual da Clínica Saúde Total. Como posso te ajudar hoje? 😊",
+    "expected_persona": "ai_assistant",
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "last_stage": "ai_assistant"
+  },
+  {
+    "name": "ai_assistant — IA com nome próprio",
+    "clinic_name": "Clínica Saúde Total",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Saúde Total?"
+      }
+    ],
+    "latest_message": "Oi! Aqui é a Sofia, assistente de IA da Clínica Saúde Total. Posso te ajudar com agendamentos, informações sobre tratamentos e muito mais!",
+    "expected_persona": "ai_assistant",
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "last_stage": "ai_assistant"
+  },
+  {
+    "name": "call_center — menciona central de atendimento",
+    "clinic_name": "Clínica Bella Luna",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Bella Luna?"
+      }
+    ],
+    "latest_message": "Olá! Falo da central de atendimento da clínica. Como posso ajudar?",
+    "expected_persona": "call_center",
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "last_stage": "call_center"
+  },
+  {
+    "name": "call_center — especialista de agendamento",
+    "clinic_name": "Clínica Bella Luna",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Bella Luna?"
+      }
+    ],
+    "latest_message": "Aqui é a Vitória, especialista de agendamento. Em que posso ajudar?",
+    "expected_persona": "call_center",
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "last_stage": "call_center"
+  },
+  {
+    "name": "receptionist — se apresenta com nome",
+    "clinic_name": "Clínica Bella Luna",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Bella Luna?"
+      }
+    ],
+    "latest_message": "Sim! Aqui é a Tayná, em que posso ajudar?",
+    "expected_persona": "receptionist",
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "last_stage": "receptionist"
+  },
+  {
+    "name": "receptionist — resposta curta ambígua",
+    "clinic_name": "Clínica Bella Luna",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Bella Luna?"
+      }
+    ],
+    "latest_message": "Sim, boa tarde!",
+    "expected_persona": "unknown",
+    "resolved": false,
+    "last_run": "2026-03-09",
+    "notes": "persona: esperado=unknown, obtido=receptionist (confiança=high)",
+    "last_stage": "receptionist"
+  },
+  {
+    "name": "manager — gestor atende diretamente",
+    "clinic_name": "Clínica Bella Luna",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Bella Luna?"
+      }
+    ],
+    "latest_message": "Aqui é o Dr. Carlos, sou o dono da clínica. Em que posso ajudar?",
+    "expected_persona": "manager",
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "last_stage": "manager"
+  },
+  {
+    "name": "manager — responsável responde diretamente",
+    "clinic_name": "Clínica Bella Luna",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Bella Luna?"
+      }
+    ],
+    "latest_message": "Pode falar comigo, sou a responsável pela clínica.",
+    "expected_persona": "manager",
+    "resolved": true,
+    "last_run": "2026-03-09",
+    "last_stage": "manager"
+  }
+]

@@ -259,6 +259,60 @@ def judge_gatekeeper_response(scenario: dict, result: dict) -> dict:
 
 
 # ============================================================================
+# TEST SCENARIOS - PERSONA DETECTOR
+# ============================================================================
+
+PERSONA_DETECTOR_JSON = SCRIPT_DIR / "test_persona_detector_cases.json"
+if PERSONA_DETECTOR_JSON.exists():
+    with open(PERSONA_DETECTOR_JSON, 'r', encoding='utf-8') as f:
+        PERSONA_DETECTOR_SCENARIOS = json.load(f)
+else:
+    PERSONA_DETECTOR_SCENARIOS = []
+
+
+def run_persona_detector_test(scenario: Dict, verbose: bool = True) -> dict:
+    """Executa um cenário de teste do PersonaDetector — sem juiz LLM, avaliação categórica."""
+    from app.agents.sdr.gatekeeper.persona_detector import PersonaDetector
+
+    idx      = scenario.get("_idx", "?")
+    expected = scenario.get("expected_persona", "?")
+    resolved = "✓ resolved" if scenario.get("resolved") else "⏳ pending"
+
+    print(f"\n{'='*60}")
+    print(f"[#{idx}] {scenario['name']}")
+    print(f"  Clínica   : {scenario['clinic_name']}")
+    print(f"  Esperado  : {expected}   |   {resolved}")
+    print(f"{'='*60}")
+
+    history = scenario.get("conversation_history", [])
+    if verbose and history:
+        print("\n  Histórico:")
+        for turn in history:
+            prefix = "🤖" if turn["role"] == "agent" else "👤"
+            print(f"    {prefix} {turn['content'][:80]}")
+
+    latest = scenario.get("latest_message", "")
+    print(f"  Última msg: {repr(latest[:80]) if latest else 'null'}")
+
+    detector = PersonaDetector()
+    result = detector.forward(
+        clinic_name=scenario["clinic_name"],
+        conversation_history=history,
+        latest_message=latest,
+    )
+
+    persona_ok   = result["persona"] == expected
+    persona_icon = "✅" if persona_ok else "❌"
+
+    print(f"\n  {persona_icon} Persona    : {result['persona']}  (esperado: {expected})")
+    print(f"  📊 Confiança : {result['confidence']}")
+    print(f"  🔑 Sinal     : {result['key_signal'][:100]}")
+    print(f"  💭 Reasoning : {result['reasoning'][:150]}")
+
+    return result
+
+
+# ============================================================================
 # TEST SCENARIOS - GATEKEEPER
 # ============================================================================
 
@@ -614,6 +668,7 @@ def mark_resolved(json_path: Path, scenario_name: str, passed: bool, notes: str 
 def main():
     parser = argparse.ArgumentParser(description="Testes dos agentes SDR")
     parser.add_argument("--gatekeeper", action="store_true", help="Rodar cenários do Gatekeeper")
+    parser.add_argument("--persona-detector", action="store_true", help="Rodar cenários do PersonaDetector")
     parser.add_argument("--closer", action="store_true", help="Rodar cenários do Closer")
     parser.add_argument("--interactive", action="store_true", help="Modo interativo")
     parser.add_argument("--all", action="store_true", help="Rodar todos os cenários")
@@ -637,7 +692,7 @@ def main():
     args = parser.parse_args()
 
     # Se nenhum argumento, mostra ajuda
-    if not any([args.gatekeeper, args.closer, args.interactive, args.all]):
+    if not any([args.gatekeeper, args.persona_detector, args.closer, args.interactive, args.all]):
         parser.print_help()
         print("\nExemplos:")
         print("  python -m app.agents.sdr.test_sdr_agents --gatekeeper          # próximos pendentes")
@@ -671,10 +726,12 @@ def main():
 
     # Determina qual agente para nomear o log
     agent_label = "all"
-    if args.gatekeeper and not args.closer:
+    if args.gatekeeper and not args.closer and not args.persona_detector:
         agent_label = "gatekeeper"
-    elif args.closer and not args.gatekeeper:
+    elif args.closer and not args.gatekeeper and not args.persona_detector:
         agent_label = "closer"
+    elif args.persona_detector and not args.gatekeeper and not args.closer:
+        agent_label = "persona-detector"
 
     # Inicia logger (após init_dspy para ter settings disponível)
     logger = setup_logger(agent_label)
@@ -772,6 +829,60 @@ def main():
         total_g = g_passed + g_failed
         print(f"\n{'='*60}")
         print(f"GATEKEEPER: {g_passed}/{total_g} ({100*g_passed//total_g if total_g else 0}%)")
+        print(f"{'='*60}")
+
+    # Cenários PersonaDetector
+    if args.persona_detector or args.all:
+        print("\n" + "#"*60)
+        print("# TESTES PERSONA DETECTOR")
+        print("#"*60)
+
+        total_pd = len(PERSONA_DETECTOR_SCENARIOS)
+        resolved_pd = sum(1 for s in PERSONA_DETECTOR_SCENARIOS if s.get("resolved", False))
+        pending_pd = total_pd - resolved_pd
+        print(f"\n📊 Status: {resolved_pd}/{total_pd} resolved | {pending_pd} pendentes")
+
+        only_pending = not args.all_cases
+        pd_queue = [
+            {**s, "_idx": i}
+            for i, s in enumerate(PERSONA_DETECTOR_SCENARIOS)
+            if not (only_pending and s.get("resolved", False))
+        ]
+        if args.n:
+            pd_queue = pd_queue[:args.n]
+        print(f"🎯 Rodando {len(pd_queue)} caso(s) {'pendentes' if only_pending else 'no total'}")
+
+        pd_passed = pd_failed = 0
+        for i_q, scenario in enumerate(pd_queue):
+            if i_q > 0:
+                time.sleep(2)
+            try:
+                result = run_persona_detector_test(scenario)
+                expected = scenario.get("expected_persona")
+                actual = result["persona"]
+                scenario_ok = actual == expected
+
+                if scenario_ok:
+                    pd_passed += 1
+                    print(f"  ✅ PASSOU — marcando resolved=true")
+                    mark_resolved(PERSONA_DETECTOR_JSON, scenario["name"], passed=True, stage=actual)
+                else:
+                    pd_failed += 1
+                    reason = f"persona: esperado={expected}, obtido={actual} (confiança={result['confidence']})"
+                    failures.append(f"PERSONA DETECTOR | {scenario['name']} | {reason}")
+                    print(f"  ❌ FALHOU — {reason}")
+                    mark_resolved(PERSONA_DETECTOR_JSON, scenario["name"], passed=False, notes=reason, stage=actual)
+            except Exception as e:
+                pd_failed += 1
+                failures.append(f"PERSONA DETECTOR | {scenario['name']} | ERRO: {e}")
+                print(f"\n❌ ERRO no cenário '{scenario['name']}': {e}")
+                mark_resolved(PERSONA_DETECTOR_JSON, scenario["name"], passed=False, notes=str(e))
+
+        total_passed += pd_passed
+        total_failed += pd_failed
+        total_pd_run = pd_passed + pd_failed
+        print(f"\n{'='*60}")
+        print(f"PERSONA DETECTOR: {pd_passed}/{total_pd_run} ({100*pd_passed//total_pd_run if total_pd_run else 0}%)")
         print(f"{'='*60}")
 
     # Cenários Closer
