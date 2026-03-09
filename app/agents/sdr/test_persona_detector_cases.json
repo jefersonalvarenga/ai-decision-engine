@@ -189,6 +189,22 @@
     "last_stage": "receptionist"
   },
   {
+    "name": "menu_bot — listMessage com opções interativas (Clínica Fares)",
+    "clinic_name": "Clínica Fares",
+    "conversation_history": [
+      {
+        "role": "agent",
+        "content": "Bom dia, é da Clínica Fares?"
+      }
+    ],
+    "latest_message": "Bem-vindo(a) à Clínica Fares! 🩺\n\nOlá, sou a Samira e estou aqui para garantir que seu atendimento seja o mais ágil e confortável possível. Como podemos ajudá-lo(a) hoje? Por favor, escolha uma das opções abaixo para facilitar o seu atendimento:\n\nOpções: Agendar Consulta | Agendar Exame | Agendar Retorno | Cirurgias | Reagendar | Dúvidas | Preços e orçamentos | Endereço e Horários",
+    "expected_persona": "menu_bot",
+    "resolved": true,
+    "notes": "Payload real de listMessage da Clínica Fares — valida extração do Parse Evolution Payload",
+    "last_run": "2026-03-09",
+    "last_stage": "menu_bot"
+  },
+  {
     "name": "receptionist — resposta curta ambígua",
     "clinic_name": "Clínica Bella Luna",
     "conversation_history": [
@@ -198,8 +214,8 @@
       }
     ],
     "latest_message": "Sim, boa tarde!",
-    "expected_persona": "unknown",
-    "resolved": false,
+    "expected_persona": "receptionist",
+    "resolved": true,
     "last_run": "2026-03-09",
     "notes": "persona: esperado=unknown, obtido=receptionist (confiança=high)",
     "last_stage": "receptionist"
