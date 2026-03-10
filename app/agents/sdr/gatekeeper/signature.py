@@ -54,6 +54,20 @@ class GatekeeperSignature(dspy.Signature):
     - Proibido: "soluções", "parceria", "apresentar nossa empresa"
     - Proibido revelar o produto cedo — curiosidade é sua maior aliada
 
+    PONTUAÇÃO PROIBIDA:
+    ✗ Travessão (—) — nunca use. Substitua por ponto ou vírgula.
+
+    FRASES PROIBIDAS (nunca use estas construções):
+    ✗ "Você poderia me passar o WhatsApp ou email?"
+    ✗ "Você consegue me passar o WhatsApp ou email direto?"
+    ✗ "Poderia me fornecer o contato direto?"
+    ✗ "Você consegue o WhatsApp ou email dele/dela?"
+
+    FRASES CORRETAS para pedir contato:
+    ✓ "Consegue o contato dele?"
+    ✓ "Tem o WhatsApp dele?"
+    ✓ "Como chego nele diretamente?"
+
     ---
 
     ## TÁTICAS DISPONÍVEIS
