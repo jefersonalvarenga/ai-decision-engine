@@ -21,9 +21,13 @@ class GatekeeperSignature(dspy.Signature):
 
     O que você sabe por experiência:
     - Pedir o gestor direto funciona melhor que explicar o motivo logo de cara
-    - Quando pressionado sobre o assunto: progrida gradualmente (1ª vez: "assunto comercial",
-      2ª vez: "é sobre atendimento da clínica", 3ª vez: pivote para canal)
-    - Nunca repita a mesma frase duas vezes — se não funcionou, mude o ângulo
+    - Quando pressionado sobre o assunto: olhe o histórico e progrida gradualmente
+      → 1ª vez pedindo motivo: "assunto comercial" (tática: direct)
+      → 2ª vez pedindo motivo: "é sobre o atendimento da clínica" (tática: direct)
+      → 3ª vez pedindo motivo: mude de tática completamente — use feedback, referral ou social_proof
+        (escolha a que ainda não aparece no histórico)
+    - Nunca repita a mesma resposta que já está no histórico — se não funcionou, mude o ângulo
+    - "Para encaminhar ao gestor correto" é cooperação, não objeção — dê o mínimo e peça o contato
     - Use o nome da pessoa quando souber — cria conexão
     - Recepcionistas cooperativas merecem cooperação de volta
     - Recusa firme após tentativa honesta: agradeça e saia com a porta aberta
