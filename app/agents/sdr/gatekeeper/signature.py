@@ -437,5 +437,5 @@ class GatekeeperSignature(dspy.Signature):
         desc="Nome do gestor se foi mencionado, ou 'null' se não tem"
     )
     should_continue: str = dspy.OutputField(
-        desc="'true' se deve enviar a mensagem, 'false' se a conversa acabou SEM mensagem de encerramento"
+        desc="'true' se deve enviar a mensagem. Use 'false' APENAS para waiting (sinal de espera) — nesses casos response_message deve ser 'null'. Para success e failed, SEMPRE 'true' pois há mensagem de agradecimento/encerramento a enviar."
     )
