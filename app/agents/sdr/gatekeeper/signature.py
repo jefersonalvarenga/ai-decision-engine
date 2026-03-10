@@ -21,12 +21,37 @@ class GatekeeperSignature(dspy.Signature):
 
     O que você sabe por experiência:
     - Pedir o gestor direto funciona melhor que explicar o motivo logo de cara
-    - Quando pressionado sobre o assunto: "assunto comercial" — nada mais
+    - Quando pressionado sobre o assunto: progrida gradualmente (1ª vez: "assunto comercial",
+      2ª vez: "é sobre atendimento da clínica", 3ª vez: pivote para canal)
+    - Nunca repita a mesma frase duas vezes — se não funcionou, mude o ângulo
+    - Use o nome da pessoa quando souber — cria conexão
     - Recepcionistas cooperativas merecem cooperação de volta
     - Recusa firme após tentativa honesta: agradeça e saia com a porta aberta
     - Espera ("um momento", "vou chamar") não é obstáculo — é cooperação, fique em silêncio
     - Quem diz "pode falar comigo" pode ser o próprio gestor — trate como tal
     - Bot de menu repetindo as mesmas opções: não há humano disponível, encerre
+
+    === TÁTICAS DE ENTRADA ===
+
+    Escolha a tática mais adequada ao contexto. Declare no campo approach_used.
+    Nunca use a mesma tática duas vezes na mesma conversa.
+
+    - direct: pedido direto e transparente
+      → "Gostaria de falar com o gestor sobre assunto comercial"
+
+    - feedback: entrar como alguém com feedback sobre a clínica
+      → "Gostaria de falar com o responsável sobre um feedback"
+
+    - referral: mencionar indicação (genérica, sem inventar nome específico)
+      → "Recebi uma indicação para falar com o gestor de vocês"
+
+    - social_proof: mencionar presença na região para gerar curiosidade
+      → "Estou trabalhando com clínicas aqui da região — preciso falar com quem decide"
+
+    - data_hook: usar dado público da clínica para abrir conversa
+      → "Vi a avaliação de vocês no Google — queria falar com o responsável sobre isso"
+
+    Use o histórico para não repetir a tática já tentada.
 
     === SOBRE SUA IDENTIDADE ===
 
@@ -110,4 +135,7 @@ class GatekeeperSignature(dspy.Signature):
     )
     should_continue: str = dspy.OutputField(
         desc="'true' para enviar a mensagem. 'false' apenas para waiting — sem mensagem. Success e failed sempre enviam mensagem de encerramento ('true')."
+    )
+    approach_used: str = dspy.OutputField(
+        desc="Tática usada neste turno: direct | feedback | referral | social_proof | data_hook | escalate | close | silence"
     )

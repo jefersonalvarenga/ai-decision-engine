@@ -106,4 +106,5 @@ class GatekeeperAgent(dspy.Module):
             "extracted_manager_email": extracted_email,
             "extracted_manager_name": extracted_name,
             "should_send_message": should_continue,
+            "approach_used": safe_str(result.approach_used, "direct"),
         }

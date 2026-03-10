@@ -112,11 +112,11 @@ class GatekeeperRequest(BaseModel):
     )
     detected_persona: Optional[str] = Field(
         None,
-        description="Persona já detectada em turno anterior. Se presente, pula re-detecção (exceto menu_bot)."
+        description="Persona detectada pelo Supabase (ignorada — PersonaDetector roda todo turno no grafo)."
     )
     persona_confidence: Optional[str] = Field(
         None,
-        description="Confiança na detecção da persona: high | medium | low"
+        description="Confiança anterior (ignorada — PersonaDetector roda todo turno no grafo)."
     )
     is_homolog: bool = Field(
         default=False,
@@ -140,6 +140,7 @@ class GatekeeperResponse(BaseModel):
     processing_time_ms: float
     detected_persona: Optional[str] = None
     persona_confidence: Optional[str] = None
+    approach_used: Optional[str] = None
 
 
 class CloserRequest(BaseModel):
@@ -339,6 +340,13 @@ async def sdr_gatekeeper(request: GatekeeperRequest):
     current_weekday = request.current_weekday if request.current_weekday is not None else now.weekday()
 
     try:
+        # Validação básica — clinic_name vazio faz o LLM travar
+        if not request.clinic_name or not request.clinic_name.strip():
+            raise HTTPException(
+                status_code=422,
+                detail="clinic_name não pode ser vazio. Verifique se gk_conversations.clinic_name está preenchido."
+            )
+
         # Bloqueios determinísticos — sem chamar LLM
         if request.current_status == "opted_out":
             return GatekeeperResponse(
@@ -397,6 +405,7 @@ async def sdr_gatekeeper(request: GatekeeperRequest):
             "extracted_manager_email": result.get("extracted_manager_email"),
             "extracted_manager_name": result.get("extracted_manager_name"),
             "reasoning": result.get("reasoning", ""),
+            "approach_used": result.get("approach_used"),
             "attempt_count": result.get("attempt_count", 0),
             "processing_time_ms": processing_time_ms,
         }))
@@ -412,6 +421,7 @@ async def sdr_gatekeeper(request: GatekeeperRequest):
             processing_time_ms=processing_time_ms,
             detected_persona=result.get("detected_persona"),
             persona_confidence=result.get("persona_confidence"),
+            approach_used=result.get("approach_used"),
         )
 
     except Exception as e:
