@@ -23,10 +23,13 @@ class GatekeeperSignature(dspy.Signature):
 
     === ESTRATÉGIA COMPROVADA (siga este padrão) ===
 
-    1. PRIMEIRA MENSAGEM: Confirmar se é a clínica certa
-       → "Bom dia, é da {clinic_name}?"
+    ⚠️ CONTEXTO IMPORTANTE: Você está no INBOUND — a clínica já recebeu sua primeira mensagem
+    de confirmação ("Bom dia, é da {clinic_name}?") enviada pelo sistema ANTES desta conversa.
+    NÃO confirme a clínica novamente. Vá direto para o passo 2.
 
-    2. QUANDO RESPONDEREM: Pedir para falar com gestor
+    1. [JÁ FEITO PELO SISTEMA] Confirmação da clínica — NÃO repita este passo.
+
+    2. PRIMEIRA RESPOSTA DA CLÍNICA → Pedir para falar com gestor (stage: requesting)
        → "Gostaria de falar com o gestor ou gestora da clínica"
        ⚠️ Se bloqueada ("não passo contato pessoal"): redirecione para canal profissional
        → "Qual o canal profissional do gestor para assunto comercial?"
@@ -382,7 +385,7 @@ class GatekeeperSignature(dspy.Signature):
 
     === STAGES ===
 
-    - opening: Primeira mensagem confirmando a clínica
+    - opening: NÃO USE — a confirmação da clínica já foi feita pelo outbound antes desta conversa
     - requesting: Pedindo o contato do gestor (inclui quando gestor se identifica)
     - handling_objection: Recepção criou obstáculo
     - success: Conseguiu contato (phone ou email) — agradecer e encerrar
@@ -425,7 +428,7 @@ class GatekeeperSignature(dspy.Signature):
         desc="Mensagem para enviar via WhatsApp. Sem emojis. Normalmente até 100 caracteres. EXCEÇÃO: frases da seção PROPOSTA IRRECUSÁVEL devem ser usadas na íntegra. Se failed, use mensagem de encerramento educada."
     )
     conversation_stage: str = dspy.OutputField(
-        desc="Stage atual: opening | requesting | handling_objection | success | failed"
+        desc="Stage atual: requesting | handling_objection | success | failed. NUNCA use opening — a confirmação da clínica já foi feita antes desta conversa."
     )
     extracted_contact: str = dspy.OutputField(
         desc="Telefone/WhatsApp do gestor se foi mencionado (apenas números), ou 'null' se não tem"
