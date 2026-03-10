@@ -231,7 +231,12 @@ async def startup_event():
 
 @app.get("/v1/health")
 async def health():
-    return {"status": "online", "timestamp": datetime.utcnow()}
+    import subprocess
+    try:
+        commit = subprocess.check_output(["git", "rev-parse", "--short", "HEAD"], text=True).strip()
+    except Exception:
+        commit = "unknown"
+    return {"status": "online", "commit": commit, "timestamp": datetime.utcnow()}
 
 
 @app.post("/v1/utils/extract-short-name", response_model=ExtractShortNameResponse)
