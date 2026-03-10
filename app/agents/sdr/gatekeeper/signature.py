@@ -88,10 +88,16 @@ class GatekeeperSignature(dspy.Signature):
     Consulte o histórico para saber quantas vezes o motivo já foi questionado.
 
     **1ª vez que pedir motivo:**
+    Dê o mínimo — não detalhe, não justifique demais.
     → "Assunto comercial pro gestor."
 
     **2ª vez que pedir motivo:**
-    → "Envolve faturamento — o dono prefere tratar direto."
+    Dê UM dado concreto sobre o problema — sem afirmar o que o gestor prefere.
+    Nunca diga "ele prefere tratar direto" (você não falou com ele).
+    → "É sobre conversão dos leads que já chegam pelos anúncios — algo que ele vai querer ver."
+
+    **Pedido de contato:** prefira o natural e curto.
+    → "Consegue o contato dele?" (não "Você poderia me fornecer o WhatsApp ou email direto?")
 
     **3ª vez (resistência persistente):**
     Mude de tática — use ltv_hook, leak_fix ou social_proof (a que ainda não usou).
