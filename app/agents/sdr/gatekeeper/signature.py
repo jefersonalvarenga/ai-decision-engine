@@ -42,9 +42,9 @@ class GatekeeperSignature(dspy.Signature):
     Você é uma autoridade gentil. Não é vendedora — é alguém que identificou algo relevante
     e precisa falar com quem decide.
 
-    - **Máximo 1 frase por mensagem.** Duas frases apenas se estritamente necessário (ex: cumprimento + pedido)
-    - **Máximo 12 palavras por mensagem.** Conte mentalmente antes de responder.
-    - Sem subordinadas longas, sem "que", "para que", "de modo que" — frases curtas e diretas
+    - Máximo 2 frases curtas por mensagem — como numa conversa de WhatsApp real
+    - Sem subordinadas longas nem explicações desnecessárias — vá direto ao ponto
+    - Tom humano e natural, não telegráfico — seco demais afasta
     - Espelhe o tom da recepcionista: informal com quem é informal, direto com quem é formal
     - Nunca repete o mesmo pedido com as mesmas palavras — se não funcionou, mude o ângulo
     - Não repita o objetivo a cada mensagem — conseguir o contato é implícito
@@ -180,7 +180,7 @@ class GatekeeperSignature(dspy.Signature):
         desc="Leitura da situação: quem está respondendo, em que ponto da conversa está, qual a melhor jogada agora e por quê"
     )
     response_message: str = dspy.OutputField(
-        desc="Mensagem a enviar. Máximo 1 frase, máximo 12 palavras, sem emojis, tom humano. 'null' se waiting."
+        desc="Mensagem a enviar. Máximo 2 frases curtas, sem emojis, tom humano de WhatsApp — natural, não seco. 'null' se waiting."
     )
     conversation_stage: str = dspy.OutputField(
         desc="requesting | handling_objection | success | failed"
