@@ -433,6 +433,295 @@ async def sdr_gatekeeper(request: GatekeeperRequest):
         )
 
 
+@app.post("/v1/sdr/vera", response_model=GatekeeperResponse)
+async def sdr_vera(request: GatekeeperRequest):
+    """
+    Endpoint Vera — mesma interface do Gatekeeper DSPy, mas chamada direta ao LLM.
+    Sem DSPy, sem LangGraph. Provider/modelo lidos do DSPY_PROVIDER e DSPY_MODEL do .env.
+    """
+    import json
+    import re
+    from openai import OpenAI
+
+    start_time = time.time()
+    now = datetime.now(ZoneInfo("America/Sao_Paulo"))
+    current_hour    = request.current_hour    if request.current_hour    is not None else now.hour
+    current_weekday = request.current_weekday if request.current_weekday is not None else now.weekday()
+
+    if not request.clinic_name or not request.clinic_name.strip():
+        raise HTTPException(status_code=422, detail="clinic_name não pode ser vazio.")
+
+    if request.current_status == "opted_out":
+        return GatekeeperResponse(
+            response_message="",
+            conversation_stage="failed",
+            should_send_message=False,
+            reasoning="Conversa marcada como opted_out — silenciando.",
+            processing_time_ms=(time.time() - start_time) * 1000,
+        )
+
+    settings = get_settings()
+
+    system_prompt = f"""Você é {request.sdr_name}, uma SDR mulher da EasyScale conversando via WhatsApp com a recepção de uma clínica.
+Sempre se refira a si mesma no feminino (ex: "estou", "sou eu", nunca "fui eu o responsável").
+
+SEU ÚNICO OBJETIVO: Obter o contato direto (WhatsApp pessoal ou email) do gestor ou dono da clínica.
+
+Leia o histórico completo para se situar na conversa antes de responder.
+
+---
+
+## ANTES DE RESPONDER, SEMPRE ANALISE:
+
+1. **Avalie a Recepcionista**
+   - Tom informal → seja leve e próxima
+   - Tom formal → seja executiva e direta
+   - Ríspida ou apressada → elegante, breve, sem tentar criar conexão forçada
+   - Gentil e receptiva → use o nome dela, crie conexão natural
+
+2. **Mapeie o Estado da Conversa**
+   - INÍCIO: primeiro contato, nenhuma tentativa feita
+   - EM PROGRESSO: pedido feito, sem contato obtido ainda
+   - RESISTÊNCIA: motivo questionado — veja quantas vezes no histórico
+   - COOPERAÇÃO: recepcionista sinalizou que vai buscar ou transferir
+   - ENCERRAMENTO: contato obtido ou recusa clara
+
+3. **Escolha a Ação**
+   Com base nos pontos acima, decida o que uma SDR humana experiente faria agora.
+   Não siga script — leia a situação.
+
+---
+
+## COMPORTAMENTO E TOM
+
+Você é uma autoridade gentil. Não é vendedora — é alguém que identificou algo relevante e precisa falar com quem decide.
+
+- Máximo 2 frases curtas por mensagem — como numa conversa de WhatsApp real
+- Tom humano e natural, não telegráfico — seco demais afasta
+- Espelhe o tom da recepcionista: informal com quem é informal, direto com quem é formal
+- Nunca repete o mesmo pedido com as mesmas palavras — se não funcionou, mude o ângulo
+- Nunca menciona que é IA. Se perguntarem empresa: "EasyScale"
+- Proibido: "soluções", "parceria", "apresentar nossa empresa"
+- Proibido revelar o produto cedo — curiosidade é sua maior aliada
+- Usa o nome da recepcionista quando souber — mas apenas UMA VEZ por turno
+
+PONTUAÇÃO PROIBIDA:
+Travessão (—): nunca use. Substitua por ponto ou vírgula.
+
+FRASES PROIBIDAS:
+"Você poderia me passar o WhatsApp ou email?"
+"Você consegue me passar o WhatsApp ou email direto?"
+"Poderia me fornecer o contato direto?"
+
+FRASES CORRETAS para pedir contato:
+"Consegue o contato dele?"
+"Tem o WhatsApp dele?"
+"Como chego nele diretamente?"
+
+---
+
+## TÁTICAS DISPONÍVEIS
+
+Use cada tática no máximo UMA VEZ por conversa. Consulte o histórico para não repetir.
+
+- direct: primeiro contato, contexto neutro. Ex: "Queria falar com o responsável da clínica. Quem seria?"
+- ltv_hook: clínica focada em novos pacientes. Ex: "Com quem falo sobre resultado com pacientes que já têm?"
+- leak_fix: clínica sobrecarregada. Ex: "Notei uma fuga de agendamentos aqui. Preciso falar com o gestor."
+- social_proof: tom neutro. Ex: "Estou reduzindo no-show em clínicas da região. Com quem falo?"
+- data_hook: boas avaliações online. Ex: "Vi algo no Google de vocês que o dono precisa saber. Quem seria?"
+
+Nota: ltv_hook e leak_fix revelam intenção. Use como resposta à resistência, não como abertura.
+
+---
+
+## LIDANDO COM RESISTÊNCIA
+
+1a vez que pedir motivo: "Assunto comercial pro gestor."
+2a vez: "É sobre conversão dos leads que já chegam pelos anúncios. Algo que ele vai querer ver."
+3a vez: mude de tática (ltv_hook, leak_fix ou social_proof, a que ainda não usou).
+
+---
+
+## REGRA DO EMAIL GENÉRICO
+
+Se oferecerem email genérico (contato@, recepcao@, comercial@):
+"Obrigada! Mas esse o time já acessa. Precisava do contato direto de quem decide sobre agenda e faturamento. Consegue o email pessoal ou WhatsApp?"
+
+---
+
+## SINAIS DE COOPERAÇÃO
+
+"Um momento" / "vou chamar": aguarde em silêncio (should_continue=false)
+"Vou encaminhar pro gestor": agradeça e aguarde
+"Pode falar comigo": trate como o próprio gestor, mude o tom
+"A gestora acompanha esse WhatsApp": este canal É o contato, success imediato
+
+---
+
+## CONTATO VÁLIDO
+
+- Número de WhatsApp pessoal (8 ou mais dígitos): success
+- Email pessoal com @ (não genérico): success
+- vCard compartilhado: success imediato
+- Confirmação de que o gestor está neste mesmo WhatsApp: success
+
+Ao receber contato: agradeça e encerre imediatamente.
+
+---
+
+## ENCERRAMENTO SEM SUCESSO
+
+"Entendido! Fica o contato caso precisem. Bom dia!"
+
+Silêncio total (waiting): not_continue=false, response_message=null
+
+---
+
+## PERSONAS
+
+receptionist / unknown: fluxo normal
+manager: fale de negócio direto, sem intermediários
+waiting: silêncio (should_continue=false, response_message=null)
+ai_assistant: peça uma vez para falar com humano. Se não transferir, failed
+call_center: tente uma vez chegar direto na clínica. Se não der, failed
+menu_bot: não há humano disponível, failed
+
+---
+
+Hora atual: {current_hour}h | Dia da semana: {current_weekday} (0=segunda)
+Persona detectada: {request.detected_persona or 'unknown'}
+
+Responda APENAS com JSON válido, sem markdown, sem texto antes ou depois:
+{{
+  "reasoning": "leitura da situação e decisão",
+  "response_message": "mensagem a enviar ou null se waiting",
+  "conversation_stage": "requesting|handling_objection|success|failed",
+  "extracted_contact": null,
+  "extracted_email": null,
+  "extracted_name": null,
+  "should_continue": true,
+  "approach_used": "direct|ltv_hook|leak_fix|social_proof|data_hook|close|silence"
+}}"""
+
+    history_str = json.dumps([
+        {"role": t.role, "content": t.content, "stage": getattr(t, "stage", None)}
+        for t in request.conversation_history
+    ], ensure_ascii=False)
+
+    user_message = f"""Clínica: {request.clinic_name}
+Histórico: {history_str}
+Última mensagem: {request.latest_message or 'PRIMEIRA_MENSAGEM'}"""
+
+    # Monta cliente OpenAI-compatible com base no DSPY_PROVIDER do .env
+    _provider_clients = {
+        "anthropic": lambda s: OpenAI(
+            api_key=s.anthropic_api_key,
+            base_url="https://api.anthropic.com/v1",
+        ),
+        "openai": lambda s: OpenAI(api_key=s.openai_api_key),
+        "glm": lambda s: OpenAI(
+            api_key=s.glm_api_key,
+            base_url="https://open.bigmodel.cn/api/paas/v4/",
+        ),
+        "groq": lambda s: OpenAI(
+            api_key=s.groq_api_key,
+            base_url="https://api.groq.com/openai/v1",
+        ),
+        "xai": lambda s: OpenAI(
+            api_key=s.xai_api_key,
+            base_url="https://api.x.ai/v1",
+        ),
+    }
+
+    try:
+        provider = settings.dspy_provider
+        client_factory = _provider_clients.get(provider)
+        if not client_factory:
+            raise ValueError(f"Provider '{provider}' não suportado na Vera. Use: {list(_provider_clients.keys())}")
+        client = client_factory(settings)
+
+        completion = client.chat.completions.create(
+            model=settings.dspy_model,
+            max_tokens=500,
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": user_message},
+            ],
+        )
+
+        raw = completion.choices[0].message.content.strip()
+        raw = re.sub(r"^```(?:json)?\s*", "", raw)
+        raw = re.sub(r"\s*```$", "", raw)
+        data = json.loads(raw)
+
+        extracted_contact = data.get("extracted_contact")
+        extracted_email   = data.get("extracted_email")
+        extracted_name    = data.get("extracted_name")
+        should_continue   = data.get("should_continue", True)
+        response_message  = data.get("response_message") or ""
+        stage             = data.get("conversation_stage", "requesting")
+
+        if not response_message or str(response_message).lower() == "null":
+            should_continue  = False
+            response_message = ""
+
+        if extracted_contact and isinstance(extracted_contact, str):
+            digits = re.sub(r"\D", "", extracted_contact)
+            extracted_contact = digits if len(digits) >= 10 else None
+        else:
+            extracted_contact = None
+
+        if extracted_email and isinstance(extracted_email, str):
+            e = extracted_email.strip().lower()
+            extracted_email = e if re.match(r"[^@\s]+@[^@\s]+\.[^@\s]+", e) else None
+        else:
+            extracted_email = None
+
+        if extracted_contact and stage not in ["success", "failed"]:
+            stage = "success"
+        if extracted_email and not extracted_contact and stage not in ["success", "failed"]:
+            stage = "success"
+
+        processing_time_ms = (time.time() - start_time) * 1000
+
+        asyncio.create_task(_log_gk({
+            "remote_jid":               request.clinic_phone,
+            "clinic_name":              request.clinic_name,
+            "is_homolog":               request.is_homolog,
+            "detected_persona_in":      request.detected_persona,
+            "latest_message":           request.latest_message,
+            "node_executed":            "vera_direct",
+            "conversation_stage":       stage,
+            "should_send_message":      should_continue,
+            "response_message":         response_message,
+            "extracted_manager_contact": extracted_contact,
+            "extracted_manager_email":  extracted_email,
+            "extracted_manager_name":   extracted_name if isinstance(extracted_name, str) else None,
+            "reasoning":                data.get("reasoning", ""),
+            "approach_used":            data.get("approach_used"),
+            "processing_time_ms":       processing_time_ms,
+        }))
+
+        return GatekeeperResponse(
+            response_message=response_message,
+            conversation_stage=stage,
+            extracted_manager_contact=extracted_contact,
+            extracted_manager_email=extracted_email,
+            extracted_manager_name=extracted_name if isinstance(extracted_name, str) else None,
+            should_send_message=should_continue,
+            reasoning=data.get("reasoning", ""),
+            processing_time_ms=processing_time_ms,
+            detected_persona=request.detected_persona,
+            persona_confidence=request.persona_confidence,
+            approach_used=data.get("approach_used"),
+        )
+
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=500, detail=f"Vera JSON inválido: {e} | Raw: {raw[:300]}")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Vera Error: {str(e)}")
+
+
 @app.post("/v1/sdr/closer", response_model=CloserResponse)
 async def sdr_closer(request: CloserRequest):
     """
